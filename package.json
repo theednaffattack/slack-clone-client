@@ -1,14 +1,20 @@
 {
-  "name": "with-chakra-ui-typescript",
+  "name": "pictogram-client",
   "version": "1.0.0",
   "scripts": {
-    "dev": "next",
+    "dev": "next -p 3050",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint-and-fix": "eslint . --ext .ts,.tsx --fix"
+  },
+  "engines": {
+    "node": "12.16.2"
   },
   "dependencies": {
     "@chakra-ui/core": "^1.0.0-rc.3",
     "@chakra-ui/icons": "^1.0.0-rc.3",
+    "formik": "^2.2.0",
     "next": "latest",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
@@ -17,7 +23,36 @@
     "@types/node": "^14.6.0",
     "@types/react": "^16.9.46",
     "@types/react-dom": "^16.9.8",
+    "@typescript-eslint/eslint-plugin": "^4.4.1",
+    "@typescript-eslint/parser": "^4.4.1",
+    "eslint": "^7.11.0",
+    "eslint-config-prettier": "^6.12.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "prettier": "^2.1.2",
     "typescript": "4.0.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "env": {
+      "browser": true,
+      "amd": true,
+      "node": true
+    },
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "prettier"
+    ],
+    "rules": {
+      "no-console": 0,
+      "@typescript-eslint/explicit-module-boundary-types": 0,
+      "@typescript-eslint/no-explicit-any": 0
+    }
   },
   "license": "MIT"
 }
