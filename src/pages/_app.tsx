@@ -1,14 +1,23 @@
-import { ChakraProvider } from '@chakra-ui/core'
+import { ChakraProvider } from "@chakra-ui/core";
+import { Provider, createClient } from "urql";
+import { AppProps } from "next/app";
 
-import theme from '../theme'
-import { AppProps } from 'next/app'
+import theme from "../theme";
+import { development_qql_uri } from "../config";
+
+const client = createClient({
+  fetchOptions: { credentials: "include" },
+  url: development_qql_uri
+});
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <ChakraProvider resetCSS theme={theme}>
-      <Component {...pageProps} />
-    </ChakraProvider>
-  )
+    <Provider value={client}>
+      <ChakraProvider resetCSS theme={theme}>
+        <Component {...pageProps} />
+      </ChakraProvider>
+    </Provider>
+  );
 }
 
-export default MyApp
+export default MyApp;
