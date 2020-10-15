@@ -6,7 +6,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx",
-    "lint-and-fix": "eslint . --ext .ts,.tsx --fix"
+    "lint-and-fix": "eslint . --ext .ts,.tsx --fix",
   },
   "engines": {
     "node": "12.16.2"
