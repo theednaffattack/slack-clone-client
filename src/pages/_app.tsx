@@ -7,7 +7,7 @@ import { development_qql_uri } from "../config";
 
 const client = createClient({
   fetchOptions: { credentials: "include" },
-  url: development_qql_uri
+  url: process.env.NEXT_PUBLIC_DEVELOPMENT_GQL_URI ?? "http://123" // development_qql_uri
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
