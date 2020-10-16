@@ -1,6 +1,7 @@
 import React from "react";
 import { Form, Formik } from "formik";
 import { Box, Button } from "@chakra-ui/core";
+import { useRouter } from "next/router";
 
 import { Wrapper } from "../components/register.wrapper";
 import { InputField } from "../components/forms.input-field";
@@ -8,6 +9,7 @@ import { useRegisterMutation } from "../generated/graphql";
 import { toErrorMap } from "../lib/utilities.toErrorMap";
 
 function Register() {
+  const router = useRouter();
   const [, register] = useRegisterMutation();
   return (
     <Formik
@@ -48,22 +50,16 @@ function Register() {
             ({ message }) => message === "Argument Validation Error"
           );
 
-          // We dive deeper to get the validationErrors. This may be
-          // a good candidate to refactor with Array methods. It's a mess.
-          const extractedErrors =
-            filteredValidationErrors[0].extensions?.exception.validationErrors;
+          // We take the filtered validation erros and
+          // copy the custom valErrors object created on our
+          // server via Apollo's "formatError". These have
+          // been formatted to FieldError format, so they're
+          // easy to map.
 
-          const mySetErrors: any = {};
+          const extractedValErrors =
+            filteredValidationErrors[0].extensions?.valErrors;
 
-          // Loop over the extracted Errors and grab the value. The key is
-          // the name of the validator rule, which we don't need on the,
-          // front-end. The "constraints" sibling "property" will match the
-          // Formik field name if the Resolver field shares the same name.
-          for (const vError of extractedErrors) {
-            mySetErrors[vError.property] = Object.values(vError.constraints)[0];
-          }
-
-          setErrors(mySetErrors);
+          setErrors(toErrorMap(extractedValErrors));
         }
 
         if (response.data?.register.errors) {
