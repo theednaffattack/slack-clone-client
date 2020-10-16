@@ -1,10 +1,21 @@
-import { Avatar, Box, Flex, Link as ChLink, Text } from "@chakra-ui/core";
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  Link as ChLink,
+  Text
+} from "@chakra-ui/core";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
-import { useMeQuery } from "../generated/graphql";
+
+import { useLogoutMutation, useMeQuery } from "../generated/graphql";
 
 export function Navbar() {
+  const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
   const [{ data, fetching }] = useMeQuery();
+  const router = useRouter();
   let body = null;
   if (fetching) {
     // fetching
@@ -30,16 +41,28 @@ export function Navbar() {
             <Avatar size="md" name={data.me.username} />
           </ChLink>
         </Link>
-        <Link href="/logout">
+        <Button
+          bg="transparent"
+          border="1px solid gray"
+          isLoading={logoutFetching}
+          onClick={() => {
+            logout();
+
+            // router.push("/login");
+          }}
+        >
+          logout
+        </Button>
+        {/* <Link href="/logout">
           <ChLink>
             <Text>logout</Text>
           </ChLink>
-        </Link>
+        </Link> */}
       </Flex>
     );
   }
   return (
-    <Flex bg="tomato" p={4}>
+    <Flex bg="papayawhip" p={4}>
       {body}
     </Flex>
   );
