@@ -1,5 +1,15 @@
+import { Box, Text } from "@chakra-ui/core";
+import { Navbar } from "../components/navbar";
+
 function Index() {
-  return <div>Hello world</div>;
+  return (
+    <>
+      <Navbar />
+      <Box>
+        <Text>Hello world</Text>
+      </Box>
+    </>
+  );
 }
 
 export default Index;
