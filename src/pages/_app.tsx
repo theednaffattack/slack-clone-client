@@ -7,6 +7,7 @@ import theme from "../theme";
 import { development_qql_uri } from "../config";
 import {
   LoginMutation,
+  LogoutMutation,
   MeDocument,
   MeQuery,
   RegisterMutation
@@ -46,6 +47,14 @@ const client = createClient({
                   };
                 }
               }
+            );
+          },
+          logout: (_result, args, cache, info) => {
+            betterUpdateQuery<LogoutMutation, MeQuery>(
+              cache,
+              { query: MeDocument },
+              _result,
+              () => ({ me: null, __typename: "Query" })
             );
           },
           register: (_result, args, cache, info) => {
