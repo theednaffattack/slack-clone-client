@@ -4,14 +4,25 @@ import { Box, Button } from "@chakra-ui/core";
 
 import { Wrapper } from "../components/register.wrapper";
 import { InputField } from "../components/forms.input-field";
+import { useLoginMutation } from "../generated/graphql";
+import { toErrorMap } from "../lib/utilities.toErrorMap";
 
 function Login() {
+  const [, login] = useLoginMutation();
   return (
     <Formik
       initialValues={{ username: "", password: "" }}
-      onSubmit={(values) => console.log("FAKE SUBMIT", values)}
+      onSubmit={async (values, { setErrors }) => {
+        const response = await login({
+          password: values.password,
+          username: values.username
+        });
+        if (response.data?.login?.errors) {
+          setErrors(toErrorMap(response.data?.login?.errors));
+        }
+      }}
     >
-      {({ handleSubmit, isSubmitting }) => {
+      {({ errors, handleSubmit, isSubmitting }) => {
         return (
           <Wrapper>
             <Form onSubmit={handleSubmit}>
@@ -30,8 +41,8 @@ function Login() {
                   type="password"
                 />
               </Box>
-              <Button type="submit" isLoading={isSubmitting}>
-                register
+              <Button colorScheme="teal" type="submit" isLoading={isSubmitting}>
+                login
               </Button>
             </Form>
           </Wrapper>
