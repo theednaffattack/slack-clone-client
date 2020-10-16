@@ -1,6 +1,7 @@
 import React from "react";
 import { Form, Formik } from "formik";
 import { Box, Button } from "@chakra-ui/core";
+import { useRouter } from "next/router";
 
 import { Wrapper } from "../components/register.wrapper";
 import { InputField } from "../components/forms.input-field";
@@ -9,6 +10,7 @@ import { toErrorMap } from "../lib/utilities.toErrorMap";
 
 function Login() {
   const [, login] = useLoginMutation();
+  const router = useRouter();
   return (
     <Formik
       initialValues={{ username: "", password: "" }}
@@ -19,6 +21,8 @@ function Login() {
         });
         if (response.data?.login?.errors) {
           setErrors(toErrorMap(response.data?.login?.errors));
+        } else {
+          router.push("/");
         }
       }}
     >
