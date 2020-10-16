@@ -72,6 +72,8 @@ function Register() {
           // Call the utility function "toErrorMap" to match formik's error
           // shape.
           setErrors(toErrorMap(response.data.register.errors));
+        } else if (response.data?.register.user) {
+          router.push("/profile");
         }
 
         return response;
