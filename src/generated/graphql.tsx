@@ -680,6 +680,14 @@ export type ConfirmUserMutation = (
   & Pick<Mutation, 'confirmUser'>
 );
 
+export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LogoutMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'logout'>
+);
+
 export type RegisterMutationVariables = Exact<{
   data: RegisterInput;
 }>;
@@ -744,6 +752,15 @@ export const ConfirmUserDocument = gql`
 
 export function useConfirmUserMutation() {
   return Urql.useMutation<ConfirmUserMutation, ConfirmUserMutationVariables>(ConfirmUserDocument);
+};
+export const LogoutDocument = gql`
+    mutation Logout {
+  logout
+}
+    `;
+
+export function useLogoutMutation() {
+  return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument);
 };
 export const RegisterDocument = gql`
     mutation Register($data: RegisterInput!) {
