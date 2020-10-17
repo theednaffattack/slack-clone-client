@@ -1,5 +1,8 @@
 import { Box, Text } from "@chakra-ui/core";
+import { withUrqlClient } from "next-urql";
+
 import { Navbar } from "../components/navbar";
+import { createUrqlClient } from "../lib/utilities.create-urql-client";
 
 function Index() {
   return (
@@ -12,4 +15,4 @@ function Index() {
   );
 }
 
-export default Index;
+export default withUrqlClient(createUrqlClient, { ssr: false })(Index);
