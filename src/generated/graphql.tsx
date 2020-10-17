@@ -680,6 +680,16 @@ export type ConfirmUserMutation = (
   & Pick<Mutation, 'confirmUser'>
 );
 
+export type ForgotPasswordMutationVariables = Exact<{
+  email: Scalars['String'];
+}>;
+
+
+export type ForgotPasswordMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'forgotPassword'>
+);
+
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -752,6 +762,15 @@ export const ConfirmUserDocument = gql`
 
 export function useConfirmUserMutation() {
   return Urql.useMutation<ConfirmUserMutation, ConfirmUserMutationVariables>(ConfirmUserDocument);
+};
+export const ForgotPasswordDocument = gql`
+    mutation ForgotPassword($email: String!) {
+  forgotPassword(email: $email)
+}
+    `;
+
+export function useForgotPasswordMutation() {
+  return Urql.useMutation<ForgotPasswordMutation, ForgotPasswordMutationVariables>(ForgotPasswordDocument);
 };
 export const LogoutDocument = gql`
     mutation Logout {
