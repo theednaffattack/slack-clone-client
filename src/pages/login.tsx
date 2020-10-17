@@ -7,6 +7,8 @@ import { Wrapper } from "../components/register.wrapper";
 import { InputField } from "../components/forms.input-field";
 import { useLoginMutation } from "../generated/graphql";
 import { toErrorMap } from "../lib/utilities.toErrorMap";
+import { withUrqlClient } from "next-urql";
+import { createUrqlClient } from "../lib/utilities.create-urql-client";
 
 function Login() {
   const [, login] = useLoginMutation();
@@ -56,4 +58,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default withUrqlClient(createUrqlClient)(Login);
