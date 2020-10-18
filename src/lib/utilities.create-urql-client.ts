@@ -7,7 +7,8 @@ import {
   MeQuery,
   MeDocument,
   LogoutMutation,
-  RegisterMutation
+  RegisterMutation,
+  ChangePasswordMutation
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./utilities.better-update-query";
 
@@ -19,7 +20,24 @@ export const createUrqlClient = (ssrExchange: any) => ({
     cacheExchange({
       updates: {
         Mutation: {
-          login: (_result, args, cache, info) => {
+          changePassword: (_result, _args, cache, _info) => {
+            betterUpdateQuery<ChangePasswordMutation, MeQuery>(
+              cache,
+              { query: MeDocument },
+              _result,
+              (result, query) => {
+                if (result.changePassword?.errors) {
+                  return query;
+                } else {
+                  return {
+                    me: result.changePassword?.user,
+                    __typename: "Query"
+                  };
+                }
+              }
+            );
+          },
+          login: (_result, _args, cache, _info) => {
             betterUpdateQuery<LoginMutation, MeQuery>(
               cache,
               { query: MeDocument },
@@ -36,7 +54,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
               }
             );
           },
-          logout: (_result, args, cache, info) => {
+          logout: (_result, _args, cache, _info) => {
             betterUpdateQuery<LogoutMutation, MeQuery>(
               cache,
               { query: MeDocument },
@@ -44,7 +62,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
               () => ({ me: null, __typename: "Query" })
             );
           },
-          register: (_result, args, cache, info) => {
+          register: (_result, _args, cache, _info) => {
             betterUpdateQuery<RegisterMutation, MeQuery>(
               cache,
               { query: MeDocument },

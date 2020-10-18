@@ -1,25 +1,43 @@
-import React from "react";
+import { Box, Button, Text } from "@chakra-ui/core";
 import { Form, Formik } from "formik";
-import { Button } from "@chakra-ui/core";
-
-import { Wrapper } from "../components/register.wrapper";
+import { withUrqlClient } from "next-urql";
+import React, { useState } from "react";
 import { InputField } from "../components/forms.input-field";
+import { Wrapper } from "../components/register.wrapper";
+import { useForgotPasswordMutation } from "../generated/graphql";
+import { createUrqlClient } from "../lib/utilities.create-urql-client";
 
 function ForgotPassword() {
+  const [mutationState, setMutationState] = useState<
+    "isNOTComplete" | "isComplete"
+  >("isNOTComplete");
+  const [, forgotPassword] = useForgotPasswordMutation();
   return (
     <Formik
-      initialValues={{ username: "", password: "" }}
-      onSubmit={(values) => console.log("FAKE SUBMIT", values)}
+      initialValues={{ email: "" }}
+      onSubmit={async (values) => {
+        await forgotPassword({
+          email: values.email
+        });
+        setMutationState("isComplete");
+      }}
     >
-      {({ handleSubmit, isSubmitting }) => {
-        return (
+      {({ handleSubmit, isSubmitting }) =>
+        mutationState === "isComplete" ? (
+          <Box>
+            <Text>
+              Please check your email address associated with this account. If
+              an account with that email exists, we sent you an email.
+            </Text>
+          </Box>
+        ) : (
           <Wrapper>
             <Form onSubmit={handleSubmit}>
               <InputField
                 isRequired={true}
-                label="Username"
-                name="username"
-                placeholder="Idi Ogunye"
+                label="email"
+                name="email"
+                placeholder="idi@idi.com"
               />
 
               <Button mt={4} type="submit" isLoading={isSubmitting}>
@@ -27,10 +45,10 @@ function ForgotPassword() {
               </Button>
             </Form>
           </Wrapper>
-        );
-      }}
+        )
+      }
     </Formik>
   );
 }
 
-export default ForgotPassword;
+export default withUrqlClient(createUrqlClient)(ForgotPassword);
