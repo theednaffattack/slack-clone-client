@@ -1,16 +1,35 @@
 import { cacheExchange } from "@urql/exchange-graphcache";
-import { dedupExchange, fetchExchange } from "urql";
+import { dedupExchange, Exchange, fetchExchange } from "urql";
+import { pipe, tap } from "wonka";
+import Router from "next/router";
 
-import { development_qql_uri } from "./config";
 import {
+  ChangePasswordMutation,
   LoginMutation,
-  MeQuery,
-  MeDocument,
   LogoutMutation,
-  RegisterMutation,
-  ChangePasswordMutation
+  MeDocument,
+  MeQuery,
+  RegisterMutation
 } from "../generated/graphql";
+import { development_qql_uri } from "./config";
 import { betterUpdateQuery } from "./utilities.better-update-query";
+
+const errorExchange: Exchange = ({ forward }) => (ops$) => {
+  return pipe(
+    forward(ops$),
+    tap(({ error }) => {
+      // If the OperationResult has an error check for specific errors
+      // listed below.
+      // ["Not authenticated"]
+      if (error) {
+        // the error is a CombinedError with networkError and graphqlErrors properties
+        if (error.message.includes("Not authenticated")) {
+          Router.replace("/");
+        }
+      }
+    })
+  );
+};
 
 export const createUrqlClient = (ssrExchange: any) => ({
   fetchOptions: { credentials: "include" as const },
@@ -87,6 +106,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
         // }
       }
     }),
+    errorExchange,
     ssrExchange,
     fetchExchange
   ]
