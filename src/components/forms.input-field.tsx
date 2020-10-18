@@ -1,18 +1,17 @@
-import React, { InputHTMLAttributes } from "react";
-import { Field, Form, Formik, useField } from "formik";
 import {
-  Button,
   FormControl,
   FormErrorMessage,
   FormLabel,
   Input
 } from "@chakra-ui/core";
+import { useField } from "formik";
+import React, { InputHTMLAttributes } from "react";
 
 type InputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   isRequired?: boolean;
-  label: string;
+  label?: string;
   name: string;
-  placeholder: string;
+  placeholder?: string;
 };
 
 export const InputField: React.FC<InputFieldProps> = ({
@@ -25,7 +24,7 @@ export const InputField: React.FC<InputFieldProps> = ({
 }) => {
   const [field, { error }] = useField({ name });
   return (
-    <FormControl isRequired={props.isRequired} isInvalid={!!error}>
+    <FormControl isRequired={isRequired} isInvalid={!!error}>
       {props.type === "hidden" ? null : (
         <FormLabel htmlFor={field.name}>{label}</FormLabel>
       )}
