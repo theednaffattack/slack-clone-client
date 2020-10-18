@@ -266,6 +266,7 @@ export type Mutation = {
   signS3: SignedS3Payload;
   createOrUpdateLikes?: Maybe<LikeReturnType>;
   addCommentToPost: AddCommentPayloadType;
+  resendConfirmationEmail: UserResponse;
 };
 
 export type MutationCreateProductArgs = {
@@ -349,6 +350,10 @@ export type MutationAddCommentToPostArgs = {
   input: NewCommentsArgs;
 };
 
+export type MutationResendConfirmationEmailArgs = {
+  data: ResendConfirmationEmailInput;
+};
+
 export type ProductInput = {
   name: Scalars["String"];
 };
@@ -398,7 +403,6 @@ export type UploadProfilePictueReturnType = {
 export type PostInput = {
   text: Scalars["String"];
   title?: Maybe<Scalars["String"]>;
-  user: Scalars["ID"];
   images?: Maybe<Array<Maybe<Scalars["String"]>>>;
 };
 
@@ -470,6 +474,10 @@ export type AddCommentPayloadType = {
   userId: Scalars["ID"];
   created_at?: Maybe<Scalars["String"]>;
   content: Scalars["String"];
+};
+
+export type ResendConfirmationEmailInput = {
+  username: Scalars["String"];
 };
 
 export type Subscription = {
