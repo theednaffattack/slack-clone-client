@@ -5,10 +5,15 @@ import { useRouter } from "next/router";
 
 import { Wrapper } from "../components/register.wrapper";
 import { InputField } from "../components/forms.input-field";
-import { useRegisterMutation } from "../generated/graphql";
+import {
+  FieldError,
+  RegisterMutation,
+  useRegisterMutation
+} from "../generated/graphql";
 import { toErrorMap } from "../lib/utilities.toErrorMap";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../lib/utilities.create-urql-client";
+import { formatValidationErrors } from "../lib/utilities.graphQLErrors.format-validation-errors";
 
 function Register() {
   const router = useRouter();
@@ -40,28 +45,13 @@ function Register() {
         // from: https://formidable.com/open-source/urql/docs/basics/errors/
         // We filter for validation errors set on our resolvers via type-graphql
         // middleware (these are set as decorators on the resolver function itself).
-        if (
-          response.error?.graphQLErrors &&
-          response.error?.graphQLErrors.filter(
-            ({ message }) => message === "Argument Validation Error"
-          ).length > 0
-        ) {
-          // First we filter for any "Argument Validation Error" messages
-          // we can find. These were set by type-graphql
-          const filteredValidationErrors = response.error?.graphQLErrors.filter(
-            ({ message }) => message === "Argument Validation Error"
-          );
+        // These validation errors are set into the graphQLErrors array at
+        // "response.error.graphQLErrors[].extensions.valErrors[]"
+        let validationErrors: FieldError[];
+        if (response.error) {
+          validationErrors = formatValidationErrors<RegisterMutation>(response);
 
-          // We take the filtered validation erros and
-          // copy the custom valErrors object created on our
-          // server via Apollo's "formatError". These have
-          // been formatted to FieldError format, so they're
-          // easy to map.
-
-          const extractedValErrors =
-            filteredValidationErrors[0].extensions?.valErrors;
-
-          setErrors(toErrorMap(extractedValErrors));
+          setErrors(toErrorMap(validationErrors));
         }
 
         if (response.data?.register.errors) {
@@ -71,7 +61,7 @@ function Register() {
           // shape.
           setErrors(toErrorMap(response.data.register.errors));
         } else if (response.data?.register.user) {
-          router.push("/profile");
+          router.push("/");
         }
 
         return response;
@@ -143,4 +133,4 @@ function Register() {
   );
 }
 
-export default withUrqlClient(createUrqlClient)(Register);
+export default withUrqlClient(createUrqlClient, { ssr: false })(Register);
