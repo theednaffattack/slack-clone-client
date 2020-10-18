@@ -8,7 +8,7 @@ import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../lib/utilities.create-urql-client";
 
 function Profile() {
-  const [{ data, error, fetching }] = useMeQuery();
+  const [{ data }] = useMeQuery();
 
   return (
     <Wrapper>
