@@ -2,15 +2,19 @@ import { Avatar, Box, Button, Flex, Link as ChLink } from "@chakra-ui/core";
 import Link from "next/link";
 import React from "react";
 
-import { useLogoutMutation, useMeQuery } from "../generated/graphql";
-import { isServer } from "../lib/utilities.is-server";
+import { MeQuery, useLogoutMutation } from "../generated/graphql";
 
-export function Navbar() {
+type NavbarProps = {
+  dataMe?: MeQuery;
+  fetchingMe?: boolean;
+};
+
+export function Navbar({ dataMe }: NavbarProps) {
   const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
-  const [{ data, fetching }] = useMeQuery({
-    // Do not run this query on the server.
-    pause: isServer()
-  });
+  // const [{ data, fetching }] = useMeQuery({
+  //   // Do not run this query on the server.
+  //   pause: isServer()
+  // });
 
   // user is not logged in
   let body = (
@@ -23,15 +27,17 @@ export function Navbar() {
       </Link>
     </>
   );
-  if (fetching) {
-    // fetching
-  } else if (data?.me) {
+  // if (fetchingMe) {
+  //   // fetching
+  // } else
+  if (dataMe?.me) {
     // logged in
     body = (
       <>
+        {dataMe.me?.username.toString()}
         <Link href="/profile" passHref>
           <ChLink mr={2}>
-            <Avatar size="md" name={data?.me?.username} />
+            <Avatar size="md" name={dataMe.me?.username} />
           </ChLink>
         </Link>
         <Button
