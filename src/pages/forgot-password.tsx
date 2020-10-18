@@ -3,7 +3,7 @@ import { Form, Formik } from "formik";
 import { withUrqlClient } from "next-urql";
 import React, { useState } from "react";
 import { InputField } from "../components/forms.input-field";
-import { Wrapper } from "../components/register.wrapper";
+import { Wrapper } from "../components/box-wrapper";
 import { useForgotPasswordMutation } from "../generated/graphql";
 import { createUrqlClient } from "../lib/utilities.create-urql-client";
 

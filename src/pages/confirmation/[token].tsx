@@ -1,7 +1,7 @@
 import React from "react";
 import { NextPage } from "next";
 
-import { Wrapper } from "../../components/register.wrapper";
+import { Wrapper } from "../../components/box-wrapper";
 // import { useConfirmUserMutation } from "../../generated/graphql";
 import { Stack, Text } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";

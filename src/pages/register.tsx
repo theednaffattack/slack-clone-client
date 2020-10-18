@@ -1,9 +1,10 @@
 import React from "react";
 import { Form, Formik } from "formik";
-import { Box, Button } from "@chakra-ui/core";
+import { Box, Button, Link, Text } from "@chakra-ui/core";
 import { useRouter } from "next/router";
+import NextLink from "next/link";
 
-import { Wrapper } from "../components/register.wrapper";
+import { Wrapper } from "../components/flex-wrapper";
 import { InputField } from "../components/forms.input-field";
 import {
   FieldError,
@@ -69,7 +70,7 @@ function Register() {
     >
       {({ handleSubmit, isSubmitting }) => {
         return (
-          <Wrapper>
+          <Wrapper flexDirection="column">
             <>
               <Form onSubmit={handleSubmit}>
                 <InputField
@@ -125,6 +126,13 @@ function Register() {
                   register
                 </Button>
               </Form>
+
+              <Text mx="auto" mt={3}>
+                Already a member?{" "}
+                <NextLink href="/login" passHref>
+                  <Link color="crimson">Sign in</Link>
+                </NextLink>
+              </Text>
             </>
           </Wrapper>
         );

@@ -4,7 +4,7 @@ import { Box, Button, Link, Text } from "@chakra-ui/core";
 import { useRouter } from "next/router";
 import NextLink from "next/link";
 
-import { Wrapper } from "../components/register.wrapper";
+import { Wrapper } from "../components/flex-wrapper";
 import { InputField } from "../components/forms.input-field";
 import {
   FieldError,
@@ -62,33 +62,45 @@ function Login() {
     >
       {({ handleSubmit, isSubmitting }) => {
         return (
-          <Wrapper>
-            <Form onSubmit={handleSubmit}>
-              {userConfirmedHelper}
-              <InputField
-                isRequired={true}
-                type="hidden"
-                name="user_confirmed"
-              />
-              <InputField
-                isRequired={true}
-                label="Username"
-                name="username"
-                placeholder="Idi Ogunye"
-              />
-              <Box my={4}>
+          <Wrapper flexDirection="column">
+            <>
+              <Form onSubmit={handleSubmit}>
+                {userConfirmedHelper}
                 <InputField
                   isRequired={true}
-                  label="Password"
-                  name="password"
-                  placeholder="password"
-                  type="password"
+                  type="hidden"
+                  name="user_confirmed"
                 />
-              </Box>
-              <Button colorScheme="teal" type="submit" isLoading={isSubmitting}>
-                login
-              </Button>
-            </Form>
+                <InputField
+                  isRequired={true}
+                  label="Username"
+                  name="username"
+                  placeholder="Idi Ogunye"
+                />
+                <Box my={4}>
+                  <InputField
+                    isRequired={true}
+                    label="Password"
+                    name="password"
+                    placeholder="password"
+                    type="password"
+                  />
+                </Box>
+                <Button
+                  colorScheme="teal"
+                  type="submit"
+                  isLoading={isSubmitting}
+                >
+                  login
+                </Button>
+              </Form>
+              <Text mx="auto" mt={3}>
+                Need an account?{" "}
+                <NextLink href="/register" passHref>
+                  <Link color="crimson">register</Link>
+                </NextLink>
+              </Text>
+            </>
           </Wrapper>
         );
       }}

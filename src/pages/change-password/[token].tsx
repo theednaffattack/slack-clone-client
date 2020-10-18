@@ -6,7 +6,7 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { ReactElement, useState } from "react";
 import { InputField } from "../../components/forms.input-field";
-import { Wrapper } from "../../components/register.wrapper";
+import { Wrapper } from "../../components/box-wrapper";
 import {
   ChangePasswordMutation,
   FieldError,
