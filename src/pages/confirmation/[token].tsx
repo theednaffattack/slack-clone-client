@@ -8,7 +8,9 @@ import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../../lib/utilities.create-urql-client";
 
 const Confirmation: NextPage<{ token: string }> = ({ token }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [, confirmUser] = useConfirmUserMutation();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [confirmationError, setConfirmationError] = useState(null);
   // const response = confirmUser({ token })
   //   .then((data) => data)
