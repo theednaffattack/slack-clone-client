@@ -1,17 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import { NextPage } from "next";
 
 import { Wrapper } from "../../components/register.wrapper";
-import { useConfirmUserMutation } from "../../generated/graphql";
-import { Code, Stack, Text } from "@chakra-ui/core";
+// import { useConfirmUserMutation } from "../../generated/graphql";
+import { Stack, Text } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../../lib/utilities.create-urql-client";
 
 const Confirmation: NextPage<{ token: string }> = ({ token }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [, confirmUser] = useConfirmUserMutation();
+  // const [, _confirmUser] = useConfirmUserMutation();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [confirmationError, setConfirmationError] = useState(null);
+  // const [confirmationError, _setConfirmationError] = useState(null);
   // const response = confirmUser({ token })
   //   .then((data) => data)
   //   .catch((err) => setConfirmationError(err.message))
@@ -23,7 +23,7 @@ const Confirmation: NextPage<{ token: string }> = ({ token }) => {
         Confirmation page
         <Text>{token}</Text>
         <Stack isInline={false}>
-          <Code colorScheme="red">{confirmationError}</Code>
+          {/* <Code colorScheme="red">{confirmationError}</Code> */}
           {/* <Code colorScheme="yellow">{response}</Code> */}
         </Stack>
         <Text>{}</Text>
