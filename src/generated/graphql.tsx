@@ -668,6 +668,18 @@ export type ConfirmUserMutation = { __typename?: "Mutation" } & Pick<
   "confirmUser"
 >;
 
+export type CreatePostMutationVariables = Exact<{
+  data: PostInput;
+}>;
+
+export type CreatePostMutation = { __typename?: "Mutation" } & {
+  createPost: { __typename?: "Post" } & Pick<Post, "id" | "title" | "text"> & {
+      images?: Maybe<
+        Array<{ __typename?: "Image" } & Pick<Image, "id" | "uri">>
+      >;
+    };
+};
+
 export type ForgotPasswordMutationVariables = Exact<{
   email: Scalars["String"];
 }>;
@@ -755,6 +767,25 @@ export const ConfirmUserDocument = gql`
 export function useConfirmUserMutation() {
   return Urql.useMutation<ConfirmUserMutation, ConfirmUserMutationVariables>(
     ConfirmUserDocument
+  );
+}
+export const CreatePostDocument = gql`
+  mutation CreatePost($data: PostInput!) {
+    createPost(data: $data) {
+      id
+      title
+      text
+      images {
+        id
+        uri
+      }
+    }
+  }
+`;
+
+export function useCreatePostMutation() {
+  return Urql.useMutation<CreatePostMutation, CreatePostMutationVariables>(
+    CreatePostDocument
   );
 }
 export const ForgotPasswordDocument = gql`
