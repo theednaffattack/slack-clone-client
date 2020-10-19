@@ -1,7 +1,7 @@
-import { useRouter } from "next/router";
-import React, { ReactChild, ReactChildren, useEffect } from "react";
+import React, { ReactChild, ReactChildren } from "react";
 import { useMeQuery } from "../generated/graphql";
-import { isServer } from "../lib/utilities.is-server";
+import { useIsAuth } from "../lib/utilities.hooks.useIsAuth";
+// import { isServer } from "../lib/utilities.is-server";
 import { Wrapper } from "./box-wrapper";
 import { Navbar } from "./navbar-authenticated";
 
@@ -10,17 +10,22 @@ type LayoutProps = {
 };
 
 export function Layout({ children }: LayoutProps) {
-  const router = useRouter();
+  // const router = useRouter();
+  useIsAuth();
   const [{ data: dataMe, fetching: fetchingMe }] = useMeQuery({
     // Do not run this query on the server.
-    pause: isServer()
+    // pause: isServer()
   });
 
-  useEffect(() => {
-    if (!fetchingMe && !dataMe?.me) {
-      router.replace("/login");
-    }
-  }, [dataMe, fetchingMe, router]);
+  // for now show a loading state
+  if (fetchingMe) {
+    return (
+      <>
+        <Navbar dataMe={dataMe} fetchingMe={fetchingMe} />
+        <Wrapper>loading...</Wrapper>
+      </>
+    );
+  }
 
   // Below is only useful for client routing.
   // Something will need to be prepared to
