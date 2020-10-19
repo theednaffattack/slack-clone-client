@@ -712,6 +712,30 @@ export type RegisterMutation = { __typename?: "Mutation" } & {
   register: { __typename?: "UserResponse" } & TypicalUserResponseFragment;
 };
 
+export type GetGlobalPostsQueryVariables = Exact<{
+  cursor?: Maybe<Scalars["String"]>;
+  skip?: Maybe<Scalars["Int"]>;
+  take?: Maybe<Scalars["Int"]>;
+}>;
+
+export type GetGlobalPostsQuery = { __typename?: "Query" } & {
+  getGlobalPosts?: Maybe<
+    Array<
+      { __typename?: "GlobalPostReturnType" } & Pick<
+        GlobalPostReturnType,
+        "id" | "title" | "text" | "created_at"
+      > & {
+          images?: Maybe<
+            Array<{ __typename?: "Image" } & Pick<Image, "id" | "uri">>
+          >;
+          likes?: Maybe<
+            Array<{ __typename?: "Like" } & Pick<Like, "id" | "count">>
+          >;
+        }
+    >
+  >;
+};
+
 export type LoginMutationVariables = Exact<{
   username: Scalars["String"];
   password: Scalars["String"];
@@ -832,6 +856,33 @@ export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(
     RegisterDocument
   );
+}
+export const GetGlobalPostsDocument = gql`
+  query GetGlobalPosts($cursor: String, $skip: Int, $take: Int) {
+    getGlobalPosts(cursor: $cursor, skip: $skip, take: $take) {
+      id
+      title
+      text
+      images {
+        id
+        uri
+      }
+      likes {
+        id
+        count
+      }
+      created_at
+    }
+  }
+`;
+
+export function useGetGlobalPostsQuery(
+  options: Omit<Urql.UseQueryArgs<GetGlobalPostsQueryVariables>, "query"> = {}
+) {
+  return Urql.useQuery<GetGlobalPostsQuery>({
+    query: GetGlobalPostsDocument,
+    ...options
+  });
 }
 export const LoginDocument = gql`
   mutation Login($username: String!, $password: String!) {
