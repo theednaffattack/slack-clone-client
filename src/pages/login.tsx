@@ -51,12 +51,18 @@ function Login() {
             );
 
             delete errorMap.user_confirmed;
+            setErrors(errorMap);
           } else {
-            setErrors(toErrorMap(response.data?.login?.errors));
+            setErrors(errorMap);
           }
-          // setErrors(toErrorMap(response.data?.login?.errors));
-        } else {
-          router.push("/");
+        } else if (response.data?.login?.user) {
+          // if we've set a redirect after login,
+          // follow it. Otherwise go to home page.
+          if (typeof router.query.next === "string") {
+            router.push(router.query.next);
+          } else {
+            router.push("/");
+          }
         }
       }}
     >
