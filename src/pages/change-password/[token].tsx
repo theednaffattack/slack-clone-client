@@ -27,7 +27,8 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
         const response = await changePassword({
           data: {
             password: values.password,
-            token
+            token:
+              typeof router.query.token === "string" ? router.query.token : ""
           }
         });
         let validationErrors: FieldError[];
@@ -88,10 +89,10 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
   );
 };
 
-ChangePassword.getInitialProps = ({ query }) => {
-  return {
-    token: query.token as string
-  };
-};
+// ChangePassword.getInitialProps = ({ query }) => {
+//   return {
+//     token: query.token as string
+//   };
+// };
 
 export default withUrqlClient(createUrqlClient)(ChangePassword);
