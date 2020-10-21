@@ -1,19 +1,56 @@
 import { Box, Button, Text } from "@chakra-ui/core";
 import { Field, FieldArray, Form, Formik } from "formik";
-import { withUrqlClient } from "next-urql";
 import { useRouter } from "next/router";
 import React, { ReactElement } from "react";
 import { InputField } from "../components/forms.input-field";
 import { TextArea } from "../components/forms.textarea";
 import { Layout } from "../components/layout.basic";
-import { useCreatePostMutation } from "../generated/graphql";
-import { createUrqlClient } from "../lib/utilities.create-urql-client";
+import { PostConnection, useCreatePostMutation } from "../generated/graphql";
 import { useIsAuth } from "../lib/utilities.hooks.useIsAuth";
 
 function CreatePost(): ReactElement {
   const router = useRouter();
   useIsAuth();
-  const [, createPost] = useCreatePostMutation();
+  const [createPost, { error }] = useCreatePostMutation({
+    update(cache, { data: postMutationData }) {
+      console.log("CACHE UPDATE FIRING");
+
+      // if there's no data don't screw around with the cache
+      if (!postMutationData) return;
+
+      cache.modify({
+        fields: {
+          getGlobalPostsRelay(existingPosts): PostConnection {
+            const { edges, __typename, pageInfo } = existingPosts;
+
+            return {
+              edges: [
+                {
+                  __typename: "PostEdge",
+                  cursor: new Date().toISOString(),
+                  node: {
+                    comments_count: 0,
+                    likes_count: 0,
+                    currently_liked: true,
+                    likes: [],
+                    created_at: new Date().toISOString(),
+                    __typename: postMutationData?.createPost.__typename,
+                    images: postMutationData?.createPost.images,
+                    text: postMutationData?.createPost.text,
+                    title: postMutationData?.createPost.title,
+                    id: postMutationData?.createPost.id
+                  }
+                },
+                ...edges
+              ],
+              __typename,
+              pageInfo
+            };
+          }
+        }
+      });
+    }
+  });
   return (
     <Layout>
       <Box>
@@ -21,10 +58,10 @@ function CreatePost(): ReactElement {
         <Formik
           initialValues={{ title: "", text: "", images: [] }}
           onSubmit={async ({ text, title, images }, actions) => {
-            const { error, data } = await createPost({
-              data: { title, text, images }
+            await createPost({
+              variables: { data: { text, title, images } }
             });
-            console.log("SUBMIT POST", data);
+
             actions.setSubmitting(false);
             actions.resetForm({
               values: { text: "", title: "", images: [] }
@@ -101,4 +138,4 @@ function CreatePost(): ReactElement {
   );
 }
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(CreatePost);
+export default CreatePost;
