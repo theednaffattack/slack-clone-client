@@ -11,13 +11,15 @@ function ForgotPassword() {
   const [mutationState, setMutationState] = useState<
     "isNOTComplete" | "isComplete"
   >("isNOTComplete");
-  const [, forgotPassword] = useForgotPasswordMutation();
+  const [forgotPassword] = useForgotPasswordMutation();
   return (
     <Formik
       initialValues={{ email: "" }}
       onSubmit={async (values) => {
         await forgotPassword({
-          email: values.email
+          variables: {
+            email: values.email
+          }
         });
         setMutationState("isComplete");
       }}
@@ -41,7 +43,7 @@ function ForgotPassword() {
               />
 
               <Button mt={4} type="submit" isLoading={isSubmitting}>
-                register
+                reset password
               </Button>
             </Form>
           </Wrapper>
