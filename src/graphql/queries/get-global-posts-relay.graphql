@@ -1,0 +1,37 @@
+query GetGlobalPostsRelay(
+  $before: String
+  $after: String
+  $first: Float
+  $last: Float
+) {
+  getGlobalPostsRelay(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+  ) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        title
+        text
+        images {
+          id
+          uri
+        }
+        likes {
+          id
+          count
+        }
+        created_at
+      }
+    }
+  }
+}
