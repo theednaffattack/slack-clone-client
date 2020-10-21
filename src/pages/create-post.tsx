@@ -13,8 +13,6 @@ function CreatePost(): ReactElement {
   useIsAuth();
   const [createPost, { error }] = useCreatePostMutation({
     update(cache, { data: postMutationData }) {
-      console.log("CACHE UPDATE FIRING");
-
       // if there's no data don't screw around with the cache
       if (!postMutationData) return;
 
