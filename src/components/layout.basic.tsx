@@ -12,16 +12,16 @@ type LayoutProps = {
 export function Layout({ children }: LayoutProps) {
   // const router = useRouter();
   useIsAuth();
-  const [{ data: dataMe, fetching: fetchingMe }] = useMeQuery({
+  const { data: dataMe, loading: loadingMe } = useMeQuery({
     // Do not run this query on the server.
     // pause: isServer()
   });
 
   // for now show a loading state
-  if (fetchingMe) {
+  if (loadingMe) {
     return (
       <>
-        <Navbar dataMe={dataMe} fetchingMe={fetchingMe} />
+        <Navbar dataMe={dataMe} loadingMe={loadingMe} />
         <Wrapper>loading...</Wrapper>
       </>
     );
@@ -33,9 +33,9 @@ export function Layout({ children }: LayoutProps) {
   // the first-load flash of content.
   return (
     <>
-      <Navbar dataMe={dataMe} fetchingMe={fetchingMe} />
+      <Navbar dataMe={dataMe} loadingMe={loadingMe} />
       <Wrapper>
-        {!fetchingMe && !dataMe?.me ? "unexpected state" : children}
+        {!loadingMe && !dataMe?.me ? "unexpected state" : children}
       </Wrapper>
     </>
   );

@@ -6,15 +6,11 @@ import { MeQuery, useLogoutMutation } from "../generated/graphql";
 
 type NavbarProps = {
   dataMe?: MeQuery;
-  fetchingMe?: boolean;
+  loadingMe?: boolean;
 };
 
 export function Navbar({ dataMe }: NavbarProps) {
-  const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
-  // const [{ data, fetching }] = useMeQuery({
-  //   // Do not run this query on the server.
-  //   pause: isServer()
-  // });
+  const [logout, { loading: loadingLogout }] = useLogoutMutation();
 
   // user is not logged in
   let body = (
@@ -34,7 +30,6 @@ export function Navbar({ dataMe }: NavbarProps) {
     // logged in
     body = (
       <>
-        {dataMe.me?.username.toString()}
         <Link href="/profile" passHref>
           <ChLink mr={2}>
             <Avatar size="md" name={dataMe.me?.username} />
@@ -43,7 +38,7 @@ export function Navbar({ dataMe }: NavbarProps) {
         <Button
           bg="transparent"
           border="1px solid gray"
-          isLoading={logoutFetching}
+          isLoading={loadingLogout}
           onClick={async () => {
             await logout();
           }}
@@ -54,7 +49,19 @@ export function Navbar({ dataMe }: NavbarProps) {
     );
   }
   return (
-    <Flex bg="papayawhip" p={4}>
+    <Flex alignItems="center" bg="papayawhip" p={4}>
+      <Box mr={2}>Branding</Box>
+      <Box mr={2}>
+        <Link href="/" passHref>
+          <ChLink mr={2}>home</ChLink>
+        </Link>
+      </Box>
+      <Box mr={2}>
+        <Link href="/create-post" passHref>
+          <ChLink mr={2}>create post</ChLink>
+        </Link>
+      </Box>
+
       <Box ml="auto">{body}</Box>
     </Flex>
   );
