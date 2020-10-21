@@ -10,9 +10,9 @@ import {
 } from "@chakra-ui/core";
 import NextLink from "next/link";
 import React from "react";
-import { GlobalPostsStack } from "../components/home.global-posts";
-import { useGetGlobalPostsRelayQuery } from "../generated/graphql";
 
+import { LikesAndCommentsSummary } from "../components/home.global-feed.likes";
+import { useGetGlobalPostsRelayQuery } from "../generated/graphql";
 function Index() {
   const initialGlobalPostsVariables = {
     after: null,
@@ -29,60 +29,86 @@ function Index() {
 
   const {
     data: dataPosts,
-    error: errorPosts,
-    fetchMore: fetchMorePosts,
-    loading: loadingPosts
+    // error,
+    fetchMore: fetchMorePosts
   } = useGetGlobalPostsRelayQuery({
     variables: initialGlobalPostsVariables
   });
+
+  console.log("VIEW POSTS", dataPosts);
 
   return (
     <Flex flexDirection="column" alignItems="center">
       <Flex alignItems="center" width={[1 / 2, 1 / 2, 1 / 2, "900px"]}>
         <Heading>Branding</Heading>
+
         <NextLink href="/create-post" passHref>
           <Link ml="auto">create post</Link>
         </NextLink>
       </Flex>
-      <div>
-        <Stack mb={50}>
-          {dataPosts
-            ? dataPosts.getGlobalPostsRelay?.edges.map(
-                ({ node: { created_at, id, images, title, text } }) => {
-                  return (
-                    <Box key={id}>
-                      <Heading>{title}</Heading>
-                      <Box maxWidth="350px">
-                        <Image src={images && images[0] ? images[0].uri : ""} />
-                        <Text>{created_at}</Text>
-                        <Text>{text}</Text>
-                      </Box>
-                    </Box>
-                  );
+      <Stack mb={50}>
+        {dataPosts
+          ? dataPosts.getGlobalPostsRelay?.edges.map(
+              ({
+                node: {
+                  created_at,
+                  id,
+                  images,
+                  title,
+                  text,
+                  comments_count,
+                  currently_liked,
+                  likes_count
                 }
-              )
-            : ""}
-          {dataPosts?.getGlobalPostsRelay?.pageInfo.hasNextPage === true ? (
-            <Button
-              colorScheme="teal"
-              type="button"
-              onClick={() => {
-                fetchMorePosts({
-                  variables: {
-                    first: initialGlobalPostsVariables.first,
-                    after:
-                      dataPosts?.getGlobalPostsRelay?.edges[
-                        dataPosts?.getGlobalPostsRelay?.edges.length - 1
-                      ].node.created_at
-                  }
-                });
-              }}
-            >
-              load more
-            </Button>
-          ) : null}
-        </Stack>
-      </div>
+              }) => {
+                return (
+                  <Box key={id}>
+                    <Heading>{title}</Heading>
+                    <Box maxWidth="350px">
+                      <Image src={images && images[0] ? images[0].uri : ""} />
+                      <Text>{created_at}</Text>
+                      <Text>{text}</Text>
+                    </Box>
+
+                    <Text>
+                      CURRENTLY LIKED:
+                      {currently_liked.toString()}
+                    </Text>
+                    <Text>
+                      ID:
+                      {id}
+                    </Text>
+                    <LikesAndCommentsSummary
+                      comments_count={comments_count}
+                      currently_liked={currently_liked}
+                      likes_count={likes_count}
+                      postId={id}
+                    />
+                  </Box>
+                );
+              }
+            )
+          : ""}
+        {dataPosts?.getGlobalPostsRelay?.pageInfo.hasNextPage === true ? (
+          <Button
+            colorScheme="teal"
+            type="button"
+            onClick={() => {
+              fetchMorePosts({
+                variables: {
+                  first: initialGlobalPostsVariables.first,
+                  after:
+                    dataPosts?.getGlobalPostsRelay?.edges[
+                      dataPosts?.getGlobalPostsRelay?.edges.length - 1
+                    ].node.created_at
+                }
+              });
+            }}
+          >
+            load more
+          </Button>
+        ) : null}
+      </Stack>
       {/* <GlobalPostsStack
         posts={dataPosts?.getGlobalPostsRelay?.edges}
         postsError={errorPosts}
