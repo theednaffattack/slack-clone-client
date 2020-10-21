@@ -1,12 +1,10 @@
 import { Avatar, Button, Text } from "@chakra-ui/core";
-import { withUrqlClient } from "next-urql";
 
 import { Layout } from "../components/layout.basic";
 import { useMeQuery } from "../generated/graphql";
-import { createUrqlClient } from "../lib/utilities.create-urql-client";
 
 function Profile() {
-  const [{ data }] = useMeQuery();
+  const { data } = useMeQuery();
 
   return (
     <Layout>
@@ -21,4 +19,4 @@ function Profile() {
   );
 }
 
-export default withUrqlClient(createUrqlClient)(Profile);
+export default Profile;
