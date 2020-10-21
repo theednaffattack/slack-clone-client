@@ -1,10 +1,9 @@
-import gql from "graphql-tag";
-import * as Urql from "urql";
+import { gql } from "@apollo/client";
+import * as Apollo from "@apollo/client";
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
 };
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -35,6 +34,8 @@ export type Query = {
   getListToCreateThread?: Maybe<TransUserReturn>;
   getOnlyThreads?: Maybe<ThreadConnection>;
   getMessagesByThreadId?: Maybe<MessageConnection>;
+  getGlobalPostsRelay?: Maybe<PostConnection>;
+  getGlobalPostsSimplePagination?: Maybe<PaginatedPosts>;
 };
 
 export type QueryGetMyMessagesFromUserArgs = {
@@ -61,6 +62,20 @@ export type QueryGetOnlyThreadsArgs = {
 
 export type QueryGetMessagesByThreadIdArgs = {
   input: GetMessagesByThreadIdInput;
+};
+
+export type QueryGetGlobalPostsRelayArgs = {
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Float"]>;
+  last?: Maybe<Scalars["Float"]>;
+};
+
+export type QueryGetGlobalPostsSimplePaginationArgs = {
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Float"]>;
+  last?: Maybe<Scalars["Float"]>;
 };
 
 export type User = {
@@ -112,6 +127,7 @@ export type Post = {
   likes?: Maybe<Array<Like>>;
   comments?: Maybe<Array<Comment>>;
   isCtxUserIdAFollowerOfPostUser?: Maybe<Scalars["Boolean"]>;
+  userId?: Maybe<Scalars["ID"]>;
   user?: Maybe<User>;
   created_at?: Maybe<Scalars["DateTime"]>;
   updated_at?: Maybe<Scalars["DateTime"]>;
@@ -243,6 +259,33 @@ export type MessageConnection = {
 export type MessageEdge = {
   __typename?: "MessageEdge";
   node: Message;
+};
+
+export type PostConnection = {
+  __typename?: "PostConnection";
+  pageInfo: PageInfoType;
+  edges: Array<PostEdge>;
+};
+
+export type PageInfoType = {
+  __typename?: "PageInfoType";
+  hasNextPage: Scalars["Boolean"];
+  hasPreviousPage: Scalars["Boolean"];
+  startCursor?: Maybe<Scalars["String"]>;
+  endCursor?: Maybe<Scalars["String"]>;
+};
+
+export type PostEdge = {
+  __typename?: "PostEdge";
+  node: GlobalPostReturnType;
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+};
+
+export type PaginatedPosts = {
+  __typename?: "PaginatedPosts";
+  posts: Array<GlobalPostReturnType>;
+  hasMore: Scalars["Boolean"];
 };
 
 export type Mutation = {
@@ -493,6 +536,7 @@ export type Subscription = {
   newComment: AddCommentPayloadType;
   commentCount: CommentCountType;
   likesCount: LikesCountType;
+  globalPostsRelay?: Maybe<GlobalPostReturnType>;
 };
 
 export type SubscriptionFollowingPostsArgs = {
@@ -712,6 +756,61 @@ export type RegisterMutation = { __typename?: "Mutation" } & {
   register: { __typename?: "UserResponse" } & TypicalUserResponseFragment;
 };
 
+export type GetGlobalPostsRelayQueryVariables = Exact<{
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Float"]>;
+  last?: Maybe<Scalars["Float"]>;
+}>;
+
+export type GetGlobalPostsRelayQuery = { __typename?: "Query" } & {
+  getGlobalPostsRelay?: Maybe<
+    { __typename?: "PostConnection" } & {
+      pageInfo: { __typename?: "PageInfoType" } & Pick<
+        PageInfoType,
+        "hasNextPage" | "hasPreviousPage" | "endCursor" | "startCursor"
+      >;
+      edges: Array<
+        { __typename?: "PostEdge" } & Pick<PostEdge, "cursor"> & {
+            node: { __typename?: "GlobalPostReturnType" } & Pick<
+              GlobalPostReturnType,
+              "id" | "title" | "text" | "created_at"
+            > & {
+                images?: Maybe<
+                  Array<{ __typename?: "Image" } & Pick<Image, "id" | "uri">>
+                >;
+                likes?: Maybe<
+                  Array<{ __typename?: "Like" } & Pick<Like, "id" | "count">>
+                >;
+              };
+          }
+      >;
+    }
+  >;
+};
+
+export type GetGlobalPostsSimplePaginationQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Float"]>;
+}>;
+
+export type GetGlobalPostsSimplePaginationQuery = { __typename?: "Query" } & {
+  getGlobalPostsSimplePagination?: Maybe<
+    { __typename?: "PaginatedPosts" } & Pick<PaginatedPosts, "hasMore"> & {
+        posts: Array<
+          { __typename?: "GlobalPostReturnType" } & Pick<
+            GlobalPostReturnType,
+            "id" | "title" | "text" | "created_at"
+          > & {
+              images?: Maybe<
+                Array<{ __typename?: "Image" } & Pick<Image, "id" | "uri">>
+              >;
+            }
+        >;
+      }
+  >;
+};
+
 export type GetGlobalPostsQueryVariables = Exact<{
   cursor?: Maybe<Scalars["String"]>;
   skip?: Maybe<Scalars["Int"]>;
@@ -783,24 +882,97 @@ export const ChangePasswordDocument = gql`
   }
   ${TypicalUserResponseFragmentDoc}
 `;
+export type ChangePasswordMutationFn = Apollo.MutationFunction<
+  ChangePasswordMutation,
+  ChangePasswordMutationVariables
+>;
 
-export function useChangePasswordMutation() {
-  return Urql.useMutation<
+/**
+ * __useChangePasswordMutation__
+ *
+ * To run a mutation, you first call `useChangePasswordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangePasswordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changePasswordMutation, { data, loading, error }] = useChangePasswordMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useChangePasswordMutation(
+  baseOptions?: Apollo.MutationHookOptions<
     ChangePasswordMutation,
     ChangePasswordMutationVariables
-  >(ChangePasswordDocument);
+  >
+) {
+  return Apollo.useMutation<
+    ChangePasswordMutation,
+    ChangePasswordMutationVariables
+  >(ChangePasswordDocument, baseOptions);
 }
+export type ChangePasswordMutationHookResult = ReturnType<
+  typeof useChangePasswordMutation
+>;
+export type ChangePasswordMutationResult = Apollo.MutationResult<
+  ChangePasswordMutation
+>;
+export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<
+  ChangePasswordMutation,
+  ChangePasswordMutationVariables
+>;
 export const ConfirmUserDocument = gql`
   mutation ConfirmUser($token: String!) {
     confirmUser(token: $token)
   }
 `;
+export type ConfirmUserMutationFn = Apollo.MutationFunction<
+  ConfirmUserMutation,
+  ConfirmUserMutationVariables
+>;
 
-export function useConfirmUserMutation() {
-  return Urql.useMutation<ConfirmUserMutation, ConfirmUserMutationVariables>(
-    ConfirmUserDocument
+/**
+ * __useConfirmUserMutation__
+ *
+ * To run a mutation, you first call `useConfirmUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConfirmUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [confirmUserMutation, { data, loading, error }] = useConfirmUserMutation({
+ *   variables: {
+ *      token: // value for 'token'
+ *   },
+ * });
+ */
+export function useConfirmUserMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ConfirmUserMutation,
+    ConfirmUserMutationVariables
+  >
+) {
+  return Apollo.useMutation<ConfirmUserMutation, ConfirmUserMutationVariables>(
+    ConfirmUserDocument,
+    baseOptions
   );
 }
+export type ConfirmUserMutationHookResult = ReturnType<
+  typeof useConfirmUserMutation
+>;
+export type ConfirmUserMutationResult = Apollo.MutationResult<
+  ConfirmUserMutation
+>;
+export type ConfirmUserMutationOptions = Apollo.BaseMutationOptions<
+  ConfirmUserMutation,
+  ConfirmUserMutationVariables
+>;
 export const CreatePostDocument = gql`
   mutation CreatePost($data: PostInput!) {
     createPost(data: $data) {
@@ -814,35 +986,140 @@ export const CreatePostDocument = gql`
     }
   }
 `;
+export type CreatePostMutationFn = Apollo.MutationFunction<
+  CreatePostMutation,
+  CreatePostMutationVariables
+>;
 
-export function useCreatePostMutation() {
-  return Urql.useMutation<CreatePostMutation, CreatePostMutationVariables>(
-    CreatePostDocument
+/**
+ * __useCreatePostMutation__
+ *
+ * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useCreatePostMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CreatePostMutation,
+    CreatePostMutationVariables
+  >
+) {
+  return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(
+    CreatePostDocument,
+    baseOptions
   );
 }
+export type CreatePostMutationHookResult = ReturnType<
+  typeof useCreatePostMutation
+>;
+export type CreatePostMutationResult = Apollo.MutationResult<
+  CreatePostMutation
+>;
+export type CreatePostMutationOptions = Apollo.BaseMutationOptions<
+  CreatePostMutation,
+  CreatePostMutationVariables
+>;
 export const ForgotPasswordDocument = gql`
   mutation ForgotPassword($email: String!) {
     forgotPassword(email: $email)
   }
 `;
+export type ForgotPasswordMutationFn = Apollo.MutationFunction<
+  ForgotPasswordMutation,
+  ForgotPasswordMutationVariables
+>;
 
-export function useForgotPasswordMutation() {
-  return Urql.useMutation<
+/**
+ * __useForgotPasswordMutation__
+ *
+ * To run a mutation, you first call `useForgotPasswordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useForgotPasswordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [forgotPasswordMutation, { data, loading, error }] = useForgotPasswordMutation({
+ *   variables: {
+ *      email: // value for 'email'
+ *   },
+ * });
+ */
+export function useForgotPasswordMutation(
+  baseOptions?: Apollo.MutationHookOptions<
     ForgotPasswordMutation,
     ForgotPasswordMutationVariables
-  >(ForgotPasswordDocument);
+  >
+) {
+  return Apollo.useMutation<
+    ForgotPasswordMutation,
+    ForgotPasswordMutationVariables
+  >(ForgotPasswordDocument, baseOptions);
 }
+export type ForgotPasswordMutationHookResult = ReturnType<
+  typeof useForgotPasswordMutation
+>;
+export type ForgotPasswordMutationResult = Apollo.MutationResult<
+  ForgotPasswordMutation
+>;
+export type ForgotPasswordMutationOptions = Apollo.BaseMutationOptions<
+  ForgotPasswordMutation,
+  ForgotPasswordMutationVariables
+>;
 export const LogoutDocument = gql`
   mutation Logout {
     logout
   }
 `;
+export type LogoutMutationFn = Apollo.MutationFunction<
+  LogoutMutation,
+  LogoutMutationVariables
+>;
 
-export function useLogoutMutation() {
-  return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(
-    LogoutDocument
+/**
+ * __useLogoutMutation__
+ *
+ * To run a mutation, you first call `useLogoutMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLogoutMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [logoutMutation, { data, loading, error }] = useLogoutMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLogoutMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    LogoutMutation,
+    LogoutMutationVariables
+  >
+) {
+  return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(
+    LogoutDocument,
+    baseOptions
   );
 }
+export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
+export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
+export type LogoutMutationOptions = Apollo.BaseMutationOptions<
+  LogoutMutation,
+  LogoutMutationVariables
+>;
 export const RegisterDocument = gql`
   mutation Register($data: RegisterInput!) {
     register(data: $data) {
@@ -851,12 +1128,203 @@ export const RegisterDocument = gql`
   }
   ${TypicalUserResponseFragmentDoc}
 `;
+export type RegisterMutationFn = Apollo.MutationFunction<
+  RegisterMutation,
+  RegisterMutationVariables
+>;
 
-export function useRegisterMutation() {
-  return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(
-    RegisterDocument
+/**
+ * __useRegisterMutation__
+ *
+ * To run a mutation, you first call `useRegisterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRegisterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [registerMutation, { data, loading, error }] = useRegisterMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useRegisterMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    RegisterMutation,
+    RegisterMutationVariables
+  >
+) {
+  return Apollo.useMutation<RegisterMutation, RegisterMutationVariables>(
+    RegisterDocument,
+    baseOptions
   );
 }
+export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
+export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
+export type RegisterMutationOptions = Apollo.BaseMutationOptions<
+  RegisterMutation,
+  RegisterMutationVariables
+>;
+export const GetGlobalPostsRelayDocument = gql`
+  query GetGlobalPostsRelay(
+    $before: String
+    $after: String
+    $first: Float
+    $last: Float
+  ) {
+    getGlobalPostsRelay(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+    ) {
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        endCursor
+        startCursor
+      }
+      edges {
+        cursor
+        node {
+          id
+          title
+          text
+          images {
+            id
+            uri
+          }
+          likes {
+            id
+            count
+          }
+          created_at
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * __useGetGlobalPostsRelayQuery__
+ *
+ * To run a query within a React component, call `useGetGlobalPostsRelayQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGlobalPostsRelayQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetGlobalPostsRelayQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useGetGlobalPostsRelayQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    GetGlobalPostsRelayQuery,
+    GetGlobalPostsRelayQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    GetGlobalPostsRelayQuery,
+    GetGlobalPostsRelayQueryVariables
+  >(GetGlobalPostsRelayDocument, baseOptions);
+}
+export function useGetGlobalPostsRelayLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetGlobalPostsRelayQuery,
+    GetGlobalPostsRelayQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    GetGlobalPostsRelayQuery,
+    GetGlobalPostsRelayQueryVariables
+  >(GetGlobalPostsRelayDocument, baseOptions);
+}
+export type GetGlobalPostsRelayQueryHookResult = ReturnType<
+  typeof useGetGlobalPostsRelayQuery
+>;
+export type GetGlobalPostsRelayLazyQueryHookResult = ReturnType<
+  typeof useGetGlobalPostsRelayLazyQuery
+>;
+export type GetGlobalPostsRelayQueryResult = Apollo.QueryResult<
+  GetGlobalPostsRelayQuery,
+  GetGlobalPostsRelayQueryVariables
+>;
+export const GetGlobalPostsSimplePaginationDocument = gql`
+  query GetGlobalPostsSimplePagination($after: String, $first: Float) {
+    getGlobalPostsSimplePagination(after: $after, first: $first) {
+      hasMore
+      posts {
+        id
+        title
+        text
+        created_at
+        images {
+          id
+          uri
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * __useGetGlobalPostsSimplePaginationQuery__
+ *
+ * To run a query within a React component, call `useGetGlobalPostsSimplePaginationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGlobalPostsSimplePaginationQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetGlobalPostsSimplePaginationQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useGetGlobalPostsSimplePaginationQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    GetGlobalPostsSimplePaginationQuery,
+    GetGlobalPostsSimplePaginationQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    GetGlobalPostsSimplePaginationQuery,
+    GetGlobalPostsSimplePaginationQueryVariables
+  >(GetGlobalPostsSimplePaginationDocument, baseOptions);
+}
+export function useGetGlobalPostsSimplePaginationLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetGlobalPostsSimplePaginationQuery,
+    GetGlobalPostsSimplePaginationQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    GetGlobalPostsSimplePaginationQuery,
+    GetGlobalPostsSimplePaginationQueryVariables
+  >(GetGlobalPostsSimplePaginationDocument, baseOptions);
+}
+export type GetGlobalPostsSimplePaginationQueryHookResult = ReturnType<
+  typeof useGetGlobalPostsSimplePaginationQuery
+>;
+export type GetGlobalPostsSimplePaginationLazyQueryHookResult = ReturnType<
+  typeof useGetGlobalPostsSimplePaginationLazyQuery
+>;
+export type GetGlobalPostsSimplePaginationQueryResult = Apollo.QueryResult<
+  GetGlobalPostsSimplePaginationQuery,
+  GetGlobalPostsSimplePaginationQueryVariables
+>;
 export const GetGlobalPostsDocument = gql`
   query GetGlobalPosts($cursor: String, $skip: Int, $take: Int) {
     getGlobalPosts(cursor: $cursor, skip: $skip, take: $take) {
@@ -876,14 +1344,56 @@ export const GetGlobalPostsDocument = gql`
   }
 `;
 
+/**
+ * __useGetGlobalPostsQuery__
+ *
+ * To run a query within a React component, call `useGetGlobalPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGlobalPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetGlobalPostsQuery({
+ *   variables: {
+ *      cursor: // value for 'cursor'
+ *      skip: // value for 'skip'
+ *      take: // value for 'take'
+ *   },
+ * });
+ */
 export function useGetGlobalPostsQuery(
-  options: Omit<Urql.UseQueryArgs<GetGlobalPostsQueryVariables>, "query"> = {}
+  baseOptions?: Apollo.QueryHookOptions<
+    GetGlobalPostsQuery,
+    GetGlobalPostsQueryVariables
+  >
 ) {
-  return Urql.useQuery<GetGlobalPostsQuery>({
-    query: GetGlobalPostsDocument,
-    ...options
-  });
+  return Apollo.useQuery<GetGlobalPostsQuery, GetGlobalPostsQueryVariables>(
+    GetGlobalPostsDocument,
+    baseOptions
+  );
 }
+export function useGetGlobalPostsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetGlobalPostsQuery,
+    GetGlobalPostsQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<GetGlobalPostsQuery, GetGlobalPostsQueryVariables>(
+    GetGlobalPostsDocument,
+    baseOptions
+  );
+}
+export type GetGlobalPostsQueryHookResult = ReturnType<
+  typeof useGetGlobalPostsQuery
+>;
+export type GetGlobalPostsLazyQueryHookResult = ReturnType<
+  typeof useGetGlobalPostsLazyQuery
+>;
+export type GetGlobalPostsQueryResult = Apollo.QueryResult<
+  GetGlobalPostsQuery,
+  GetGlobalPostsQueryVariables
+>;
 export const LoginDocument = gql`
   mutation Login($username: String!, $password: String!) {
     login(username: $username, password: $password) {
@@ -892,10 +1402,46 @@ export const LoginDocument = gql`
   }
   ${TypicalUserResponseFragmentDoc}
 `;
+export type LoginMutationFn = Apollo.MutationFunction<
+  LoginMutation,
+  LoginMutationVariables
+>;
 
-export function useLoginMutation() {
-  return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
+/**
+ * __useLoginMutation__
+ *
+ * To run a mutation, you first call `useLoginMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLoginMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [loginMutation, { data, loading, error }] = useLoginMutation({
+ *   variables: {
+ *      username: // value for 'username'
+ *      password: // value for 'password'
+ *   },
+ * });
+ */
+export function useLoginMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    LoginMutation,
+    LoginMutationVariables
+  >
+) {
+  return Apollo.useMutation<LoginMutation, LoginMutationVariables>(
+    LoginDocument,
+    baseOptions
+  );
 }
+export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
+export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
+export type LoginMutationOptions = Apollo.BaseMutationOptions<
+  LoginMutation,
+  LoginMutationVariables
+>;
 export const MeDocument = gql`
   query Me {
     me {
@@ -905,8 +1451,34 @@ export const MeDocument = gql`
   ${UserBaseFragmentDoc}
 `;
 
+/**
+ * __useMeQuery__
+ *
+ * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
 export function useMeQuery(
-  options: Omit<Urql.UseQueryArgs<MeQueryVariables>, "query"> = {}
+  baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>
 ) {
-  return Urql.useQuery<MeQuery>({ query: MeDocument, ...options });
+  return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
 }
+export function useMeLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>
+) {
+  return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(
+    MeDocument,
+    baseOptions
+  );
+}
+export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
+export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
+export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
