@@ -22,13 +22,16 @@ query GetGlobalPostsRelay(
         id
         title
         text
+
+        likes_count
+        comments_count
+        currently_liked
         images {
           id
           uri
         }
         likes {
           id
-          count
         }
         created_at
       }
