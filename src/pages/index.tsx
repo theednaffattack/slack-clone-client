@@ -35,8 +35,6 @@ function Index() {
     variables: initialGlobalPostsVariables
   });
 
-  console.log("VIEW POSTS", dataPosts);
-
   return (
     <Flex flexDirection="column" alignItems="center">
       <Flex alignItems="center" width={[1 / 2, 1 / 2, 1 / 2, "900px"]}>

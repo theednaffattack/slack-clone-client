@@ -52,7 +52,6 @@ const splitLink = !isServer()
 
 const authLink = setContext((_, { headers, req }) => {
   const token = parseCookies(req)[process.env.NEXT_PUBLIC_COOKIE_PREFIX!];
-  console.log("CHECK HEADERS & TOKEN", { _, headers, token });
 
   return {
     headers: {
