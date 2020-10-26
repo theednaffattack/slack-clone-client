@@ -44,6 +44,7 @@ function Index() {
           <Link ml="auto">create post</Link>
         </NextLink>
       </Flex>
+      
       <Stack mb={50}>
         {dataPosts
           ? dataPosts.getGlobalPostsRelay?.edges.map(
@@ -64,23 +65,18 @@ function Index() {
                     <Heading>{title}</Heading>
                     <Box maxWidth="350px">
                       <Image src={images && images[0] ? images[0].uri : ""} />
-                      <Text>{created_at}</Text>
+                      <Flex>
+                      <Text ml="auto">{created_at}</Text>
+                      </Flex>
                       <Text>{text}</Text>
                     </Box>
 
-                    <Text>
-                      CURRENTLY LIKED:
-                      {currently_liked.toString()}
-                    </Text>
-                    <Text>
-                      ID:
-                      {id}
-                    </Text>
+
                     <LikesAndCommentsSummary
                       comments_count={comments_count}
                       currently_liked={currently_liked}
                       likes_count={likes_count}
-                      postId={id}
+                      postId={id ? id : ""}
                     />
                   </Box>
                 );
