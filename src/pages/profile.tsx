@@ -1,9 +1,14 @@
 import { Avatar, Button, Text } from "@chakra-ui/core";
+import { NextPage } from "next";
 
 import { Layout } from "../components/layout.basic";
-import { useMeQuery } from "../generated/graphql";
+import { MeDocument, useMeQuery } from "../generated/graphql";
+import { initializeApollo } from "../lib/config.apollo-client";
+import { MyContext } from "../lib/types";
 
-function Profile() {
+
+
+const Profile:NextPage = () => {
   const { data } = useMeQuery();
 
   return (
@@ -17,6 +22,26 @@ function Profile() {
       </>
     </Layout>
   );
+}
+
+Profile.getInitialProps = async (ctx: MyContext) =>{
+  if (!ctx.apolloClient) ctx.apolloClient = initializeApollo();
+
+  
+
+  let meResponse;
+  try {
+    meResponse = await ctx.apolloClient.mutate({
+      mutation: MeDocument
+    });
+  } catch (error) {
+    console.warn("ERROR", error);
+  }
+
+  return {
+    me: meResponse?.data ? meResponse?.data : {},
+  };
+  
 }
 
 export default Profile;
