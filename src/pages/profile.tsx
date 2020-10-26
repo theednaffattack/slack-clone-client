@@ -1,12 +1,15 @@
 import { Avatar, Button, Text } from "@chakra-ui/core";
-import { withUrqlClient } from "next-urql";
+import { NextPage } from "next";
 
 import { Layout } from "../components/layout.basic";
-import { useMeQuery } from "../generated/graphql";
-import { createUrqlClient } from "../lib/utilities.create-urql-client";
+import { MeDocument, useMeQuery } from "../generated/graphql";
+import { initializeApollo } from "../lib/config.apollo-client";
+import { MyContext } from "../lib/types";
 
-function Profile() {
-  const [{ data }] = useMeQuery();
+
+
+const Profile:NextPage = () => {
+  const { data } = useMeQuery();
 
   return (
     <Layout>
@@ -21,4 +24,24 @@ function Profile() {
   );
 }
 
-export default withUrqlClient(createUrqlClient)(Profile);
+Profile.getInitialProps = async (ctx: MyContext) =>{
+  if (!ctx.apolloClient) ctx.apolloClient = initializeApollo();
+
+  
+
+  let meResponse;
+  try {
+    meResponse = await ctx.apolloClient.mutate({
+      mutation: MeDocument
+    });
+  } catch (error) {
+    console.warn("ERROR", error);
+  }
+
+  return {
+    me: meResponse?.data ? meResponse?.data : {},
+  };
+  
+}
+
+export default Profile;

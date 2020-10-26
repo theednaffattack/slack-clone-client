@@ -1,16 +1,30 @@
 import { Box, Button, Text } from "@chakra-ui/core";
 import { Field, FieldArray, Form, Formik } from "formik";
-import { useRouter } from "next/router";
-import React, { ReactElement } from "react";
+import { NextPage } from "next";
+import { Router } from "next/router";
+import React from "react";
+
 import { InputField } from "../components/forms.input-field";
 import { TextArea } from "../components/forms.textarea";
 import { Layout } from "../components/layout.basic";
-import { PostConnection, useCreatePostMutation } from "../generated/graphql";
-import { useIsAuth } from "../lib/utilities.hooks.useIsAuth";
+import {
+  MeDocument,
+  MeQuery,
+  PostConnection,
+  useCreatePostMutation
+} from "../generated/graphql";
+import { initializeApollo } from "../lib/config.apollo-client";
+import { MyContext } from "../lib/types";
 
-function CreatePost(): ReactElement {
-  const router = useRouter();
-  useIsAuth();
+
+type CreatePostProps = {
+  me: MeQuery;
+  router?: Router;
+};
+
+const CreatePost: NextPage<CreatePostProps> = ({router}) => {
+  
+  
   const [createPost, { error }] = useCreatePostMutation({
     update(cache, { data: postMutationData }) {
       // if there's no data don't screw around with the cache
@@ -29,7 +43,7 @@ function CreatePost(): ReactElement {
                   node: {
                     comments_count: 0,
                     likes_count: 0,
-                    currently_liked: true,
+                    currently_liked: false,
                     likes: [],
                     created_at: new Date().toISOString(),
                     __typename: postMutationData?.createPost.__typename,
@@ -64,7 +78,7 @@ function CreatePost(): ReactElement {
             actions.resetForm({
               values: { text: "", title: "", images: [] }
             });
-            if (!error) {
+            if (!error && router) {
               router.push("/");
             }
           }}
@@ -134,6 +148,25 @@ function CreatePost(): ReactElement {
       </Box>
     </Layout>
   );
-}
+};
+
+CreatePost.getInitialProps = async (ctx: MyContext) => {
+  if (!ctx.apolloClient) ctx.apolloClient = initializeApollo();
+
+  
+
+  let meResponse;
+  try {
+    meResponse = await ctx.apolloClient.mutate({
+      mutation: MeDocument
+    });
+  } catch (error) {
+    console.warn("ERROR", error);
+  }
+
+  return {
+    me: meResponse?.data ? meResponse?.data : {},
+  };
+};
 
 export default CreatePost;

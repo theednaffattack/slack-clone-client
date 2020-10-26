@@ -1,23 +1,21 @@
 import { Box, Button, Flex, Link, Text } from "@chakra-ui/core";
 import { Form, Formik } from "formik";
 import { NextPage } from "next";
-import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { ReactElement, useState } from "react";
-import { InputField } from "../../components/forms.input-field";
 import { Wrapper } from "../../components/box-wrapper";
+import { InputField } from "../../components/forms.input-field";
 import {
   ChangePasswordMutation,
   FieldError,
   useChangePasswordMutation
 } from "../../generated/graphql";
-import { createUrqlClient } from "../../lib/utilities.create-urql-client";
-import { formatValidationErrors } from "../../lib/utilities.graphQLErrors.format-validation-errors";
+import { formatValidationErrors } from "../../lib/utilities.graphQLErrors.format-apollo-validation-errors";
 import { toErrorMap } from "../../lib/utilities.toErrorMap";
 
 const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
-  const [, changePassword] = useChangePasswordMutation();
+  const [changePassword] = useChangePasswordMutation();
   const [tokenErrorHelper, setTokenErrorHelper] = useState<ReactElement>();
   const router = useRouter();
   return (
@@ -25,16 +23,18 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
       initialValues={{ password: "", token }}
       onSubmit={async (values, { setErrors }) => {
         const response = await changePassword({
-          data: {
-            password: values.password,
-            token:
-              typeof router.query.token === "string" ? router.query.token : ""
+          variables: {
+            data: {
+              password: values.password,
+              token:
+                typeof router.query.token === "string" ? router.query.token : ""
+            }
           }
         });
         let validationErrors: FieldError[];
-        if (response.error) {
+        if (response.errors) {
           validationErrors = formatValidationErrors<ChangePasswordMutation>(
-            response
+            response.errors
           );
           const errorMap = toErrorMap(validationErrors);
           setErrors(errorMap);
@@ -95,4 +95,4 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
 //   };
 // };
 
-export default withUrqlClient(createUrqlClient)(ChangePassword);
+export default ChangePassword;

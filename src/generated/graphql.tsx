@@ -138,7 +138,9 @@ export type Post = {
 export type Like = {
   __typename?: "Like";
   id: Scalars["ID"];
+  postId: Scalars["ID"];
   post: Post;
+  userId: Scalars["ID"];
   user: User;
   count: Scalars["Int"];
 };
@@ -146,7 +148,9 @@ export type Like = {
 export type Comment = {
   __typename?: "Comment";
   id: Scalars["ID"];
+  postId: Scalars["ID"];
   post: Post;
+  userId: Scalars["ID"];
   user: User;
   created_at?: Maybe<Scalars["DateTime"]>;
   content: Scalars["String"];
@@ -720,6 +724,19 @@ export type ConfirmUserMutation = { __typename?: "Mutation" } & Pick<
   "confirmUser"
 >;
 
+export type CreateOrUpdateLikesMutationVariables = Exact<{
+  input: UpdateLikesInput;
+}>;
+
+export type CreateOrUpdateLikesMutation = { __typename?: "Mutation" } & {
+  createOrUpdateLikes?: Maybe<
+    { __typename?: "LikeReturnType" } & Pick<
+      LikeReturnType,
+      "postId" | "status"
+    >
+  >;
+};
+
 export type CreatePostMutationVariables = Exact<{
   data: PostInput;
 }>;
@@ -774,13 +791,19 @@ export type GetGlobalPostsRelayQuery = { __typename?: "Query" } & {
         { __typename?: "PostEdge" } & Pick<PostEdge, "cursor"> & {
             node: { __typename?: "GlobalPostReturnType" } & Pick<
               GlobalPostReturnType,
-              "id" | "title" | "text" | "created_at"
+              | "id"
+              | "title"
+              | "text"
+              | "likes_count"
+              | "comments_count"
+              | "currently_liked"
+              | "created_at"
             > & {
                 images?: Maybe<
                   Array<{ __typename?: "Image" } & Pick<Image, "id" | "uri">>
                 >;
                 likes?: Maybe<
-                  Array<{ __typename?: "Like" } & Pick<Like, "id" | "count">>
+                  Array<{ __typename?: "Like" } & Pick<Like, "id">>
                 >;
               };
           }
@@ -972,6 +995,57 @@ export type ConfirmUserMutationResult = Apollo.MutationResult<
 export type ConfirmUserMutationOptions = Apollo.BaseMutationOptions<
   ConfirmUserMutation,
   ConfirmUserMutationVariables
+>;
+export const CreateOrUpdateLikesDocument = gql`
+  mutation CreateOrUpdateLikes($input: UpdateLikesInput!) {
+    createOrUpdateLikes(input: $input) {
+      postId
+      status
+    }
+  }
+`;
+export type CreateOrUpdateLikesMutationFn = Apollo.MutationFunction<
+  CreateOrUpdateLikesMutation,
+  CreateOrUpdateLikesMutationVariables
+>;
+
+/**
+ * __useCreateOrUpdateLikesMutation__
+ *
+ * To run a mutation, you first call `useCreateOrUpdateLikesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateOrUpdateLikesMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createOrUpdateLikesMutation, { data, loading, error }] = useCreateOrUpdateLikesMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateOrUpdateLikesMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CreateOrUpdateLikesMutation,
+    CreateOrUpdateLikesMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    CreateOrUpdateLikesMutation,
+    CreateOrUpdateLikesMutationVariables
+  >(CreateOrUpdateLikesDocument, baseOptions);
+}
+export type CreateOrUpdateLikesMutationHookResult = ReturnType<
+  typeof useCreateOrUpdateLikesMutation
+>;
+export type CreateOrUpdateLikesMutationResult = Apollo.MutationResult<
+  CreateOrUpdateLikesMutation
+>;
+export type CreateOrUpdateLikesMutationOptions = Apollo.BaseMutationOptions<
+  CreateOrUpdateLikesMutation,
+  CreateOrUpdateLikesMutationVariables
 >;
 export const CreatePostDocument = gql`
   mutation CreatePost($data: PostInput!) {
@@ -1192,13 +1266,15 @@ export const GetGlobalPostsRelayDocument = gql`
           id
           title
           text
+          likes_count
+          comments_count
+          currently_liked
           images {
             id
             uri
           }
           likes {
             id
-            count
           }
           created_at
         }

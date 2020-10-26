@@ -1,6 +1,5 @@
 import { Box, Button, Heading, Image, Stack, Text } from "@chakra-ui/core";
 import React, { ReactElement, ReactNode } from "react";
-import { CombinedError } from "urql";
 import { ApolloError } from "@apollo/client";
 import { GetGlobalPostsRelayQuery } from "../generated/graphql";
 
@@ -38,21 +37,21 @@ export function GlobalPostsStack({
     );
   }
   // if somehow the array is empty
-  if (posts && posts.length === 0) {
+  if (posts && posts.edges.length === 0) {
     return <GlobalPostsEmpty />;
   }
   // if data...
-  if (posts && posts.length > 0) {
+  if (posts && posts.edges.length > 0) {
     const boxes = [];
-    for (const post of posts) {
+    for (const post of posts.edges) {
       boxes.push(
-        <Box key={post.id} p={5} shadow="md" borderWidth="1px" width={1 / 2}>
-          <Heading fontSize="xl">{post.title}</Heading>
+        <Box key={post.node.id} p={5} shadow="md" borderWidth="1px" width={1 / 2}>
+          <Heading fontSize="xl">{post.node.title}</Heading>
           <Image
-            src={post.images ? post.images[0].uri : ""}
+            src={post.node.images ? post.node.images[0].uri : ""}
             placeholder="https://via.placeholder.com/150"
           />
-          <Text mt={4}>{post.text}</Text>
+          <Text mt={4}>{post.node.text}</Text>
         </Box>
       );
     }

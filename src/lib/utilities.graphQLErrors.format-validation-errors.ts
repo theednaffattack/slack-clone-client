@@ -1,7 +1,7 @@
 import { OperationResult } from "urql";
 import { FieldError } from "../generated/graphql";
 
-export function formatValidationErrors<Operation>(
+export function formatUrqlValidationErrors<Operation>(
   response: OperationResult<Operation>
 ): FieldError[] {
   // // If we sense graphQL errors
