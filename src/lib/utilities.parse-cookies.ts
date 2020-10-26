@@ -8,8 +8,8 @@ export function parseCookies(req?: NextPageContext["req"], options = {}) {
     isServer() && req
       ? req.headers.cookie
         ? req.headers.cookie
-        : ""
-      : document.cookie,
+        : document.cookie
+      : "",
     options
   );
 }
