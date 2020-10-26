@@ -3,11 +3,11 @@ import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import React from "react";
 import { GlobalPostsStack } from "../components/home.global-posts";
-import { useGetGlobalPostsQuery } from "../generated/graphql";
+import { useGetGlobalPostsRelayQuery } from "../generated/graphql";
 import { createUrqlClient } from "../lib/utilities.create-urql-client";
 
 function Index() {
-  const [{ data: dataGlobalPosts }] = useGetGlobalPostsQuery();
+  const { data: dataGlobalPosts, error: errorPosts, loading: loadingPosts } = useGetGlobalPostsRelayQuery();
 
   return (
     <Box>
@@ -15,7 +15,10 @@ function Index() {
       <NextLink href="/create-post" passHref>
         <Link>create post</Link>
       </NextLink>
-      <GlobalPostsStack posts={dataGlobalPosts?.getGlobalPosts} />
+      <GlobalPostsStack
+      postsError={errorPosts}
+      postsFetching={loadingPosts}
+       posts={dataGlobalPosts?.getGlobalPostsRelay} />
     </Box>
   );
 }
