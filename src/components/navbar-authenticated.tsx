@@ -1,8 +1,8 @@
-import { Avatar, Box, Button, Flex, Link as ChLink } from "@chakra-ui/core";
+import { Avatar, Box, Flex, Link as ChLink } from "@chakra-ui/core";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
-
-import { MeQuery, useLogoutMutation } from "../generated/graphql";
+import { MeQuery } from "../generated/graphql";
 
 type NavbarProps = {
   dataMe?: MeQuery;
@@ -10,7 +10,7 @@ type NavbarProps = {
 };
 
 export function Navbar({ dataMe }: NavbarProps) {
-  const [logout, { loading: loadingLogout }] = useLogoutMutation();
+  const router = useRouter();
 
   // user is not logged in
   let body = (
@@ -35,16 +35,40 @@ export function Navbar({ dataMe }: NavbarProps) {
             <Avatar size="md" name={dataMe.me?.username} />
           </ChLink>
         </Link>
-        <Button
+        <Link href="/logout" passHref>
+          <ChLink
+            mr={2}
+            onClick={() => {
+              // to support logging out from all windows
+              window.localStorage.setItem("logout", Date.now().toString());
+
+              router.push("/logout");
+            }}
+          >
+            logout
+          </ChLink>
+        </Link>
+        {/* <Button
           bg="transparent"
           border="1px solid gray"
           isLoading={loadingLogout}
           onClick={async () => {
-            await logout();
+            try {
+              await client.resetStore();
+            } catch (cacheError) {
+              console.warn("ERROR RESET STORE");
+            }
+            try {
+              await logout();
+              // router.push("/");
+              console.log("SUCCESSFUL LOGOUT!");
+            } catch (logoutError) {
+              console.warn("LOGOUT ERROR", logoutError);
+            }
           }}
         >
           logout
-        </Button>
+        </Button> */}
       </>
     );
   }
