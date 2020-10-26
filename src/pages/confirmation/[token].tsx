@@ -1,55 +1,81 @@
 // import { useConfirmUserMutation } from "../../generated/graphql";
-import { Button, Stack, Text } from "@chakra-ui/core";
+import { Button, Flex, Link, Text } from "@chakra-ui/core";
 import { NextPage } from "next";
-import { withUrqlClient } from "next-urql";
-import { useRouter } from "next/router";
-import React from "react";
+import NextLink from "next/link";
+import React, { ReactElement } from "react";
 import { Wrapper } from "../../components/box-wrapper";
-import { useConfirmUserMutation } from "../../generated/graphql";
-import { createUrqlClient } from "../../lib/utilities.create-urql-client";
+import {
+  ConfirmUserDocument
+} from "../../generated/graphql";
+import { initializeApollo } from "../../lib/config.apollo-client";
+import { MyContext } from "../../lib/types";
 
-const Confirmation: NextPage<{ token: string }> = ({ token }) => {
-  const [{ data, fetching }, confirmUser] = useConfirmUserMutation();
+type ConfirmationProps = {
+  userConfirmed: boolean;
+};
 
-  const router = useRouter();
+const Confirmation: NextPage<ConfirmationProps> = ({
+  userConfirmed
+}) => {
+  
+  
 
-  // confirmUser({
-  //   token: typeof router.query.token === "string" ? router.query.token : ""
-  // });
+  let body: ReactElement;
+  if (userConfirmed) {
+    body = (
+      <Flex flexDirection="column" alignItems="center" justifyContent="center">
+        <Text>Thank you for confirming your account!</Text>
+        <NextLink href="/login" passHref>
+          <Link>
+          Login
+          </Link>
+        </NextLink>
+      </Flex>
+    );
+  } else {
+    body = (
+      <Flex h="100%" flexDirection="column" alignItems="center" justifyContent="center">
+        <Text mt={4}>The confirmation link has expired. Your account has not been confirmed.</Text>
+        <Button type="button" mt={4} colorScheme="teal">
+          Request a new confirmation
+        </Button>
+      </Flex>
+    );
+  }
 
   return (
     <Wrapper>
-      <>
-        Confirmation page
-        <Text>{token}</Text>
-        <Text>Loading: {fetching.toString()}</Text>
-        <Text>Data: {data?.confirmUser.toString()}</Text>
-        <Button
-          colorScheme="teal"
-          type="button"
-          onClick={() =>
-            confirmUser({
-              token:
-                typeof router.query.token === "string" ? router.query.token : ""
-            })
-          }
-        >
-          submit
-        </Button>
-        <Stack isInline={false}>
-          {/* <Code colorScheme="red">{confirmationError}</Code> */}
-          {/* <Code colorScheme="yellow">{response}</Code> */}
-        </Stack>
-        <Text>{}</Text>
-      </>
+      
+        {body}
     </Wrapper>
   );
 };
 
-// Confirmation.getInitialProps = ({ query }) => {
-//   return {
-//     token: query.token as string
-//   };
-// };
+Confirmation.getInitialProps = async (ctx: MyContext) => {
+  if (!ctx.apolloClient) ctx.apolloClient = initializeApollo();
 
-export default withUrqlClient(createUrqlClient)(Confirmation);
+  let response;
+  // Take token as a URL param and confirm the user.
+  try {
+    response = await ctx.apolloClient.mutate({
+      mutation: ConfirmUserDocument,
+      variables: {
+        token: typeof ctx.query.token === "string" ? ctx.query.token : ""
+      }
+    });
+    
+  } catch (error) {
+    console.warn("CONFIRMATION GET INITIAL PROPS", error);
+  }
+  return {
+    props: {
+      initialApolloState: ctx.apolloClient.cache.extract()
+    },
+    revalidate: 1,
+
+    
+    userConfirmed: response?.data?.confirmUser
+  };
+};
+
+export default Confirmation;
