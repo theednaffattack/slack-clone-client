@@ -1,4 +1,4 @@
-# A NextJS starter app for use in my portfolio.
+# A NextJS starter app for use in my portfolio
 
 ## Features
 
