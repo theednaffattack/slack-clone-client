@@ -1,4 +1,4 @@
-# A NextJS starter app for use in my portfolio
+# A Basic Slack Clone
 
 ## Features
 
@@ -12,4 +12,3 @@
 
 - Add file upload
 - Add url preview to Posts
-
