@@ -1,5 +1,5 @@
 import { ApolloProvider } from "@apollo/client";
-import { ChakraProvider, CSSReset } from "@chakra-ui/core";
+import { ChakraProvider, CSSReset } from "@chakra-ui/react";
 import { AppProps } from "next/app";
 import Router from "next/router";
 import { useEffect } from "react";
