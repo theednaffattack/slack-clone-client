@@ -24,8 +24,12 @@ let apolloClient: ApolloClient<NormalizedCacheObject>;
 
 export const APOLLO_STATE_PROP_NAME = "__APOLLO_STATE__";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const httpLink = new HttpLink({
-  uri: "https://nextjs-graphql-with-prisma-simple.vercel.app/api", // process.env.NEXT_PUBLIC_DEVELOPMENT_GQL_URI,
+  uri: isProduction
+    ? process.env.NEXT_PUBLIC_PRODUCTION_GQL_URI
+    : process.env.NEXT_PUBLIC_DEVELOPMENT_GQL_URI,
   credentials: "include"
 });
 
@@ -33,7 +37,9 @@ const httpLink = new HttpLink({
 const wsLink = !isServer()
   ? new WebSocketLink(
       new SubscriptionClient(
-        process.env.NEXT_PUBLIC_DEVELOPMENT_WEBSOCKET_URL!,
+        isProduction
+          ? process.env.NEXT_PUBLIC_PRODUCTION_WEBSOCKET_URL!
+          : process.env.NEXT_PUBLIC_DEVELOPMENT_WEBSOCKET_URL!,
         {
           lazy: true,
           reconnect: true
