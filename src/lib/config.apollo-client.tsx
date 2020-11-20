@@ -19,13 +19,13 @@ import Router from "next/router";
 
 import { parseCookies } from "../lib/utilities.parse-cookies";
 import { isServer } from "../lib/utilities.is-server";
-// import redirect from "./utilities.redirect";
-
 
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 
+export const APOLLO_STATE_PROP_NAME = "__APOLLO_STATE__";
+
 const httpLink = new HttpLink({
-  uri: process.env.NEXT_PUBLIC_DEVELOPMENT_GQL_URI,
+  uri: "https://nextjs-graphql-with-prisma-simple.vercel.app/api", // process.env.NEXT_PUBLIC_DEVELOPMENT_GQL_URI,
   credentials: "include"
 });
 
@@ -60,7 +60,6 @@ const splitLink = !isServer()
 
 const authLink = setContext((_, { headers, req }) => {
   const token = parseCookies(req)[process.env.NEXT_PUBLIC_COOKIE_PREFIX!];
-  
 
   return {
     headers: {
@@ -70,34 +69,41 @@ const authLink = setContext((_, { headers, req }) => {
   };
 });
 
-
-
-const errorLink = onError(({ graphQLErrors, networkError,  }) => {
+const errorLink = onError(({ graphQLErrors, networkError }) => {
   console.log("VIEW GQL ERRORS", graphQLErrors);
 
   // We don't want the home page to re-route so don't include
-  // "createOrUpdateLikes" mutations to be filtered out and 
+  // "createOrUpdateLikes" mutations to be filtered out and
   // redirected.
-  const filteredAuthErrors = graphQLErrors && graphQLErrors.filter((error)=>error.message === "Not authenticated" && !error.path?.includes("createOrUpdateLikes"))
-  
-  if(filteredAuthErrors && filteredAuthErrors.length > 0){
+  const filteredAuthErrors =
+    graphQLErrors &&
+    graphQLErrors.filter(
+      (error) =>
+        error.message === "Not authenticated" &&
+        !error.path?.includes("createOrUpdateLikes")
+    );
+
+  if (filteredAuthErrors && filteredAuthErrors.length > 0) {
     console.log("GOD KNOWS FILTERED AUTH ERRORS", filteredAuthErrors);
-    !isServer() && Router.push("/login?flash=You must be authenticated")
+    !isServer() && Router.push("/login?flash=You must be authenticated");
     return;
   }
-  
+
   console.log("STILL GOING?");
-  
-  const filteredRoutes = graphQLErrors && graphQLErrors?.filter((errorThing)=>{
-    const {path} = errorThing;
-    const something = path && typeof path[0] === "string" ? path[0] : ""
-  
-    
-    return something === "register";
-    
-  })
-  
-  if (graphQLErrors && filteredRoutes && filteredRoutes.length < 1 || graphQLErrors && !filteredRoutes) {
+
+  const filteredRoutes =
+    graphQLErrors &&
+    graphQLErrors?.filter((errorThing) => {
+      const { path } = errorThing;
+      const something = path && typeof path[0] === "string" ? path[0] : "";
+
+      return something === "register";
+    });
+
+  if (
+    (graphQLErrors && filteredRoutes && filteredRoutes.length < 1) ||
+    (graphQLErrors && !filteredRoutes)
+  ) {
     graphQLErrors.map(({ message, locations, path }) =>
       console.warn(
         `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
@@ -146,7 +152,19 @@ export function initializeApollo(initialState = null) {
   return _apolloClient;
 }
 
-export function useApollo(initialState: any) {
-  const store = useMemo(() => initializeApollo(initialState), [initialState]);
+export function addApolloState(
+  client: ApolloClient<NormalizedCacheObject>,
+  pageProps: any
+) {
+  if (pageProps?.props) {
+    pageProps.props[APOLLO_STATE_PROP_NAME] = client.cache.extract();
+  }
+
+  return pageProps;
+}
+
+export function useApollo(pageProps: any) {
+  const state = pageProps[APOLLO_STATE_PROP_NAME];
+  const store = useMemo(() => initializeApollo(state), [state]);
   return store;
 }
