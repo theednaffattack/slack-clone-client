@@ -1,5 +1,5 @@
 overwrite: true
-schema: "http://10.0.0.188:4000/graphql"
+schema: ${NEXT_PUBLIC_DEVELOPMENT_GQL_URI:10.0.0.188:5050/graphql}
 documents: "src/graphql/**/*.graphql"
 generates:
   src/generated/graphql.tsx:
