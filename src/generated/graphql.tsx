@@ -13,88 +13,124 @@ export type Scalars = {
   Float: number;
   /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: any;
-  /** The `Upload` scalar type represents a file upload. */
-  Upload: any;
 };
 
 export type Query = {
   __typename?: "Query";
+  batchTeams: Array<Team>;
+  getAllTeamMembers: Array<UserToTeam>;
+  getAllTeamsForUser: Array<Team>;
+  teamMembers?: Maybe<Array<Maybe<User>>>;
   me?: Maybe<User>;
   helloWorld: Scalars["String"];
-  GetAllMyImages: Array<Image>;
-  getThoseIFollowAndTheirPostsResolver?: Maybe<User>;
-  getMyMessagesFromUser?: Maybe<Array<Message>>;
-  getGlobalPosts?: Maybe<Array<GlobalPostReturnType>>;
-  getGlobalPostById?: Maybe<GlobalPostReturnType>;
-  meAndAllFollowers?: Maybe<User>;
-  myFollowingPosts?: Maybe<Array<FollowingPostReturnType>>;
-  getMyFollowingPostById?: Maybe<FollowingPostReturnType>;
   getAllMyMessages?: Maybe<User>;
-  getMessageThreads?: Maybe<Array<Maybe<Thread>>>;
-  getListToCreateThread?: Maybe<TransUserReturn>;
-  getOnlyThreads?: Maybe<ThreadConnection>;
-  getMessagesByThreadId?: Maybe<MessageConnection>;
-  getGlobalPostsRelay?: Maybe<PostConnection>;
-  getGlobalPostsSimplePagination?: Maybe<PaginatedPosts>;
+  getListToCreateThread: Array<Maybe<User>>;
+  getMyMessagesFromUser?: Maybe<Array<Message>>;
+  getChannelName: Scalars["String"];
+  getAllChannelMembers: Array<User>;
+  getAllChannelMessages: Array<Message>;
+  loadChannelsByTeamId: Array<Channel>;
+  channelMembers?: Maybe<Array<Maybe<User>>>;
+  loadDirectMessagesThreadById: Thread;
+  loadDirectMessageThreadsByTeamAndUser: Array<Thread>;
+};
+
+export type QueryGetAllTeamMembersArgs = {
+  teamId: Scalars["String"];
+};
+
+export type QueryTeamMembersArgs = {
+  teamIds: Array<Scalars["ID"]>;
+};
+
+export type QueryGetListToCreateThreadArgs = {
+  teamId: Scalars["String"];
 };
 
 export type QueryGetMyMessagesFromUserArgs = {
   input: GetMessagesFromUserInput;
 };
 
-export type QueryGetGlobalPostsArgs = {
-  cursor?: Maybe<Scalars["String"]>;
-  skip?: Maybe<Scalars["Int"]>;
-  take?: Maybe<Scalars["Int"]>;
+export type QueryGetChannelNameArgs = {
+  channelId: Scalars["String"];
 };
 
-export type QueryGetGlobalPostByIdArgs = {
-  getpostinput: GetGlobalPostByIdInput;
+export type QueryGetAllChannelMembersArgs = {
+  channelId: Scalars["String"];
 };
 
-export type QueryGetMyFollowingPostByIdArgs = {
-  getpostinput: GetMyFollowingPostByIdInput;
+export type QueryGetAllChannelMessagesArgs = {
+  teamId?: Maybe<Scalars["String"]>;
+  channelId?: Maybe<Scalars["String"]>;
 };
 
-export type QueryGetOnlyThreadsArgs = {
-  feedinput: FeedInput;
+export type QueryLoadChannelsByTeamIdArgs = {
+  teamId: Scalars["String"];
 };
 
-export type QueryGetMessagesByThreadIdArgs = {
-  input: GetMessagesByThreadIdInput;
+export type QueryChannelMembersArgs = {
+  channelIds: Array<Scalars["ID"]>;
 };
 
-export type QueryGetGlobalPostsRelayArgs = {
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Float"]>;
-  last?: Maybe<Scalars["Float"]>;
+export type QueryLoadDirectMessagesThreadByIdArgs = {
+  teamId: Scalars["String"];
+  threadId: Scalars["String"];
 };
 
-export type QueryGetGlobalPostsSimplePaginationArgs = {
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Float"]>;
-  last?: Maybe<Scalars["Float"]>;
+export type QueryLoadDirectMessageThreadsByTeamAndUserArgs = {
+  teamId: Scalars["String"];
+};
+
+export type Team = {
+  __typename?: "Team";
+  id: Scalars["ID"];
+  name: Scalars["String"];
+  owner: User;
+  channels: Array<Maybe<Channel>>;
+  threads: Array<Maybe<Thread>>;
+  members: Array<Maybe<User>>;
+  userToTeams: Array<Maybe<UserToTeam>>;
 };
 
 export type User = {
   __typename?: "User";
-  id: Scalars["ID"];
-  mappedMessages: Array<Message>;
-  email: Scalars["String"];
-  username: Scalars["String"];
-  threads?: Maybe<Array<Thread>>;
-  likes?: Maybe<Array<Like>>;
-  confirmed: Scalars["Boolean"];
-  posts?: Maybe<Array<Post>>;
+  id?: Maybe<Scalars["ID"]>;
+  firstName?: Maybe<Scalars["String"]>;
+  lastName?: Maybe<Scalars["String"]>;
+  username?: Maybe<Scalars["String"]>;
+  email?: Maybe<Scalars["String"]>;
+  channels_created?: Maybe<Channel>;
   images?: Maybe<Array<Maybe<Image>>>;
-  profileImgUrl?: Maybe<Scalars["String"]>;
+  files?: Maybe<Array<Maybe<FileEntity>>>;
+  mappedMessages?: Maybe<Array<Maybe<Message>>>;
+  followers?: Maybe<Array<Maybe<User>>>;
+  following?: Maybe<Array<Maybe<User>>>;
+  teams?: Maybe<Array<Maybe<Team>>>;
+  threads?: Maybe<Array<Thread>>;
+  thread_invitations?: Maybe<Array<Maybe<Thread>>>;
+  channel_memberships?: Maybe<Array<Maybe<Channel>>>;
+  profileImageUri?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  team_ownership: Scalars["String"];
   messages?: Maybe<Array<Message>>;
   sent_messages?: Maybe<Array<Message>>;
-  followers?: Maybe<Array<Maybe<User>>>;
-  thread_invitations?: Maybe<Array<Maybe<Thread>>>;
-  following?: Maybe<Array<Maybe<User>>>;
+  userToTeams?: Maybe<Array<UserToTeam>>;
+};
+
+export type Channel = {
+  __typename?: "Channel";
+  id?: Maybe<Scalars["ID"]>;
+  name: Scalars["String"];
+  messages?: Maybe<Array<Maybe<Message>>>;
+  last_message?: Maybe<Scalars["String"]>;
+  message_count: Scalars["Int"];
+  /** Determines whether this channel is viewable to the public. (default = false) */
+  public?: Maybe<Scalars["Boolean"]>;
+  team: Array<Team>;
+  invitees?: Maybe<Array<Maybe<User>>>;
+  created_by: User;
+  created_at?: Maybe<Scalars["DateTime"]>;
+  updated_at?: Maybe<Scalars["DateTime"]>;
 };
 
 export type Message = {
@@ -104,8 +140,10 @@ export type Message = {
   updated_at?: Maybe<Scalars["DateTime"]>;
   message: Scalars["String"];
   images?: Maybe<Array<Maybe<Image>>>;
+  files?: Maybe<Array<Maybe<FileEntity>>>;
   sentBy: User;
   user: User;
+  channel?: Maybe<Channel>;
   thread?: Maybe<Thread>;
 };
 
@@ -113,48 +151,30 @@ export type Image = {
   __typename?: "Image";
   id: Scalars["ID"];
   uri: Scalars["String"];
-  post: Post;
   message?: Maybe<Message>;
   user: User;
 };
 
-export type Post = {
-  __typename?: "Post";
-  id?: Maybe<Scalars["ID"]>;
-  title?: Maybe<Scalars["String"]>;
-  text?: Maybe<Scalars["String"]>;
-  images?: Maybe<Array<Image>>;
-  likes?: Maybe<Array<Like>>;
-  comments?: Maybe<Array<Comment>>;
-  isCtxUserIdAFollowerOfPostUser?: Maybe<Scalars["Boolean"]>;
-  userId?: Maybe<Scalars["ID"]>;
-  user?: Maybe<User>;
-  created_at?: Maybe<Scalars["DateTime"]>;
-  updated_at?: Maybe<Scalars["DateTime"]>;
-  comments_count: Scalars["Int"];
-  likes_count: Scalars["Int"];
+export type FileEntity = {
+  __typename?: "FileEntity";
+  id: Scalars["ID"];
+  uri: Scalars["String"];
+  file_type: FileTypeEnum;
+  message?: Maybe<Message>;
+  upload_user: User;
 };
 
-export type Like = {
-  __typename?: "Like";
-  id: Scalars["ID"];
-  postId: Scalars["ID"];
-  post: Post;
-  userId: Scalars["ID"];
-  user: User;
-  count: Scalars["Int"];
-};
-
-export type Comment = {
-  __typename?: "Comment";
-  id: Scalars["ID"];
-  postId: Scalars["ID"];
-  post: Post;
-  userId: Scalars["ID"];
-  user: User;
-  created_at?: Maybe<Scalars["DateTime"]>;
-  content: Scalars["String"];
-};
+/** css | csv | image-all | pdf | svg | docx | other */
+export enum FileTypeEnum {
+  Css = "CSS",
+  Csv = "CSV",
+  Image = "IMAGE",
+  Pdf = "PDF",
+  Svg = "SVG",
+  Md = "MD",
+  Doc = "DOC",
+  Other = "OTHER"
+}
 
 export type Thread = {
   __typename?: "Thread";
@@ -163,157 +183,62 @@ export type Thread = {
   last_message?: Maybe<Scalars["String"]>;
   message_count: Scalars["Int"];
   user: User;
+  team?: Maybe<Team>;
   invitees: Array<User>;
   created_at?: Maybe<Scalars["DateTime"]>;
   updated_at?: Maybe<Scalars["DateTime"]>;
 };
+
+export type UserToTeam = {
+  __typename?: "UserToTeam";
+  userToTeamId: Scalars["ID"];
+  userId: Scalars["ID"];
+  teamId: Scalars["ID"];
+  teamRoleAuthorizations: Array<TeamRoleEnum>;
+  user: User;
+  team: Team;
+};
+
+/** admin | owner | member | public guest */
+export enum TeamRoleEnum {
+  Admin = "ADMIN",
+  Owner = "OWNER",
+  Member = "MEMBER",
+  PublicGuest = "PUBLIC_GUEST"
+}
 
 export type GetMessagesFromUserInput = {
   sentBy: Scalars["String"];
   user: Scalars["String"];
 };
 
-export type GlobalPostReturnType = {
-  __typename?: "GlobalPostReturnType";
-  id?: Maybe<Scalars["ID"]>;
-  title?: Maybe<Scalars["String"]>;
-  text?: Maybe<Scalars["String"]>;
-  images?: Maybe<Array<Image>>;
-  likes?: Maybe<Array<Like>>;
-  comments?: Maybe<Array<Comment>>;
-  user?: Maybe<User>;
-  created_at?: Maybe<Scalars["DateTime"]>;
-  updated_at?: Maybe<Scalars["DateTime"]>;
-  isCtxUserIdAFollowerOfPostUser?: Maybe<Scalars["Boolean"]>;
-  comments_count: Scalars["Int"];
-  likes_count: Scalars["Int"];
-  currently_liked: Scalars["Boolean"];
-  success?: Maybe<Scalars["Boolean"]>;
-  action?: Maybe<Scalars["String"]>;
-};
-
-export type GetGlobalPostByIdInput = {
-  postId: Scalars["ID"];
-};
-
-export type FollowingPostReturnType = {
-  __typename?: "FollowingPostReturnType";
-  id?: Maybe<Scalars["ID"]>;
-  title?: Maybe<Scalars["String"]>;
-  text?: Maybe<Scalars["String"]>;
-  images?: Maybe<Array<Image>>;
-  likes?: Maybe<Array<Like>>;
-  comments?: Maybe<Array<Comment>>;
-  isCtxUserIdAFollowerOfPostUser?: Maybe<Scalars["Boolean"]>;
-  user?: Maybe<User>;
-  created_at?: Maybe<Scalars["DateTime"]>;
-  updated_at?: Maybe<Scalars["DateTime"]>;
-  comments_count: Scalars["Int"];
-  likes_count: Scalars["Int"];
-  currently_liked: Scalars["Boolean"];
-};
-
-export type GetMyFollowingPostByIdInput = {
-  postId: Scalars["ID"];
-};
-
-export type TransUserReturn = {
-  __typename?: "TransUserReturn";
-  id: Scalars["ID"];
-  thoseICanMessage?: Maybe<Array<User>>;
-};
-
-export type FeedInput = {
-  cursor?: Maybe<Scalars["String"]>;
-  take?: Maybe<Scalars["Int"]>;
-};
-
-export type ThreadConnection = {
-  __typename?: "ThreadConnection";
-  edges: Array<ThreadEdge>;
-  pageInfo: PageInfo;
-};
-
-export type ThreadEdge = {
-  __typename?: "ThreadEdge";
-  node: Thread;
-};
-
-export type PageInfo = {
-  __typename?: "PageInfo";
-  startCursor: Scalars["String"];
-  endCursor: Scalars["String"];
-  hasNextPage: Scalars["Boolean"];
-  hasPreviousPage: Scalars["Boolean"];
-};
-
-export type GetMessagesByThreadIdInput = {
-  cursor?: Maybe<Scalars["String"]>;
-  threadId: Scalars["String"];
-  skip?: Maybe<Scalars["Int"]>;
-  take?: Maybe<Scalars["Int"]>;
-};
-
-export type MessageConnection = {
-  __typename?: "MessageConnection";
-  edges: Array<MessageEdge>;
-  pageInfo: PageInfo;
-};
-
-export type MessageEdge = {
-  __typename?: "MessageEdge";
-  node: Message;
-};
-
-export type PostConnection = {
-  __typename?: "PostConnection";
-  pageInfo: PageInfoType;
-  edges: Array<PostEdge>;
-};
-
-export type PageInfoType = {
-  __typename?: "PageInfoType";
-  hasNextPage: Scalars["Boolean"];
-  hasPreviousPage: Scalars["Boolean"];
-  startCursor?: Maybe<Scalars["String"]>;
-  endCursor?: Maybe<Scalars["String"]>;
-};
-
-export type PostEdge = {
-  __typename?: "PostEdge";
-  node: GlobalPostReturnType;
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-};
-
-export type PaginatedPosts = {
-  __typename?: "PaginatedPosts";
-  posts: Array<GlobalPostReturnType>;
-  hasMore: Scalars["Boolean"];
-};
-
 export type Mutation = {
   __typename?: "Mutation";
   createProduct: Product;
   createUser: User;
-  changePassword?: Maybe<UserResponse>;
+  addTeamMember: UserToTeamIdReferencesOnlyClass;
+  createTeam: Team;
+  teamLogin?: Maybe<User>;
+  changePasswordFromContextUserid?: Maybe<User>;
+  changePasswordFromToken?: Maybe<User>;
   confirmUser: Scalars["Boolean"];
   forgotPassword: Scalars["Boolean"];
-  login?: Maybe<UserResponse>;
+  login?: Maybe<User>;
   logout: Scalars["Boolean"];
-  register: UserResponse;
+  register: User;
   addProfilePicture: UploadProfilePictueReturnType;
-  createPost: Post;
   editUserInfo: User;
-  followUser: Scalars["Boolean"];
-  addNewMessage: Scalars["Boolean"];
-  unFollowUser: Scalars["Boolean"];
-  createMessageThread: Thread;
-  addMessageToThread: AddMessagePayload;
+  adminEditUserInfo: UserClassTypeWithReferenceIds;
   signS3: SignedS3Payload;
-  createOrUpdateLikes?: Maybe<LikeReturnType>;
-  addCommentToPost: AddCommentPayloadType;
-  resendConfirmationEmail: UserResponse;
+  signS3GetObject: SignedS3Payload;
+  addMessageToChannel: AddMessagePayload;
+  addChannelMember: Scalars["Boolean"];
+  removeChannelMember: Scalars["Boolean"];
+  createChannel: Channel;
+  updateChannelName: Scalars["Boolean"];
+  deleteChannel: Scalars["Boolean"];
+  addDirectMessageToThread: AddDirectMessagePayload;
+  createDirectMessage: AddDirectMessagePayload;
 };
 
 export type MutationCreateProductArgs = {
@@ -324,7 +249,27 @@ export type MutationCreateUserArgs = {
   data: RegisterInput;
 };
 
-export type MutationChangePasswordArgs = {
+export type MutationAddTeamMemberArgs = {
+  roles: Array<TeamRoleEnum>;
+  teamId: Scalars["String"];
+  email: Scalars["String"];
+};
+
+export type MutationCreateTeamArgs = {
+  name: Scalars["String"];
+};
+
+export type MutationTeamLoginArgs = {
+  email: Scalars["Int"];
+  password: Scalars["Int"];
+  teamId: Scalars["String"];
+};
+
+export type MutationChangePasswordFromContextUseridArgs = {
+  data: PasswordInput;
+};
+
+export type MutationChangePasswordFromTokenArgs = {
   data: ChangePasswordInput;
 };
 
@@ -349,56 +294,58 @@ export type MutationAddProfilePictureArgs = {
   data: UploadProfilePictureInput;
 };
 
-export type MutationCreatePostArgs = {
-  data: PostInput;
-};
-
 export type MutationEditUserInfoArgs = {
   data: EditUserInput;
 };
 
-export type MutationFollowUserArgs = {
-  data: FollowUserInput;
-};
-
-export type MutationAddNewMessageArgs = {
-  sentTo: Scalars["String"];
-  message: Scalars["String"];
-};
-
-export type MutationUnFollowUserArgs = {
-  data: UnFollowUserInput;
-};
-
-export type MutationCreateMessageThreadArgs = {
-  sentTo: Scalars["String"];
-  invitees: Array<Scalars["ID"]>;
-  message: Scalars["String"];
-  images?: Maybe<Array<Maybe<Scalars["Upload"]>>>;
-};
-
-export type MutationAddMessageToThreadArgs = {
-  threadId: Scalars["ID"];
-  sentTo: Scalars["String"];
-  invitees: Array<Scalars["ID"]>;
-  message: Scalars["String"];
-  images?: Maybe<Array<Maybe<Scalars["String"]>>>;
+export type MutationAdminEditUserInfoArgs = {
+  data: EditUserInput;
 };
 
 export type MutationSignS3Args = {
   files: Array<ImageSubInput>;
+  action: S3SignatureAction;
 };
 
-export type MutationCreateOrUpdateLikesArgs = {
-  input: UpdateLikesInput;
+export type MutationSignS3GetObjectArgs = {
+  files: Array<FileInput>;
+  action?: Maybe<S3SignatureAction>;
 };
 
-export type MutationAddCommentToPostArgs = {
-  input: NewCommentsArgs;
+export type MutationAddMessageToChannelArgs = {
+  data: AddMessageToChannelInput;
 };
 
-export type MutationResendConfirmationEmailArgs = {
-  data: ResendConfirmationEmailInput;
+export type MutationAddChannelMemberArgs = {
+  channelId: Scalars["String"];
+  userId: Scalars["ID"];
+};
+
+export type MutationRemoveChannelMemberArgs = {
+  channelId: Scalars["String"];
+  userId: Scalars["ID"];
+};
+
+export type MutationCreateChannelArgs = {
+  input: AddChannelInput;
+};
+
+export type MutationUpdateChannelNameArgs = {
+  channelId: Scalars["String"];
+  name: Scalars["String"];
+};
+
+export type MutationDeleteChannelArgs = {
+  channelId: Scalars["String"];
+  channelName: Scalars["String"];
+};
+
+export type MutationAddDirectMessageToThreadArgs = {
+  input: AddDirectMessageToThreadInput;
+};
+
+export type MutationCreateDirectMessageArgs = {
+  input: CreateDirectMessageInput;
 };
 
 export type ProductInput = {
@@ -413,27 +360,27 @@ export type Product = {
 
 export type RegisterInput = {
   password: Scalars["String"];
-  email: Scalars["String"];
+  firstName: Scalars["String"];
+  lastName: Scalars["String"];
   username: Scalars["String"];
-  termsAndConditions: Scalars["Boolean"];
-  keepMeSignedIn: Scalars["Boolean"];
+  email: Scalars["String"];
+};
+
+export type UserToTeamIdReferencesOnlyClass = {
+  __typename?: "UserToTeamIdReferencesOnlyClass";
+  userToTeamId: Scalars["ID"];
+  userId: Scalars["ID"];
+  teamId: Scalars["ID"];
+  teamRoleAuthorizations: Array<TeamRoleEnum>;
+};
+
+export type PasswordInput = {
+  password: Scalars["String"];
 };
 
 export type ChangePasswordInput = {
   password: Scalars["String"];
-  token: Scalars["String"];
-};
-
-export type UserResponse = {
-  __typename?: "UserResponse";
-  errors?: Maybe<Array<FieldError>>;
-  user?: Maybe<User>;
-};
-
-export type FieldError = {
-  __typename?: "FieldError";
-  field: Scalars["String"];
-  message: Scalars["String"];
+  token?: Maybe<Scalars["String"]>;
 };
 
 export type UploadProfilePictureInput = {
@@ -447,38 +394,53 @@ export type UploadProfilePictueReturnType = {
   profileImgUrl: Scalars["String"];
 };
 
-export type PostInput = {
-  text: Scalars["String"];
-  title?: Maybe<Scalars["String"]>;
-  images?: Maybe<Array<Maybe<Scalars["String"]>>>;
-};
-
 export type EditUserInput = {
-  username: Scalars["String"];
+  firstName: Scalars["String"];
+  lastName: Scalars["String"];
   email: Scalars["String"];
+  teamRoles: Array<TeamRoleEnum>;
+  teamId: Scalars["ID"];
 };
 
-export type FollowUserInput = {
-  userIDToFollow: Scalars["String"];
-};
-
-export type UnFollowUserInput = {
-  userIDToUnFollow: Scalars["String"];
-};
-
-export type AddMessagePayload = {
-  __typename?: "AddMessagePayload";
-  success: Scalars["Boolean"];
-  threadId: Scalars["ID"];
-  message: Message;
-  user: User;
-  invitees: Array<User>;
+export type UserClassTypeWithReferenceIds = {
+  __typename?: "UserClassTypeWithReferenceIds";
+  id?: Maybe<Scalars["ID"]>;
+  firstName?: Maybe<Scalars["String"]>;
+  lastName?: Maybe<Scalars["String"]>;
+  email?: Maybe<Scalars["String"]>;
+  channels_created?: Maybe<Channel>;
+  images?: Maybe<Array<Maybe<Image>>>;
+  files?: Maybe<Array<Maybe<FileEntity>>>;
+  mappedMessages?: Maybe<Array<Maybe<Message>>>;
+  followers?: Maybe<Array<Maybe<User>>>;
+  following?: Maybe<Array<Maybe<User>>>;
+  teams?: Maybe<Array<Maybe<Team>>>;
+  threads?: Maybe<Array<Thread>>;
+  thread_invitations?: Maybe<Array<Maybe<Thread>>>;
+  channel_memberships?: Maybe<Array<Maybe<Channel>>>;
+  profileImageUri?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  team_ownership: Scalars["String"];
+  messages?: Maybe<Array<Message>>;
+  sent_messages?: Maybe<Array<Message>>;
+  userToTeams?: Maybe<Array<UserToTeamIdReferencesOnlyClass>>;
 };
 
 export type ImageSubInput = {
-  filename: Scalars["String"];
-  filetype: Scalars["String"];
+  type: Scalars["String"];
+  lastModified: Scalars["Float"];
+  lastModifiedDate: Scalars["DateTime"];
+  size: Scalars["Int"];
+  name: Scalars["String"];
+  webkitRelativePath: Scalars["String"];
+  path: Scalars["String"];
 };
+
+/** The actions associated with obtaining a signed URL from S3 (get | put | delete) */
+export enum S3SignatureAction {
+  PutObject = "putObject",
+  GetObject = "getObject"
+}
 
 export type SignedS3Payload = {
   __typename?: "SignedS3Payload";
@@ -487,159 +449,81 @@ export type SignedS3Payload = {
 
 export type SignedS3SubPayload = {
   __typename?: "SignedS3SubPayload";
-  url: Scalars["String"];
+  uri: Scalars["String"];
   signedRequest: Scalars["String"];
 };
 
-export type UpdateLikesInput = {
-  postId: Scalars["ID"];
-};
-
-export type LikeReturnType = {
-  __typename?: "LikeReturnType";
-  postId: Scalars["ID"];
-  status: LikeStatus;
-};
-
-/** Describes whether a like has been created or deleted in the database. */
-export enum LikeStatus {
-  Created = "Created",
-  Deleted = "Deleted",
-  CountUpdated = "CountUpdated",
-  Undetermined = "Undetermined"
-}
-
-export type NewCommentsArgs = {
-  postId: Scalars["ID"];
-  content: Scalars["String"];
-};
-
-export type AddCommentPayloadType = {
-  __typename?: "AddCommentPayloadType";
+export type FileInput = {
   id: Scalars["ID"];
-  postId: Scalars["ID"];
-  userId: Scalars["ID"];
-  created_at?: Maybe<Scalars["String"]>;
-  content: Scalars["String"];
+  uri: Scalars["String"];
 };
 
-export type ResendConfirmationEmailInput = {
-  username: Scalars["String"];
+export type AddMessageToChannelInput = {
+  channelId: Scalars["ID"];
+  teamId: Scalars["ID"];
+  created_at?: Maybe<Scalars["DateTime"]>;
+  sentTo: Scalars["String"];
+  invitees?: Maybe<Array<Maybe<Scalars["ID"]>>>;
+  message: Scalars["String"];
+  images?: Maybe<Array<Maybe<Scalars["String"]>>>;
+  files?: Maybe<Array<Maybe<FileInputHelper>>>;
+};
+
+export type FileInputHelper = {
+  uri: Scalars["String"];
+  file_type: FileTypeEnum;
+};
+
+export type AddMessagePayload = {
+  __typename?: "AddMessagePayload";
+  success: Scalars["Boolean"];
+  channelId: Scalars["ID"];
+  message: Message;
+  user: User;
+  invitees?: Maybe<Array<Maybe<User>>>;
+};
+
+export type AddChannelInput = {
+  teamId: Scalars["ID"];
+  name: Scalars["String"];
+};
+
+export type AddDirectMessageToThreadInput = {
+  threadId: Scalars["ID"];
+  teamId: Scalars["ID"];
+  message_text: Scalars["String"];
+  invitees: Array<Scalars["String"]>;
+};
+
+export type AddDirectMessagePayload = {
+  __typename?: "AddDirectMessagePayload";
+  success: Scalars["Boolean"];
+  threadId: Scalars["ID"];
+  message: Message;
+  sentBy: User;
+  invitees: Array<User>;
+};
+
+export type CreateDirectMessageInput = {
+  teamId: Scalars["ID"];
+  message_text: Scalars["String"];
+  invitees: Array<Scalars["String"]>;
 };
 
 export type Subscription = {
   __typename?: "Subscription";
-  followingPosts: PostSubType;
-  newMessage: MessageSubType;
-  globalPosts?: Maybe<GlobalPostReturnType>;
-  followingPostsSub: HandlePostPayload;
-  messageThreads: AddMessagePayload;
-  getMessagesByThreadId: AddMessagePayload;
-  newMessageByThreadId: AddMessagePayload;
-  likesUpdated: LikeReturnType;
-  newComment: AddCommentPayloadType;
-  commentCount: CommentCountType;
-  likesCount: LikesCountType;
-  globalPostsRelay?: Maybe<GlobalPostReturnType>;
+  newMessageSub: Message;
+  newDirectMessageSub: AddDirectMessagePayload;
 };
 
-export type SubscriptionFollowingPostsArgs = {
-  data: PostSubInput;
+export type SubscriptionNewMessageSubArgs = {
+  data: AddMessageToChannelInput;
 };
 
-export type SubscriptionNewMessageArgs = {
-  sentTo: Scalars["String"];
-  message: Scalars["String"];
-};
-
-export type SubscriptionMessageThreadsArgs = {
-  data: AddMessageToThreadInput_V2;
-};
-
-export type SubscriptionGetMessagesByThreadIdArgs = {
-  input: GetMessagesByThreadIdInput;
-};
-
-export type SubscriptionNewCommentArgs = {
-  input: NewCommentsArgs;
-};
-
-export type SubscriptionCommentCountArgs = {
-  input: CommentCountArgs;
-};
-
-export type SubscriptionLikesCountArgs = {
-  input: LikesCountArgs;
-};
-
-export type PostSubInput = {
-  sentBy: Scalars["String"];
-  message: Scalars["String"];
-};
-
-export type PostSubType = {
-  __typename?: "PostSubType";
-  id: Scalars["ID"];
-  title: Scalars["String"];
-  text: Scalars["String"];
-  images: Array<Image>;
-  user: User;
-  created_at: Scalars["DateTime"];
-  updated_at: Scalars["DateTime"];
-};
-
-export type MessageSubType = {
-  __typename?: "MessageSubType";
-  id: Scalars["ID"];
-  message?: Maybe<Scalars["String"]>;
-  sentBy: User;
-  user: User;
-  created_at?: Maybe<Scalars["DateTime"]>;
-  updated_at?: Maybe<Scalars["DateTime"]>;
-};
-
-export type HandlePostPayload = {
-  __typename?: "HandlePostPayload";
-  success: Scalars["Boolean"];
-  action: Scalars["String"];
+export type Role = {
+  __typename?: "Role";
   id?: Maybe<Scalars["ID"]>;
-  title?: Maybe<Scalars["Boolean"]>;
-  images?: Maybe<Array<Image>>;
-  isCtxUserIdAFollowerOfPostUser?: Maybe<Scalars["Boolean"]>;
-  user?: Maybe<User>;
-  created_at?: Maybe<Scalars["DateTime"]>;
-  updated_at?: Maybe<Scalars["DateTime"]>;
-  comment_count?: Maybe<Scalars["Int"]>;
-  likes_count: Scalars["Int"];
-  currently_liked: Scalars["Boolean"];
-};
-
-export type AddMessageToThreadInput_V2 = {
-  threadId: Scalars["ID"];
-  sentTo: Scalars["String"];
-  invitees: Array<Scalars["ID"]>;
-  message: Scalars["String"];
-  images?: Maybe<Array<Maybe<Scalars["String"]>>>;
-};
-
-export type CommentCountArgs = {
-  postId: Scalars["ID"];
-};
-
-export type CommentCountType = {
-  __typename?: "CommentCountType";
-  count: Scalars["Int"];
-  postId: Scalars["ID"];
-};
-
-export type LikesCountArgs = {
-  postId: Scalars["ID"];
-};
-
-export type LikesCountType = {
-  __typename?: "LikesCountType";
-  count: Scalars["Int"];
-  postId: Scalars["ID"];
+  teamRoleAuthorizations: Array<TeamRoleEnum>;
 };
 
 export type MessageOutput = {
@@ -647,71 +531,31 @@ export type MessageOutput = {
   message: Scalars["String"];
 };
 
-export type MessageThreadOutput = {
-  __typename?: "MessageThreadOutput";
-  message: Scalars["String"];
+export type UserTeam = {
+  __typename?: "UserTeam";
+  userId: Scalars["ID"];
+  teamId: Scalars["ID"];
+  name: Scalars["String"];
 };
 
-export type LikesCountReturnType = {
-  __typename?: "LikesCountReturnType";
-  postId: Scalars["ID"];
-  status: LikeStatus;
-  count: Scalars["Int"];
-};
-
-export type PasswordInput = {
-  password: Scalars["String"];
-};
-
-export type PostInputOld = {
-  text: Scalars["String"];
-  title?: Maybe<Scalars["String"]>;
-  user: Scalars["ID"];
-  images?: Maybe<Array<Maybe<Scalars["String"]>>>;
+export type GetFileObjectInput = {
+  id: Scalars["ID"];
+  uri: Scalars["String"];
 };
 
 export type GetAllMyMessagesInput = {
   user: Scalars["String"];
 };
 
-export type PostSubscriptionInput = {
-  text: Scalars["String"];
-  title?: Maybe<Scalars["String"]>;
-  user: Scalars["ID"];
-  images?: Maybe<Array<Maybe<Scalars["String"]>>>;
-};
-
-export type GetMessageThreadsFromUserInput = {
-  sentBy: Scalars["String"];
-  user: Scalars["String"];
-};
-
-export type GetAllMyMessageThreadsInput = {
-  user: Scalars["String"];
-};
-
-export type ErrorTypicalFragment = { __typename?: "FieldError" } & Pick<
-  FieldError,
-  "field" | "message"
->;
-
-export type TypicalUserResponseFragment = { __typename?: "UserResponse" } & {
-  errors?: Maybe<Array<{ __typename?: "FieldError" } & ErrorTypicalFragment>>;
-  user?: Maybe<{ __typename?: "User" } & UserBaseFragment>;
-};
-
-export type UserBaseFragment = { __typename?: "User" } & Pick<
-  User,
-  "id" | "username"
->;
-
-export type ChangePasswordMutationVariables = Exact<{
-  data: ChangePasswordInput;
+export type ChangePasswordFromContextUseridMutationVariables = Exact<{
+  data: PasswordInput;
 }>;
 
-export type ChangePasswordMutation = { __typename?: "Mutation" } & {
-  changePassword?: Maybe<
-    { __typename?: "UserResponse" } & TypicalUserResponseFragment
+export type ChangePasswordFromContextUseridMutation = {
+  __typename?: "Mutation";
+} & {
+  changePasswordFromContextUserid?: Maybe<
+    { __typename?: "User" } & Pick<User, "id" | "name" | "username">
   >;
 };
 
@@ -723,31 +567,6 @@ export type ConfirmUserMutation = { __typename?: "Mutation" } & Pick<
   Mutation,
   "confirmUser"
 >;
-
-export type CreateOrUpdateLikesMutationVariables = Exact<{
-  input: UpdateLikesInput;
-}>;
-
-export type CreateOrUpdateLikesMutation = { __typename?: "Mutation" } & {
-  createOrUpdateLikes?: Maybe<
-    { __typename?: "LikeReturnType" } & Pick<
-      LikeReturnType,
-      "postId" | "status"
-    >
-  >;
-};
-
-export type CreatePostMutationVariables = Exact<{
-  data: PostInput;
-}>;
-
-export type CreatePostMutation = { __typename?: "Mutation" } & {
-  createPost: { __typename?: "Post" } & Pick<Post, "id" | "title" | "text"> & {
-      images?: Maybe<
-        Array<{ __typename?: "Image" } & Pick<Image, "id" | "uri">>
-      >;
-    };
-};
 
 export type ForgotPasswordMutationVariables = Exact<{
   email: Scalars["String"];
@@ -770,91 +589,18 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 export type RegisterMutation = { __typename?: "Mutation" } & {
-  register: { __typename?: "UserResponse" } & TypicalUserResponseFragment;
+  register: { __typename?: "User" } & Pick<User, "id" | "name" | "username">;
 };
 
-export type GetGlobalPostsRelayQueryVariables = Exact<{
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Float"]>;
-  last?: Maybe<Scalars["Float"]>;
-}>;
+export type GetAllTeamsForUserQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GetGlobalPostsRelayQuery = { __typename?: "Query" } & {
-  getGlobalPostsRelay?: Maybe<
-    { __typename?: "PostConnection" } & {
-      pageInfo: { __typename?: "PageInfoType" } & Pick<
-        PageInfoType,
-        "hasNextPage" | "hasPreviousPage" | "endCursor" | "startCursor"
-      >;
-      edges: Array<
-        { __typename?: "PostEdge" } & Pick<PostEdge, "cursor"> & {
-            node: { __typename?: "GlobalPostReturnType" } & Pick<
-              GlobalPostReturnType,
-              | "id"
-              | "title"
-              | "text"
-              | "likes_count"
-              | "comments_count"
-              | "currently_liked"
-              | "created_at"
-            > & {
-                images?: Maybe<
-                  Array<{ __typename?: "Image" } & Pick<Image, "id" | "uri">>
-                >;
-                likes?: Maybe<
-                  Array<{ __typename?: "Like" } & Pick<Like, "id">>
-                >;
-              };
-          }
-      >;
-    }
-  >;
-};
-
-export type GetGlobalPostsSimplePaginationQueryVariables = Exact<{
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Float"]>;
-}>;
-
-export type GetGlobalPostsSimplePaginationQuery = { __typename?: "Query" } & {
-  getGlobalPostsSimplePagination?: Maybe<
-    { __typename?: "PaginatedPosts" } & Pick<PaginatedPosts, "hasMore"> & {
-        posts: Array<
-          { __typename?: "GlobalPostReturnType" } & Pick<
-            GlobalPostReturnType,
-            "id" | "title" | "text" | "created_at"
-          > & {
-              images?: Maybe<
-                Array<{ __typename?: "Image" } & Pick<Image, "id" | "uri">>
-              >;
-            }
+export type GetAllTeamsForUserQuery = { __typename?: "Query" } & {
+  getAllTeamsForUser: Array<
+    { __typename?: "Team" } & Pick<Team, "id" | "name"> & {
+        members: Array<
+          Maybe<{ __typename?: "User" } & Pick<User, "id" | "name">>
         >;
       }
-  >;
-};
-
-export type GetGlobalPostsQueryVariables = Exact<{
-  cursor?: Maybe<Scalars["String"]>;
-  skip?: Maybe<Scalars["Int"]>;
-  take?: Maybe<Scalars["Int"]>;
-}>;
-
-export type GetGlobalPostsQuery = { __typename?: "Query" } & {
-  getGlobalPosts?: Maybe<
-    Array<
-      { __typename?: "GlobalPostReturnType" } & Pick<
-        GlobalPostReturnType,
-        "id" | "title" | "text" | "created_at"
-      > & {
-          images?: Maybe<
-            Array<{ __typename?: "Image" } & Pick<Image, "id" | "uri">>
-          >;
-          likes?: Maybe<
-            Array<{ __typename?: "Like" } & Pick<Like, "id" | "count">>
-          >;
-        }
-    >
   >;
 };
 
@@ -864,89 +610,68 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 export type LoginMutation = { __typename?: "Mutation" } & {
-  login?: Maybe<{ __typename?: "UserResponse" } & TypicalUserResponseFragment>;
+  login?: Maybe<
+    { __typename?: "User" } & Pick<User, "id" | "name" | "username">
+  >;
 };
 
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = { __typename?: "Query" } & {
-  me?: Maybe<{ __typename?: "User" } & UserBaseFragment>;
+  me?: Maybe<{ __typename?: "User" } & Pick<User, "id" | "name" | "username">>;
 };
 
-export const ErrorTypicalFragmentDoc = gql`
-  fragment ErrorTypical on FieldError {
-    field
-    message
-  }
-`;
-export const UserBaseFragmentDoc = gql`
-  fragment UserBase on User {
-    id
-    username
-  }
-`;
-export const TypicalUserResponseFragmentDoc = gql`
-  fragment TypicalUserResponse on UserResponse {
-    errors {
-      ...ErrorTypical
-    }
-    user {
-      ...UserBase
+export const ChangePasswordFromContextUseridDocument = gql`
+  mutation ChangePasswordFromContextUserid($data: PasswordInput!) {
+    changePasswordFromContextUserid(data: $data) {
+      id
+      name
+      username
     }
   }
-  ${ErrorTypicalFragmentDoc}
-  ${UserBaseFragmentDoc}
 `;
-export const ChangePasswordDocument = gql`
-  mutation ChangePassword($data: ChangePasswordInput!) {
-    changePassword(data: $data) {
-      ...TypicalUserResponse
-    }
-  }
-  ${TypicalUserResponseFragmentDoc}
-`;
-export type ChangePasswordMutationFn = Apollo.MutationFunction<
-  ChangePasswordMutation,
-  ChangePasswordMutationVariables
+export type ChangePasswordFromContextUseridMutationFn = Apollo.MutationFunction<
+  ChangePasswordFromContextUseridMutation,
+  ChangePasswordFromContextUseridMutationVariables
 >;
 
 /**
- * __useChangePasswordMutation__
+ * __useChangePasswordFromContextUseridMutation__
  *
- * To run a mutation, you first call `useChangePasswordMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useChangePasswordMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useChangePasswordFromContextUseridMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangePasswordFromContextUseridMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [changePasswordMutation, { data, loading, error }] = useChangePasswordMutation({
+ * const [changePasswordFromContextUseridMutation, { data, loading, error }] = useChangePasswordFromContextUseridMutation({
  *   variables: {
  *      data: // value for 'data'
  *   },
  * });
  */
-export function useChangePasswordMutation(
+export function useChangePasswordFromContextUseridMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    ChangePasswordMutation,
-    ChangePasswordMutationVariables
+    ChangePasswordFromContextUseridMutation,
+    ChangePasswordFromContextUseridMutationVariables
   >
 ) {
   return Apollo.useMutation<
-    ChangePasswordMutation,
-    ChangePasswordMutationVariables
-  >(ChangePasswordDocument, baseOptions);
+    ChangePasswordFromContextUseridMutation,
+    ChangePasswordFromContextUseridMutationVariables
+  >(ChangePasswordFromContextUseridDocument, baseOptions);
 }
-export type ChangePasswordMutationHookResult = ReturnType<
-  typeof useChangePasswordMutation
+export type ChangePasswordFromContextUseridMutationHookResult = ReturnType<
+  typeof useChangePasswordFromContextUseridMutation
 >;
-export type ChangePasswordMutationResult = Apollo.MutationResult<
-  ChangePasswordMutation
+export type ChangePasswordFromContextUseridMutationResult = Apollo.MutationResult<
+  ChangePasswordFromContextUseridMutation
 >;
-export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<
-  ChangePasswordMutation,
-  ChangePasswordMutationVariables
+export type ChangePasswordFromContextUseridMutationOptions = Apollo.BaseMutationOptions<
+  ChangePasswordFromContextUseridMutation,
+  ChangePasswordFromContextUseridMutationVariables
 >;
 export const ConfirmUserDocument = gql`
   mutation ConfirmUser($token: String!) {
@@ -995,113 +720,6 @@ export type ConfirmUserMutationResult = Apollo.MutationResult<
 export type ConfirmUserMutationOptions = Apollo.BaseMutationOptions<
   ConfirmUserMutation,
   ConfirmUserMutationVariables
->;
-export const CreateOrUpdateLikesDocument = gql`
-  mutation CreateOrUpdateLikes($input: UpdateLikesInput!) {
-    createOrUpdateLikes(input: $input) {
-      postId
-      status
-    }
-  }
-`;
-export type CreateOrUpdateLikesMutationFn = Apollo.MutationFunction<
-  CreateOrUpdateLikesMutation,
-  CreateOrUpdateLikesMutationVariables
->;
-
-/**
- * __useCreateOrUpdateLikesMutation__
- *
- * To run a mutation, you first call `useCreateOrUpdateLikesMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateOrUpdateLikesMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createOrUpdateLikesMutation, { data, loading, error }] = useCreateOrUpdateLikesMutation({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useCreateOrUpdateLikesMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    CreateOrUpdateLikesMutation,
-    CreateOrUpdateLikesMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    CreateOrUpdateLikesMutation,
-    CreateOrUpdateLikesMutationVariables
-  >(CreateOrUpdateLikesDocument, baseOptions);
-}
-export type CreateOrUpdateLikesMutationHookResult = ReturnType<
-  typeof useCreateOrUpdateLikesMutation
->;
-export type CreateOrUpdateLikesMutationResult = Apollo.MutationResult<
-  CreateOrUpdateLikesMutation
->;
-export type CreateOrUpdateLikesMutationOptions = Apollo.BaseMutationOptions<
-  CreateOrUpdateLikesMutation,
-  CreateOrUpdateLikesMutationVariables
->;
-export const CreatePostDocument = gql`
-  mutation CreatePost($data: PostInput!) {
-    createPost(data: $data) {
-      id
-      title
-      text
-      images {
-        id
-        uri
-      }
-    }
-  }
-`;
-export type CreatePostMutationFn = Apollo.MutationFunction<
-  CreatePostMutation,
-  CreatePostMutationVariables
->;
-
-/**
- * __useCreatePostMutation__
- *
- * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreatePostMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
- *   variables: {
- *      data: // value for 'data'
- *   },
- * });
- */
-export function useCreatePostMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    CreatePostMutation,
-    CreatePostMutationVariables
-  >
-) {
-  return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(
-    CreatePostDocument,
-    baseOptions
-  );
-}
-export type CreatePostMutationHookResult = ReturnType<
-  typeof useCreatePostMutation
->;
-export type CreatePostMutationResult = Apollo.MutationResult<
-  CreatePostMutation
->;
-export type CreatePostMutationOptions = Apollo.BaseMutationOptions<
-  CreatePostMutation,
-  CreatePostMutationVariables
 >;
 export const ForgotPasswordDocument = gql`
   mutation ForgotPassword($email: String!) {
@@ -1197,10 +815,11 @@ export type LogoutMutationOptions = Apollo.BaseMutationOptions<
 export const RegisterDocument = gql`
   mutation Register($data: RegisterInput!) {
     register(data: $data) {
-      ...TypicalUserResponse
+      id
+      name
+      username
     }
   }
-  ${TypicalUserResponseFragmentDoc}
 `;
 export type RegisterMutationFn = Apollo.MutationFunction<
   RegisterMutation,
@@ -1241,242 +860,74 @@ export type RegisterMutationOptions = Apollo.BaseMutationOptions<
   RegisterMutation,
   RegisterMutationVariables
 >;
-export const GetGlobalPostsRelayDocument = gql`
-  query GetGlobalPostsRelay(
-    $before: String
-    $after: String
-    $first: Float
-    $last: Float
-  ) {
-    getGlobalPostsRelay(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-    ) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        endCursor
-        startCursor
-      }
-      edges {
-        cursor
-        node {
-          id
-          title
-          text
-          likes_count
-          comments_count
-          currently_liked
-          images {
-            id
-            uri
-          }
-          likes {
-            id
-          }
-          created_at
-        }
-      }
-    }
-  }
-`;
-
-/**
- * __useGetGlobalPostsRelayQuery__
- *
- * To run a query within a React component, call `useGetGlobalPostsRelayQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetGlobalPostsRelayQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetGlobalPostsRelayQuery({
- *   variables: {
- *      before: // value for 'before'
- *      after: // value for 'after'
- *      first: // value for 'first'
- *      last: // value for 'last'
- *   },
- * });
- */
-export function useGetGlobalPostsRelayQuery(
-  baseOptions?: Apollo.QueryHookOptions<
-    GetGlobalPostsRelayQuery,
-    GetGlobalPostsRelayQueryVariables
-  >
-) {
-  return Apollo.useQuery<
-    GetGlobalPostsRelayQuery,
-    GetGlobalPostsRelayQueryVariables
-  >(GetGlobalPostsRelayDocument, baseOptions);
-}
-export function useGetGlobalPostsRelayLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<
-    GetGlobalPostsRelayQuery,
-    GetGlobalPostsRelayQueryVariables
-  >
-) {
-  return Apollo.useLazyQuery<
-    GetGlobalPostsRelayQuery,
-    GetGlobalPostsRelayQueryVariables
-  >(GetGlobalPostsRelayDocument, baseOptions);
-}
-export type GetGlobalPostsRelayQueryHookResult = ReturnType<
-  typeof useGetGlobalPostsRelayQuery
->;
-export type GetGlobalPostsRelayLazyQueryHookResult = ReturnType<
-  typeof useGetGlobalPostsRelayLazyQuery
->;
-export type GetGlobalPostsRelayQueryResult = Apollo.QueryResult<
-  GetGlobalPostsRelayQuery,
-  GetGlobalPostsRelayQueryVariables
->;
-export const GetGlobalPostsSimplePaginationDocument = gql`
-  query GetGlobalPostsSimplePagination($after: String, $first: Float) {
-    getGlobalPostsSimplePagination(after: $after, first: $first) {
-      hasMore
-      posts {
-        id
-        title
-        text
-        created_at
-        images {
-          id
-          uri
-        }
-      }
-    }
-  }
-`;
-
-/**
- * __useGetGlobalPostsSimplePaginationQuery__
- *
- * To run a query within a React component, call `useGetGlobalPostsSimplePaginationQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetGlobalPostsSimplePaginationQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetGlobalPostsSimplePaginationQuery({
- *   variables: {
- *      after: // value for 'after'
- *      first: // value for 'first'
- *   },
- * });
- */
-export function useGetGlobalPostsSimplePaginationQuery(
-  baseOptions?: Apollo.QueryHookOptions<
-    GetGlobalPostsSimplePaginationQuery,
-    GetGlobalPostsSimplePaginationQueryVariables
-  >
-) {
-  return Apollo.useQuery<
-    GetGlobalPostsSimplePaginationQuery,
-    GetGlobalPostsSimplePaginationQueryVariables
-  >(GetGlobalPostsSimplePaginationDocument, baseOptions);
-}
-export function useGetGlobalPostsSimplePaginationLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<
-    GetGlobalPostsSimplePaginationQuery,
-    GetGlobalPostsSimplePaginationQueryVariables
-  >
-) {
-  return Apollo.useLazyQuery<
-    GetGlobalPostsSimplePaginationQuery,
-    GetGlobalPostsSimplePaginationQueryVariables
-  >(GetGlobalPostsSimplePaginationDocument, baseOptions);
-}
-export type GetGlobalPostsSimplePaginationQueryHookResult = ReturnType<
-  typeof useGetGlobalPostsSimplePaginationQuery
->;
-export type GetGlobalPostsSimplePaginationLazyQueryHookResult = ReturnType<
-  typeof useGetGlobalPostsSimplePaginationLazyQuery
->;
-export type GetGlobalPostsSimplePaginationQueryResult = Apollo.QueryResult<
-  GetGlobalPostsSimplePaginationQuery,
-  GetGlobalPostsSimplePaginationQueryVariables
->;
-export const GetGlobalPostsDocument = gql`
-  query GetGlobalPosts($cursor: String, $skip: Int, $take: Int) {
-    getGlobalPosts(cursor: $cursor, skip: $skip, take: $take) {
+export const GetAllTeamsForUserDocument = gql`
+  query GetAllTeamsForUser {
+    getAllTeamsForUser {
       id
-      title
-      text
-      images {
+      name
+      members {
         id
-        uri
+        name
       }
-      likes {
-        id
-        count
-      }
-      created_at
     }
   }
 `;
 
 /**
- * __useGetGlobalPostsQuery__
+ * __useGetAllTeamsForUserQuery__
  *
- * To run a query within a React component, call `useGetGlobalPostsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetGlobalPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetAllTeamsForUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllTeamsForUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetGlobalPostsQuery({
+ * const { data, loading, error } = useGetAllTeamsForUserQuery({
  *   variables: {
- *      cursor: // value for 'cursor'
- *      skip: // value for 'skip'
- *      take: // value for 'take'
  *   },
  * });
  */
-export function useGetGlobalPostsQuery(
+export function useGetAllTeamsForUserQuery(
   baseOptions?: Apollo.QueryHookOptions<
-    GetGlobalPostsQuery,
-    GetGlobalPostsQueryVariables
+    GetAllTeamsForUserQuery,
+    GetAllTeamsForUserQueryVariables
   >
 ) {
-  return Apollo.useQuery<GetGlobalPostsQuery, GetGlobalPostsQueryVariables>(
-    GetGlobalPostsDocument,
-    baseOptions
-  );
+  return Apollo.useQuery<
+    GetAllTeamsForUserQuery,
+    GetAllTeamsForUserQueryVariables
+  >(GetAllTeamsForUserDocument, baseOptions);
 }
-export function useGetGlobalPostsLazyQuery(
+export function useGetAllTeamsForUserLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<
-    GetGlobalPostsQuery,
-    GetGlobalPostsQueryVariables
+    GetAllTeamsForUserQuery,
+    GetAllTeamsForUserQueryVariables
   >
 ) {
-  return Apollo.useLazyQuery<GetGlobalPostsQuery, GetGlobalPostsQueryVariables>(
-    GetGlobalPostsDocument,
-    baseOptions
-  );
+  return Apollo.useLazyQuery<
+    GetAllTeamsForUserQuery,
+    GetAllTeamsForUserQueryVariables
+  >(GetAllTeamsForUserDocument, baseOptions);
 }
-export type GetGlobalPostsQueryHookResult = ReturnType<
-  typeof useGetGlobalPostsQuery
+export type GetAllTeamsForUserQueryHookResult = ReturnType<
+  typeof useGetAllTeamsForUserQuery
 >;
-export type GetGlobalPostsLazyQueryHookResult = ReturnType<
-  typeof useGetGlobalPostsLazyQuery
+export type GetAllTeamsForUserLazyQueryHookResult = ReturnType<
+  typeof useGetAllTeamsForUserLazyQuery
 >;
-export type GetGlobalPostsQueryResult = Apollo.QueryResult<
-  GetGlobalPostsQuery,
-  GetGlobalPostsQueryVariables
+export type GetAllTeamsForUserQueryResult = Apollo.QueryResult<
+  GetAllTeamsForUserQuery,
+  GetAllTeamsForUserQueryVariables
 >;
 export const LoginDocument = gql`
   mutation Login($username: String!, $password: String!) {
     login(username: $username, password: $password) {
-      ...TypicalUserResponse
+      id
+      name
+      username
     }
   }
-  ${TypicalUserResponseFragmentDoc}
 `;
 export type LoginMutationFn = Apollo.MutationFunction<
   LoginMutation,
@@ -1521,10 +972,11 @@ export type LoginMutationOptions = Apollo.BaseMutationOptions<
 export const MeDocument = gql`
   query Me {
     me {
-      ...UserBase
+      id
+      name
+      username
     }
   }
-  ${UserBaseFragmentDoc}
 `;
 
 /**

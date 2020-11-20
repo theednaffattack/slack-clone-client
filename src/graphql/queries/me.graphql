@@ -1,5 +1,7 @@
 query Me {
   me {
-    ...UserBase
+    id
+    name
+    username
   }
 }
