@@ -1,6 +1,0 @@
-mutation CreateOrUpdateLikes($input: UpdateLikesInput!) {
-  createOrUpdateLikes(input: $input) {
-    postId
-    status
-  }
-}
