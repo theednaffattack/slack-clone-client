@@ -112,6 +112,11 @@ const ViewTeamIndex = () => {
           <Flex key="add team button" justifyContent="center">
             <IconButton
               aria-label="add team"
+              colorScheme="teal"
+              _hover={{
+                background: "white",
+                color: "teal.500"
+              }}
               icon={<AiOutlinePlusReplacement size={20} />}
               type="button"
               onClick={() => console.log("ADD TEAM CLICKED")}
