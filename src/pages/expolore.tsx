@@ -1,4 +1,4 @@
-import { Box, Link, Text } from "@chakra-ui/core";
+import { Box, Link, Text } from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import React from "react";
@@ -7,7 +7,11 @@ import { useGetGlobalPostsRelayQuery } from "../generated/graphql";
 import { createUrqlClient } from "../lib/utilities.create-urql-client";
 
 function Index() {
-  const { data: dataGlobalPosts, error: errorPosts, loading: loadingPosts } = useGetGlobalPostsRelayQuery();
+  const {
+    data: dataGlobalPosts,
+    error: errorPosts,
+    loading: loadingPosts
+  } = useGetGlobalPostsRelayQuery();
 
   return (
     <Box>
@@ -16,9 +20,10 @@ function Index() {
         <Link>create post</Link>
       </NextLink>
       <GlobalPostsStack
-      postsError={errorPosts}
-      postsFetching={loadingPosts}
-       posts={dataGlobalPosts?.getGlobalPostsRelay} />
+        postsError={errorPosts}
+        postsFetching={loadingPosts}
+        posts={dataGlobalPosts?.getGlobalPostsRelay}
+      />
     </Box>
   );
 }

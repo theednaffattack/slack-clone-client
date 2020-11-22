@@ -3,7 +3,7 @@ import {
   FormErrorMessage,
   FormLabel,
   Textarea as ChakraTextarea
-} from "@chakra-ui/core";
+} from "@chakra-ui/react";
 import { useField } from "formik";
 import React, { TextareaHTMLAttributes } from "react";
 

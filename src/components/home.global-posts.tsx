@@ -1,4 +1,4 @@
-import { Box, Button, Heading, Image, Stack, Text } from "@chakra-ui/core";
+import { Box, Button, Heading, Image, Stack, Text } from "@chakra-ui/react";
 import React, { ReactElement, ReactNode } from "react";
 import { ApolloError } from "@apollo/client";
 import { GetGlobalPostsRelayQuery } from "../generated/graphql";
@@ -45,7 +45,13 @@ export function GlobalPostsStack({
     const boxes = [];
     for (const post of posts.edges) {
       boxes.push(
-        <Box key={post.node.id} p={5} shadow="md" borderWidth="1px" width={1 / 2}>
+        <Box
+          key={post.node.id}
+          p={5}
+          shadow="md"
+          borderWidth="1px"
+          width={1 / 2}
+        >
           <Heading fontSize="xl">{post.node.title}</Heading>
           <Image
             src={post.node.images ? post.node.images[0].uri : ""}

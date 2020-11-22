@@ -1,4 +1,14 @@
-import { Alert, AlertIcon, AlertTitle, Box, Button, CloseButton, Flex, Link, Text } from "@chakra-ui/core";
+import {
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  Button,
+  CloseButton,
+  Flex,
+  Link,
+  Text
+} from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import { NextPage } from "next";
 import NextLink from "next/link";
@@ -6,24 +16,23 @@ import { Router } from "next/router";
 import React, { useEffect, useState } from "react";
 import { Wrapper } from "../components/flex-wrapper";
 import { InputField } from "../components/forms.input-field";
-import {
-  useLoginMutation
-} from "../generated/graphql";
+import { useLoginMutation } from "../generated/graphql";
 import { toErrorMap } from "../lib/utilities.toErrorMap";
 
-
-type LoginProps ={
+type LoginProps = {
   router: Router;
-}
+};
 
-const Login: NextPage<LoginProps> = ({router}) => {
-  const [flashMessage, setFlashMessage] = useState<"hidden" | "visible">("hidden")
-  const {flash} = router.query;
+const Login: NextPage<LoginProps> = ({ router }) => {
+  const [flashMessage, setFlashMessage] = useState<"hidden" | "visible">(
+    "hidden"
+  );
+  const { flash } = router.query;
   const [userConfirmedHelper, setUserConfirmedHelper] = useState(<></>);
   const [login] = useLoginMutation();
   useEffect(() => {
-    setFlashMessage(flash ? "visible" : "hidden")
-  }, [])
+    setFlashMessage(flash ? "visible" : "hidden");
+  }, []);
   return (
     <Formik
       initialValues={{ username: "", password: "", user_confirmed: <></> }}
@@ -85,18 +94,29 @@ const Login: NextPage<LoginProps> = ({router}) => {
         return (
           <Wrapper flexDirection="column">
             <>
-            {flash && flashMessage === "visible" ? <Alert
-  flexDirection="column"
-  justifyContent="center"
-  textAlign="center" status="error">
-    <Flex>
-
-  <AlertIcon />
-  <AlertTitle mr={2}>{flash}</AlertTitle>
-    </Flex>
-            {/* <AlertDescription>{flash}</AlertDescription> */}
-  <CloseButton position="absolute" right="8px" top="8px" disabled={!flash} onClick={()=>setFlashMessage("hidden")} />
-</Alert> : ""}
+              {flash && flashMessage === "visible" ? (
+                <Alert
+                  flexDirection="column"
+                  justifyContent="center"
+                  textAlign="center"
+                  status="error"
+                >
+                  <Flex>
+                    <AlertIcon />
+                    <AlertTitle mr={2}>{flash}</AlertTitle>
+                  </Flex>
+                  {/* <AlertDescription>{flash}</AlertDescription> */}
+                  <CloseButton
+                    position="absolute"
+                    right="8px"
+                    top="8px"
+                    disabled={!flash}
+                    onClick={() => setFlashMessage("hidden")}
+                  />
+                </Alert>
+              ) : (
+                ""
+              )}
               <Form onSubmit={handleSubmit}>
                 {userConfirmedHelper}
                 <InputField

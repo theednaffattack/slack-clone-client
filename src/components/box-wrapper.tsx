@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/core";
+import { Box } from "@chakra-ui/react";
 
 type WrapperProps = {
   children: React.ReactChildren | React.ReactChild;

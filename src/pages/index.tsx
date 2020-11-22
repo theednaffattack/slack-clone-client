@@ -7,7 +7,7 @@ import {
   Link,
   Stack,
   Text
-} from "@chakra-ui/core";
+} from "@chakra-ui/react";
 import NextLink from "next/link";
 import React from "react";
 
@@ -44,7 +44,7 @@ function Index() {
           <Link ml="auto">create post</Link>
         </NextLink>
       </Flex>
-      
+
       <Stack mb={50}>
         {dataPosts
           ? dataPosts.getGlobalPostsRelay?.edges.map(
@@ -66,11 +66,10 @@ function Index() {
                     <Box maxWidth="350px">
                       <Image src={images && images[0] ? images[0].uri : ""} />
                       <Flex>
-                      <Text ml="auto">{created_at}</Text>
+                        <Text ml="auto">{created_at}</Text>
                       </Flex>
                       <Text>{text}</Text>
                     </Box>
-
 
                     <LikesAndCommentsSummary
                       comments_count={comments_count}

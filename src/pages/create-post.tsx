@@ -1,4 +1,4 @@
-import { Box, Button, Text } from "@chakra-ui/core";
+import { Box, Button, Text } from "@chakra-ui/react";
 import { Field, FieldArray, Form, Formik } from "formik";
 import { NextPage } from "next";
 import { Router } from "next/router";
@@ -16,15 +16,12 @@ import {
 import { initializeApollo } from "../lib/config.apollo-client";
 import { MyContext } from "../lib/types";
 
-
 type CreatePostProps = {
   me: MeQuery;
   router?: Router;
 };
 
-const CreatePost: NextPage<CreatePostProps> = ({router}) => {
-  
-  
+const CreatePost: NextPage<CreatePostProps> = ({ router }) => {
   const [createPost, { error }] = useCreatePostMutation({
     update(cache, { data: postMutationData }) {
       // if there's no data don't screw around with the cache
@@ -153,8 +150,6 @@ const CreatePost: NextPage<CreatePostProps> = ({router}) => {
 CreatePost.getInitialProps = async (ctx: MyContext) => {
   if (!ctx.apolloClient) ctx.apolloClient = initializeApollo();
 
-  
-
   let meResponse;
   try {
     meResponse = await ctx.apolloClient.mutate({
@@ -165,7 +160,7 @@ CreatePost.getInitialProps = async (ctx: MyContext) => {
   }
 
   return {
-    me: meResponse?.data ? meResponse?.data : {},
+    me: meResponse?.data ? meResponse?.data : {}
   };
 };
 
