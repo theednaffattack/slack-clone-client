@@ -1,8 +1,9 @@
 query GetAllTeamsForUser {
   getAllTeamsForUser {
-    id
-    name
-    members {
+    userToTeamId
+    userId
+    teamId
+    team {
       id
       name
     }

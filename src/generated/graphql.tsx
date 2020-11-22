@@ -19,7 +19,7 @@ export type Query = {
   __typename?: "Query";
   batchTeams: Array<Team>;
   getAllTeamMembers: Array<UserToTeam>;
-  getAllTeamsForUser: Array<Team>;
+  getAllTeamsForUser: Array<UserToTeam>;
   teamMembers?: Maybe<Array<Maybe<User>>>;
   me?: Maybe<User>;
   helloWorld: Scalars["String"];
@@ -596,11 +596,20 @@ export type GetAllTeamsForUserQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetAllTeamsForUserQuery = { __typename?: "Query" } & {
   getAllTeamsForUser: Array<
-    { __typename?: "Team" } & Pick<Team, "id" | "name"> & {
-        members: Array<
-          Maybe<{ __typename?: "User" } & Pick<User, "id" | "name">>
-        >;
-      }
+    { __typename?: "UserToTeam" } & Pick<
+      UserToTeam,
+      "userToTeamId" | "userId" | "teamId"
+    > & { team: { __typename?: "Team" } & Pick<Team, "id" | "name"> }
+  >;
+};
+
+export type LoadChannelsByTeamIdQueryVariables = Exact<{
+  teamId: Scalars["String"];
+}>;
+
+export type LoadChannelsByTeamIdQuery = { __typename?: "Query" } & {
+  loadChannelsByTeamId: Array<
+    { __typename?: "Channel" } & Pick<Channel, "id" | "name">
   >;
 };
 
@@ -863,9 +872,10 @@ export type RegisterMutationOptions = Apollo.BaseMutationOptions<
 export const GetAllTeamsForUserDocument = gql`
   query GetAllTeamsForUser {
     getAllTeamsForUser {
-      id
-      name
-      members {
+      userToTeamId
+      userId
+      teamId
+      team {
         id
         name
       }
@@ -919,6 +929,63 @@ export type GetAllTeamsForUserLazyQueryHookResult = ReturnType<
 export type GetAllTeamsForUserQueryResult = Apollo.QueryResult<
   GetAllTeamsForUserQuery,
   GetAllTeamsForUserQueryVariables
+>;
+export const LoadChannelsByTeamIdDocument = gql`
+  query LoadChannelsByTeamId($teamId: String!) {
+    loadChannelsByTeamId(teamId: $teamId) {
+      id
+      name
+    }
+  }
+`;
+
+/**
+ * __useLoadChannelsByTeamIdQuery__
+ *
+ * To run a query within a React component, call `useLoadChannelsByTeamIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLoadChannelsByTeamIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLoadChannelsByTeamIdQuery({
+ *   variables: {
+ *      teamId: // value for 'teamId'
+ *   },
+ * });
+ */
+export function useLoadChannelsByTeamIdQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    LoadChannelsByTeamIdQuery,
+    LoadChannelsByTeamIdQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    LoadChannelsByTeamIdQuery,
+    LoadChannelsByTeamIdQueryVariables
+  >(LoadChannelsByTeamIdDocument, baseOptions);
+}
+export function useLoadChannelsByTeamIdLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    LoadChannelsByTeamIdQuery,
+    LoadChannelsByTeamIdQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    LoadChannelsByTeamIdQuery,
+    LoadChannelsByTeamIdQueryVariables
+  >(LoadChannelsByTeamIdDocument, baseOptions);
+}
+export type LoadChannelsByTeamIdQueryHookResult = ReturnType<
+  typeof useLoadChannelsByTeamIdQuery
+>;
+export type LoadChannelsByTeamIdLazyQueryHookResult = ReturnType<
+  typeof useLoadChannelsByTeamIdLazyQuery
+>;
+export type LoadChannelsByTeamIdQueryResult = Apollo.QueryResult<
+  LoadChannelsByTeamIdQuery,
+  LoadChannelsByTeamIdQueryVariables
 >;
 export const LoginDocument = gql`
   mutation Login($username: String!, $password: String!) {

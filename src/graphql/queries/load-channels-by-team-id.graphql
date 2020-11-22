@@ -1,0 +1,6 @@
+query LoadChannelsByTeamId($teamId: String!) {
+  loadChannelsByTeamId(teamId: $teamId) {
+    id
+    name
+  }
+}
