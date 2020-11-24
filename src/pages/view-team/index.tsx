@@ -1,57 +1,25 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  Heading,
-  IconButton,
-  Input,
-  StackDivider,
-  Text,
-  VStack
-} from "@chakra-ui/react";
-
+import { Button, Flex, Grid, GridItem, Input, Text } from "@chakra-ui/react";
+import { Router } from "next/router";
 import React, { useEffect, useReducer } from "react";
-
 import {
-  AiOutlinePlusReplacement,
-  ChannelsList
-} from "../../components/channels-list";
+  ControllerAccordion,
+  OtherNames
+} from "../../components/controller-accordion";
+import { RenderChannelStack } from "../../components/render-channel-stack";
+import { RenderMessagesStack } from "../../components/render-messages-stack";
+import { TeamsStack } from "../../components/teams-stack";
 import { useGetAllTeamsForUserQuery } from "../../generated/graphql";
+import {
+  viewControllerInit,
+  viewControllerInitialState,
+  viewControllerReducer,
+  ViewerType
+} from "../../lib/page-funcs.view-team-state";
+import { CreateChannelForm } from "./create-channel-form";
 
-type ViewControllerStateType = {
-  teamIdShowing: null | string;
-};
+const otherStuff: OtherNames[] = ["Threads", "Saved", "Mentioned", "More"];
 
-type ActionType = { type: "changeTeamId"; payload: string | null };
-
-const viewControllerInitialState: ViewControllerStateType = {
-  teamIdShowing: null
-};
-
-function viewControllerReducer(
-  state: ViewControllerStateType,
-  action: ActionType
-): ViewControllerStateType {
-  switch (action.type) {
-    case "changeTeamId":
-      return {
-        teamIdShowing: action.payload
-      };
-
-    default:
-      return {
-        teamIdShowing: state.teamIdShowing
-      };
-  }
-}
-
-function viewControllerInit(): ViewControllerStateType {
-  return { teamIdShowing: null };
-}
-
-const ViewTeamIndex = () => {
+const ViewTeamIndex = ({ router }: { router: Router }) => {
   const [viewControllerState, viewControllerDispatch] = useReducer(
     viewControllerReducer,
     viewControllerInitialState,
@@ -62,12 +30,41 @@ const ViewTeamIndex = () => {
     error: errorTeams,
     loading: loadingTeams
   } = useGetAllTeamsForUserQuery();
+
+  const { action, viewing } = router.query;
+
   useEffect(() => {
     viewControllerDispatch({
       type: "changeTeamId",
       payload: dataTeams?.getAllTeamsForUser?.[0].teamId ?? null
     });
-  }, [viewControllerDispatch, dataTeams]);
+
+    if (typeof viewing === "string") {
+      viewControllerDispatch({
+        type: "changeDisplayToMatchRoute",
+        payload: viewing as ViewerType
+      });
+    }
+  }, [viewControllerDispatch, dataTeams, router.pathname, router.query]);
+
+  const messagesData = [
+    { id: 1, message: "message-one" },
+    { id: 2, message: "message-two" },
+    { id: 3, message: "message-three" },
+    { id: 4, message: "message-one" },
+    { id: 5, message: "message-two" },
+    { id: 6, message: "message-three" },
+    { id: 7, message: "message-one" },
+    { id: 8, message: "message-two" },
+    { id: 9, message: "message-three" },
+    { id: 10, message: "message-one" },
+    { id: 11, message: "message-two" },
+    { id: 12, message: "message-three" },
+    { id: 13, message: "message-one" },
+    { id: 14, message: "message-two" },
+    { id: 15, message: "message-three" }
+  ];
+
   return (
     <Grid
       height="100%"
@@ -84,45 +81,7 @@ const ViewTeamIndex = () => {
         <Flex alignItems="center" justifyContent="center">
           <Text>Teams</Text>
         </Flex>
-        <VStack id="teams-list" spacing={4} align="stretch" as="ul">
-          {dataTeams &&
-          dataTeams?.getAllTeamsForUser &&
-          dataTeams?.getAllTeamsForUser.length > 0 ? (
-            dataTeams?.getAllTeamsForUser.map(
-              ({ teamId: id, team: { name } }) => (
-                <Flex key={`${id}-teams-list-${name}`} justifyContent="center">
-                  <Button
-                    type="button"
-                    colorScheme="transparent"
-                    onClick={() =>
-                      viewControllerDispatch({
-                        type: "changeTeamId",
-                        payload: id
-                      })
-                    }
-                  >
-                    <Heading>{name.charAt(0)}</Heading>
-                  </Button>
-                </Flex>
-              )
-            )
-          ) : (
-            <Text>Error! No Teams</Text>
-          )}
-          <Flex key="add team button" justifyContent="center">
-            <IconButton
-              aria-label="add team"
-              colorScheme="teal"
-              _hover={{
-                background: "white",
-                color: "teal.500"
-              }}
-              icon={<AiOutlinePlusReplacement size={20} />}
-              type="button"
-              onClick={() => console.log("ADD TEAM CLICKED")}
-            />
-          </Flex>
-        </VStack>
+        <TeamsStack data={dataTeams} viewerDispatch={viewControllerDispatch} />
       </GridItem>
       <Flex
         id="channels"
@@ -132,54 +91,41 @@ const ViewTeamIndex = () => {
         color="#fff"
         bg="#4e3a4c"
       >
-        <Flex pl={2}>Other Stuff</Flex>
-        <ChannelsList teamId={viewControllerState.teamIdShowing} />
+        <Flex p={2} pl={3} flexDirection="column">
+          {otherStuff.map((item) => (
+            <Flex key={item}>ICON {item}</Flex>
+          ))}
+        </Flex>
+        <ControllerAccordion
+          router={router}
+          teamId={viewControllerState.teamIdShowing}
+        />
+        {/* <ChannelsList teamId={viewControllerState.teamIdShowing} /> */}
+        {/* <DirectMessagesList teamId={viewControllerState.teamIdShowing} /> */}
       </Flex>
 
-      <GridItem id="teams" gridColumn={3} gridRow={1}>
+      <GridItem
+        id="teams"
+        gridColumn={3}
+        gridRow={1}
+        borderBottom="1px solid #eee"
+      >
         Header
       </GridItem>
 
-      <VStack
-        gridColumn={3}
-        gridRow={2}
-        divider={<StackDivider key={Math.random()} borderColor="gray.200" />}
-        spacing={4}
-        align="stretch"
-        as="ul"
-        h="100%"
-        overflow="auto"
-      >
-        {[
-          { id: 1, message: "message-one" },
-          { id: 2, message: "message-two" },
-          { id: 3, message: "message-three" },
-          { id: 4, message: "message-one" },
-          { id: 5, message: "message-two" },
-          { id: 6, message: "message-three" },
-          { id: 7, message: "message-one" },
-          { id: 8, message: "message-two" },
-          { id: 9, message: "message-three" },
-          { id: 10, message: "message-one" },
-          { id: 11, message: "message-two" },
-          { id: 12, message: "message-three" },
-          { id: 13, message: "message-one" },
-          { id: 14, message: "message-two" },
-          { id: 15, message: "message-three" }
-        ].map(({ id, message }, index) => {
-          return (
-            <Box
-              key={`${id}-messages-list-${message}`}
-              as="li"
-              h="40px"
-              mt={index === 0 ? "auto" : 2}
-              listStyleType="none"
-            >
-              {message}
-            </Box>
-          );
-        })}
-      </VStack>
+      {viewControllerState.teamIdShowing &&
+      viewControllerState.viewerDisplayed === "channel_browser" ? (
+        <RenderChannelStack>
+          {action === "add_channel" ? (
+            <Flex>
+              <CreateChannelForm teamId={viewControllerState.teamIdShowing} />
+            </Flex>
+          ) : null}
+        </RenderChannelStack>
+      ) : null}
+      {viewControllerState.viewerDisplayed === "messages_browser" ? (
+        <RenderMessagesStack messages={messagesData} />
+      ) : null}
 
       <Flex id="input" gridColumn={3} gridRow={3}>
         <Input type="text" placeholder="CSS Grid layout module" />
