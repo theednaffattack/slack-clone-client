@@ -5,10 +5,13 @@ import {
   AccordionPanel,
   Box,
   Button,
+  ButtonGroup,
   Flex as FlexBase,
+  IconButton,
   Text
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import {
   AiFillCaretDown,
@@ -17,11 +20,11 @@ import {
 } from "react-icons/ai";
 
 import { useLoadChannelsByTeamIdQuery } from "../generated/graphql";
-import { ChannelHoverBox } from "./channel-hover-box";
-import { ChannelHoverButton } from "./channel-hover-button";
+import { ChannelHoverBox } from "./channel-hover-box_v1";
+import { ChannelHoverButton } from "./channel-hover-button_v1";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ChannelsListProps {
+interface DirectMessagesListProps {
   teamId: string | null;
 }
 
@@ -38,7 +41,9 @@ const Flex = styled(FlexBase)`
   } */
 `;
 
-export const ChannelsList: React.FC<ChannelsListProps> = ({ teamId }) => {
+export const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
+  teamId
+}) => {
   const [hoverState, setHoverState] = useState<
     "isHovering" | "is_NOT_Hovering"
   >("is_NOT_Hovering");
@@ -48,7 +53,7 @@ export const ChannelsList: React.FC<ChannelsListProps> = ({ teamId }) => {
   const [channelAddHoverState, setChannelAddHoverState] = useState<
     "isHovering" | "is_NOT_Hovering"
   >("is_NOT_Hovering");
-
+  const router = useRouter();
   const {
     data: dataFromChannels,
     error: errorFromChannels
@@ -56,6 +61,16 @@ export const ChannelsList: React.FC<ChannelsListProps> = ({ teamId }) => {
     skip: teamId === null,
     variables: { teamId: teamId || "" }
   });
+
+  function handleAddDirectMessageClick() {
+    router.push(
+      "/view-team/?viewing=messages_browser&action=add_direct_message"
+    );
+  }
+
+  function handleAddTeammatesClick() {
+    router.push("/view-team/?viewing=messages_browser&action=add_teammates");
+  }
 
   return (
     <Accordion allowToggle>
@@ -88,14 +103,14 @@ export const ChannelsList: React.FC<ChannelsListProps> = ({ teamId }) => {
 
                   <Box flex="1" textAlign="left">
                     <Text fontWeight={isExpanded ? "inherit" : "bold"}>
-                      Channels
+                      Direct Messages
                     </Text>
                   </Box>
                 </AccordionButton>
 
                 {hoverState === "isHovering" ? (
                   <ChannelHoverButton
-                    handleClick={() => console.log("NEW CHANNEL CLICKED")}
+                    handleClick={handleAddDirectMessageClick}
                     triggerHoverState={channelAddHoverState}
                     setTriggerHoverState={setChannelAddHoverState}
                   >
@@ -117,14 +132,21 @@ export const ChannelsList: React.FC<ChannelsListProps> = ({ teamId }) => {
                 ) : (
                   <Text>Please add channesl(s) to get started.</Text>
                 )}
-                <Flex justifyContent="center">
-                  <Button
-                    type="button"
-                    colorScheme="teal"
-                    onClick={() => console.log("add channel clicked")}
-                  >
-                    add channel
-                  </Button>
+                <Flex>
+                  <ButtonGroup size="sm" isAttached variant="outline">
+                    <IconButton
+                      aria-label="Add to friends"
+                      icon={<AiOutlinePlusReplacement />}
+                      onClick={handleAddTeammatesClick}
+                    />
+                    <Button
+                      type="button"
+                      mr="-px"
+                      onClick={handleAddTeammatesClick}
+                    >
+                      Add teammates
+                    </Button>
+                  </ButtonGroup>
                 </Flex>
               </AccordionPanel>
             </>
