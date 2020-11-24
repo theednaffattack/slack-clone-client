@@ -20,9 +20,9 @@ import {
   AiOutlineSearch
 } from "react-icons/ai";
 import { Thread, User } from "../generated/graphql";
+import { AiOutlinePlusReplacement } from "./ai-outline-plus-replacement";
 import { ChannelHoverBox } from "./channel-hover-box_v2";
 import { ChannelHoverButton } from "./channel-hover-button_v2";
-import { AiOutlinePlusReplacement } from "./channels-list";
 import { ControllerAction, ControllerState } from "./controller-accordion";
 
 export function DirectMessagesAccordion({
