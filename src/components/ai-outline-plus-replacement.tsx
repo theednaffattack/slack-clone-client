@@ -1,7 +1,7 @@
 import React from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 
-export const AiOutlinePlusReplacement = (props) => {
+export const AiOutlinePlusReplacement = (props: any) => {
   const {
     props: {
       attr: { pId, ...rest },
@@ -10,8 +10,19 @@ export const AiOutlinePlusReplacement = (props) => {
   } = AiOutlinePlus({});
 
   const SAFE_PATHS = paths.map(
-    ({ type, props: { pId: pathId, ...pathProps } }) =>
-      React.createElement(type, pathProps)
+    ({
+      type,
+      props: { pId: pathId, ...pathProps }
+    }: {
+      type: any;
+      props: any;
+    }) => {
+      // The following two lines only exist to
+      // get rid of no-unused-vars lint errors.
+      const wasteObj = { pId, pathId };
+      delete wasteObj.pId;
+      React.createElement(type, pathProps);
+    }
   );
   const SAFE_CHILDREN = React.Children.toArray([defs, ...SAFE_PATHS]);
   const SAFE_PROPS = { attr: rest, ...props };
