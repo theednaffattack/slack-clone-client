@@ -547,6 +547,19 @@ export type GetAllMyMessagesInput = {
   user: Scalars["String"];
 };
 
+export type AddTeamMemberMutationVariables = Exact<{
+  teamId: Scalars["String"];
+  email: Scalars["String"];
+  roles: Array<TeamRoleEnum>;
+}>;
+
+export type AddTeamMemberMutation = { __typename?: "Mutation" } & {
+  addTeamMember: { __typename?: "UserToTeamIdReferencesOnlyClass" } & Pick<
+    UserToTeamIdReferencesOnlyClass,
+    "userToTeamId" | "userId" | "teamId" | "teamRoleAuthorizations"
+  >;
+};
+
 export type ChangePasswordFromContextUseridMutationVariables = Exact<{
   data: PasswordInput;
 }>;
@@ -567,6 +580,39 @@ export type ConfirmUserMutation = { __typename?: "Mutation" } & Pick<
   Mutation,
   "confirmUser"
 >;
+
+export type CreateChannelMutationVariables = Exact<{
+  input: AddChannelInput;
+}>;
+
+export type CreateChannelMutation = { __typename?: "Mutation" } & {
+  createChannel: { __typename?: "Channel" } & Pick<Channel, "id" | "name">;
+};
+
+export type CreateDirectMessageMutationVariables = Exact<{
+  input: CreateDirectMessageInput;
+}>;
+
+export type CreateDirectMessageMutation = { __typename?: "Mutation" } & {
+  createDirectMessage: { __typename?: "AddDirectMessagePayload" } & Pick<
+    AddDirectMessagePayload,
+    "success" | "threadId"
+  > & {
+      message: { __typename?: "Message" } & Pick<
+        Message,
+        "id" | "message" | "created_at"
+      > & { sentBy: { __typename?: "User" } & Pick<User, "id" | "username"> };
+      invitees: Array<{ __typename?: "User" } & Pick<User, "id" | "username">>;
+    };
+};
+
+export type CreateTeamMutationVariables = Exact<{
+  name: Scalars["String"];
+}>;
+
+export type CreateTeamMutation = { __typename?: "Mutation" } & {
+  createTeam: { __typename?: "Team" } & Pick<Team, "id" | "name">;
+};
 
 export type ForgotPasswordMutationVariables = Exact<{
   email: Scalars["String"];
@@ -613,6 +659,36 @@ export type LoadChannelsByTeamIdQuery = { __typename?: "Query" } & {
   >;
 };
 
+export type LoadDirectMessageThreadsByTeamAndUserQueryVariables = Exact<{
+  teamId: Scalars["String"];
+}>;
+
+export type LoadDirectMessageThreadsByTeamAndUserQuery = {
+  __typename?: "Query";
+} & {
+  loadDirectMessageThreadsByTeamAndUser: Array<
+    { __typename?: "Thread" } & Pick<Thread, "id" | "last_message"> & {
+        invitees: Array<
+          { __typename?: "User" } & Pick<User, "id" | "username">
+        >;
+      }
+  >;
+};
+
+export type LoadDirectMessagesThreadByIdQueryVariables = Exact<{
+  teamId: Scalars["String"];
+  threadId: Scalars["String"];
+}>;
+
+export type LoadDirectMessagesThreadByIdQuery = { __typename?: "Query" } & {
+  loadDirectMessagesThreadById: { __typename?: "Thread" } & Pick<
+    Thread,
+    "id" | "last_message"
+  > & {
+      invitees: Array<{ __typename?: "User" } & Pick<User, "id" | "username">>;
+    };
+};
+
 export type LoginMutationVariables = Exact<{
   username: Scalars["String"];
   password: Scalars["String"];
@@ -630,6 +706,65 @@ export type MeQuery = { __typename?: "Query" } & {
   me?: Maybe<{ __typename?: "User" } & Pick<User, "id" | "name" | "username">>;
 };
 
+export const AddTeamMemberDocument = gql`
+  mutation AddTeamMember(
+    $teamId: String!
+    $email: String!
+    $roles: [TeamRoleEnum!]!
+  ) {
+    addTeamMember(teamId: $teamId, email: $email, roles: $roles) {
+      userToTeamId
+      userId
+      teamId
+      teamRoleAuthorizations
+    }
+  }
+`;
+export type AddTeamMemberMutationFn = Apollo.MutationFunction<
+  AddTeamMemberMutation,
+  AddTeamMemberMutationVariables
+>;
+
+/**
+ * __useAddTeamMemberMutation__
+ *
+ * To run a mutation, you first call `useAddTeamMemberMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddTeamMemberMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addTeamMemberMutation, { data, loading, error }] = useAddTeamMemberMutation({
+ *   variables: {
+ *      teamId: // value for 'teamId'
+ *      email: // value for 'email'
+ *      roles: // value for 'roles'
+ *   },
+ * });
+ */
+export function useAddTeamMemberMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    AddTeamMemberMutation,
+    AddTeamMemberMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    AddTeamMemberMutation,
+    AddTeamMemberMutationVariables
+  >(AddTeamMemberDocument, baseOptions);
+}
+export type AddTeamMemberMutationHookResult = ReturnType<
+  typeof useAddTeamMemberMutation
+>;
+export type AddTeamMemberMutationResult = Apollo.MutationResult<
+  AddTeamMemberMutation
+>;
+export type AddTeamMemberMutationOptions = Apollo.BaseMutationOptions<
+  AddTeamMemberMutation,
+  AddTeamMemberMutationVariables
+>;
 export const ChangePasswordFromContextUseridDocument = gql`
   mutation ChangePasswordFromContextUserid($data: PasswordInput!) {
     changePasswordFromContextUserid(data: $data) {
@@ -729,6 +864,172 @@ export type ConfirmUserMutationResult = Apollo.MutationResult<
 export type ConfirmUserMutationOptions = Apollo.BaseMutationOptions<
   ConfirmUserMutation,
   ConfirmUserMutationVariables
+>;
+export const CreateChannelDocument = gql`
+  mutation CreateChannel($input: AddChannelInput!) {
+    createChannel(input: $input) {
+      id
+      name
+    }
+  }
+`;
+export type CreateChannelMutationFn = Apollo.MutationFunction<
+  CreateChannelMutation,
+  CreateChannelMutationVariables
+>;
+
+/**
+ * __useCreateChannelMutation__
+ *
+ * To run a mutation, you first call `useCreateChannelMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateChannelMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createChannelMutation, { data, loading, error }] = useCreateChannelMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateChannelMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CreateChannelMutation,
+    CreateChannelMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    CreateChannelMutation,
+    CreateChannelMutationVariables
+  >(CreateChannelDocument, baseOptions);
+}
+export type CreateChannelMutationHookResult = ReturnType<
+  typeof useCreateChannelMutation
+>;
+export type CreateChannelMutationResult = Apollo.MutationResult<
+  CreateChannelMutation
+>;
+export type CreateChannelMutationOptions = Apollo.BaseMutationOptions<
+  CreateChannelMutation,
+  CreateChannelMutationVariables
+>;
+export const CreateDirectMessageDocument = gql`
+  mutation CreateDirectMessage($input: CreateDirectMessageInput!) {
+    createDirectMessage(input: $input) {
+      success
+      threadId
+      message {
+        id
+        message
+        created_at
+        sentBy {
+          id
+          username
+        }
+      }
+      invitees {
+        id
+        username
+      }
+    }
+  }
+`;
+export type CreateDirectMessageMutationFn = Apollo.MutationFunction<
+  CreateDirectMessageMutation,
+  CreateDirectMessageMutationVariables
+>;
+
+/**
+ * __useCreateDirectMessageMutation__
+ *
+ * To run a mutation, you first call `useCreateDirectMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDirectMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDirectMessageMutation, { data, loading, error }] = useCreateDirectMessageMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateDirectMessageMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CreateDirectMessageMutation,
+    CreateDirectMessageMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    CreateDirectMessageMutation,
+    CreateDirectMessageMutationVariables
+  >(CreateDirectMessageDocument, baseOptions);
+}
+export type CreateDirectMessageMutationHookResult = ReturnType<
+  typeof useCreateDirectMessageMutation
+>;
+export type CreateDirectMessageMutationResult = Apollo.MutationResult<
+  CreateDirectMessageMutation
+>;
+export type CreateDirectMessageMutationOptions = Apollo.BaseMutationOptions<
+  CreateDirectMessageMutation,
+  CreateDirectMessageMutationVariables
+>;
+export const CreateTeamDocument = gql`
+  mutation CreateTeam($name: String!) {
+    createTeam(name: $name) {
+      id
+      name
+    }
+  }
+`;
+export type CreateTeamMutationFn = Apollo.MutationFunction<
+  CreateTeamMutation,
+  CreateTeamMutationVariables
+>;
+
+/**
+ * __useCreateTeamMutation__
+ *
+ * To run a mutation, you first call `useCreateTeamMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTeamMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createTeamMutation, { data, loading, error }] = useCreateTeamMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCreateTeamMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CreateTeamMutation,
+    CreateTeamMutationVariables
+  >
+) {
+  return Apollo.useMutation<CreateTeamMutation, CreateTeamMutationVariables>(
+    CreateTeamDocument,
+    baseOptions
+  );
+}
+export type CreateTeamMutationHookResult = ReturnType<
+  typeof useCreateTeamMutation
+>;
+export type CreateTeamMutationResult = Apollo.MutationResult<
+  CreateTeamMutation
+>;
+export type CreateTeamMutationOptions = Apollo.BaseMutationOptions<
+  CreateTeamMutation,
+  CreateTeamMutationVariables
 >;
 export const ForgotPasswordDocument = gql`
   mutation ForgotPassword($email: String!) {
@@ -986,6 +1287,129 @@ export type LoadChannelsByTeamIdLazyQueryHookResult = ReturnType<
 export type LoadChannelsByTeamIdQueryResult = Apollo.QueryResult<
   LoadChannelsByTeamIdQuery,
   LoadChannelsByTeamIdQueryVariables
+>;
+export const LoadDirectMessageThreadsByTeamAndUserDocument = gql`
+  query LoadDirectMessageThreadsByTeamAndUser($teamId: String!) {
+    loadDirectMessageThreadsByTeamAndUser(teamId: $teamId) {
+      id
+      last_message
+      invitees {
+        id
+        username
+      }
+    }
+  }
+`;
+
+/**
+ * __useLoadDirectMessageThreadsByTeamAndUserQuery__
+ *
+ * To run a query within a React component, call `useLoadDirectMessageThreadsByTeamAndUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLoadDirectMessageThreadsByTeamAndUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLoadDirectMessageThreadsByTeamAndUserQuery({
+ *   variables: {
+ *      teamId: // value for 'teamId'
+ *   },
+ * });
+ */
+export function useLoadDirectMessageThreadsByTeamAndUserQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    LoadDirectMessageThreadsByTeamAndUserQuery,
+    LoadDirectMessageThreadsByTeamAndUserQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    LoadDirectMessageThreadsByTeamAndUserQuery,
+    LoadDirectMessageThreadsByTeamAndUserQueryVariables
+  >(LoadDirectMessageThreadsByTeamAndUserDocument, baseOptions);
+}
+export function useLoadDirectMessageThreadsByTeamAndUserLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    LoadDirectMessageThreadsByTeamAndUserQuery,
+    LoadDirectMessageThreadsByTeamAndUserQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    LoadDirectMessageThreadsByTeamAndUserQuery,
+    LoadDirectMessageThreadsByTeamAndUserQueryVariables
+  >(LoadDirectMessageThreadsByTeamAndUserDocument, baseOptions);
+}
+export type LoadDirectMessageThreadsByTeamAndUserQueryHookResult = ReturnType<
+  typeof useLoadDirectMessageThreadsByTeamAndUserQuery
+>;
+export type LoadDirectMessageThreadsByTeamAndUserLazyQueryHookResult = ReturnType<
+  typeof useLoadDirectMessageThreadsByTeamAndUserLazyQuery
+>;
+export type LoadDirectMessageThreadsByTeamAndUserQueryResult = Apollo.QueryResult<
+  LoadDirectMessageThreadsByTeamAndUserQuery,
+  LoadDirectMessageThreadsByTeamAndUserQueryVariables
+>;
+export const LoadDirectMessagesThreadByIdDocument = gql`
+  query LoadDirectMessagesThreadById($teamId: String!, $threadId: String!) {
+    loadDirectMessagesThreadById(teamId: $teamId, threadId: $threadId) {
+      id
+      last_message
+      invitees {
+        id
+        username
+      }
+    }
+  }
+`;
+
+/**
+ * __useLoadDirectMessagesThreadByIdQuery__
+ *
+ * To run a query within a React component, call `useLoadDirectMessagesThreadByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLoadDirectMessagesThreadByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLoadDirectMessagesThreadByIdQuery({
+ *   variables: {
+ *      teamId: // value for 'teamId'
+ *      threadId: // value for 'threadId'
+ *   },
+ * });
+ */
+export function useLoadDirectMessagesThreadByIdQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    LoadDirectMessagesThreadByIdQuery,
+    LoadDirectMessagesThreadByIdQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    LoadDirectMessagesThreadByIdQuery,
+    LoadDirectMessagesThreadByIdQueryVariables
+  >(LoadDirectMessagesThreadByIdDocument, baseOptions);
+}
+export function useLoadDirectMessagesThreadByIdLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    LoadDirectMessagesThreadByIdQuery,
+    LoadDirectMessagesThreadByIdQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    LoadDirectMessagesThreadByIdQuery,
+    LoadDirectMessagesThreadByIdQueryVariables
+  >(LoadDirectMessagesThreadByIdDocument, baseOptions);
+}
+export type LoadDirectMessagesThreadByIdQueryHookResult = ReturnType<
+  typeof useLoadDirectMessagesThreadByIdQuery
+>;
+export type LoadDirectMessagesThreadByIdLazyQueryHookResult = ReturnType<
+  typeof useLoadDirectMessagesThreadByIdLazyQuery
+>;
+export type LoadDirectMessagesThreadByIdQueryResult = Apollo.QueryResult<
+  LoadDirectMessagesThreadByIdQuery,
+  LoadDirectMessagesThreadByIdQueryVariables
 >;
 export const LoginDocument = gql`
   mutation Login($username: String!, $password: String!) {

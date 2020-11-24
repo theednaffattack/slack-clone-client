@@ -1,0 +1,12 @@
+mutation AddTeamMember(
+  $teamId: String!
+  $email: String!
+  $roles: [TeamRoleEnum!]!
+) {
+  addTeamMember(teamId: $teamId, email: $email, roles: $roles) {
+    userToTeamId
+    userId
+    teamId
+    teamRoleAuthorizations
+  }
+}

@@ -1,0 +1,10 @@
+query LoadDirectMessagesThreadById($teamId: String!, $threadId: String!) {
+  loadDirectMessagesThreadById(teamId: $teamId, threadId: $threadId) {
+    id
+    last_message
+    invitees {
+      id
+      username
+    }
+  }
+}

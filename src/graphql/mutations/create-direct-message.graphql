@@ -1,0 +1,19 @@
+mutation CreateDirectMessage($input: CreateDirectMessageInput!) {
+  createDirectMessage(input: $input) {
+    success
+    threadId
+    message {
+      id
+      message
+      created_at
+      sentBy {
+        id
+        username
+      }
+    }
+    invitees {
+      id
+      username
+    }
+  }
+}
