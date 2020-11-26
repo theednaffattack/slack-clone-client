@@ -2,5 +2,10 @@ query LoadChannelsByTeamId($teamId: String!) {
   loadChannelsByTeamId(teamId: $teamId) {
     id
     name
+    invitees {
+      id
+      username
+      profileImageUri
+    }
   }
 }
