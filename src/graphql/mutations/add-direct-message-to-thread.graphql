@@ -1,0 +1,16 @@
+mutation AddDirectMessageToThread($input: AddDirectMessageToThreadInput!) {
+  addDirectMessageToThread(input: $input) {
+    success
+    threadId
+    message {
+      id
+      created_at
+      message
+    }
+    sentBy {
+      id
+      username
+      profileImageUri
+    }
+  }
+}

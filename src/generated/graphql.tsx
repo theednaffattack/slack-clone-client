@@ -547,6 +547,26 @@ export type GetAllMyMessagesInput = {
   user: Scalars["String"];
 };
 
+export type AddDirectMessageToThreadMutationVariables = Exact<{
+  input: AddDirectMessageToThreadInput;
+}>;
+
+export type AddDirectMessageToThreadMutation = { __typename?: "Mutation" } & {
+  addDirectMessageToThread: { __typename?: "AddDirectMessagePayload" } & Pick<
+    AddDirectMessagePayload,
+    "success" | "threadId"
+  > & {
+      message: { __typename?: "Message" } & Pick<
+        Message,
+        "id" | "created_at" | "message"
+      >;
+      sentBy: { __typename?: "User" } & Pick<
+        User,
+        "id" | "username" | "profileImageUri"
+      >;
+    };
+};
+
 export type AddTeamMemberMutationVariables = Exact<{
   teamId: Scalars["String"];
   email: Scalars["String"];
@@ -686,6 +706,16 @@ export type LoadDirectMessagesThreadByIdQuery = { __typename?: "Query" } & {
     "id" | "last_message"
   > & {
       invitees: Array<{ __typename?: "User" } & Pick<User, "id" | "username">>;
+      messages?: Maybe<
+        Array<
+          Maybe<
+            { __typename?: "Message" } & Pick<
+              Message,
+              "id" | "created_at" | "message"
+            >
+          >
+        >
+      >;
     };
 };
 
@@ -706,6 +736,67 @@ export type MeQuery = { __typename?: "Query" } & {
   me?: Maybe<{ __typename?: "User" } & Pick<User, "id" | "name" | "username">>;
 };
 
+export const AddDirectMessageToThreadDocument = gql`
+  mutation AddDirectMessageToThread($input: AddDirectMessageToThreadInput!) {
+    addDirectMessageToThread(input: $input) {
+      success
+      threadId
+      message {
+        id
+        created_at
+        message
+      }
+      sentBy {
+        id
+        username
+        profileImageUri
+      }
+    }
+  }
+`;
+export type AddDirectMessageToThreadMutationFn = Apollo.MutationFunction<
+  AddDirectMessageToThreadMutation,
+  AddDirectMessageToThreadMutationVariables
+>;
+
+/**
+ * __useAddDirectMessageToThreadMutation__
+ *
+ * To run a mutation, you first call `useAddDirectMessageToThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddDirectMessageToThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addDirectMessageToThreadMutation, { data, loading, error }] = useAddDirectMessageToThreadMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useAddDirectMessageToThreadMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    AddDirectMessageToThreadMutation,
+    AddDirectMessageToThreadMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    AddDirectMessageToThreadMutation,
+    AddDirectMessageToThreadMutationVariables
+  >(AddDirectMessageToThreadDocument, baseOptions);
+}
+export type AddDirectMessageToThreadMutationHookResult = ReturnType<
+  typeof useAddDirectMessageToThreadMutation
+>;
+export type AddDirectMessageToThreadMutationResult = Apollo.MutationResult<
+  AddDirectMessageToThreadMutation
+>;
+export type AddDirectMessageToThreadMutationOptions = Apollo.BaseMutationOptions<
+  AddDirectMessageToThreadMutation,
+  AddDirectMessageToThreadMutationVariables
+>;
 export const AddTeamMemberDocument = gql`
   mutation AddTeamMember(
     $teamId: String!
@@ -1357,6 +1448,11 @@ export const LoadDirectMessagesThreadByIdDocument = gql`
       invitees {
         id
         username
+      }
+      messages {
+        id
+        created_at
+        message
       }
     }
   }

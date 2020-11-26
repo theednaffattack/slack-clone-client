@@ -6,5 +6,10 @@ query LoadDirectMessagesThreadById($teamId: String!, $threadId: String!) {
       id
       username
     }
+    messages {
+      id
+      created_at
+      message
+    }
   }
 }
