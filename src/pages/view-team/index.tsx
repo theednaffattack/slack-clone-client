@@ -6,7 +6,6 @@ import {
   Flex,
   Grid,
   GridItem,
-  Heading,
   HStack,
   Input,
   Text
@@ -79,24 +78,6 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
     }
   }, [viewControllerDispatch, dataTeams, router.pathname, router.query]);
 
-  const messagesData = [
-    { id: 1, message: "message-one" },
-    { id: 2, message: "message-two" },
-    { id: 3, message: "message-three" },
-    { id: 4, message: "message-one" },
-    { id: 5, message: "message-two" },
-    { id: 6, message: "message-three" },
-    { id: 7, message: "message-one" },
-    { id: 8, message: "message-two" },
-    { id: 9, message: "message-three" },
-    { id: 10, message: "message-one" },
-    { id: 11, message: "message-two" },
-    { id: 12, message: "message-three" },
-    { id: 13, message: "message-one" },
-    { id: 14, message: "message-two" },
-    { id: 15, message: "message-three" }
-  ];
-
   return (
     <Grid
       height="100%"
@@ -136,29 +117,39 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
       </Flex>
 
       <GridItem
-        id="teams"
+        id="header"
         gridColumn={3}
         gridRow={1}
         borderBottom="1px solid #eee"
       >
         <Flex>
-          <Heading>{viewControllerState.viewerDisplaying.viewing}</Heading>
+          {viewControllerState.viewerDisplaying.viewing === "channel" ? (
+            <Flex flexDirection="column">
+              <Text>CHANNEL NAME: </Text>
+              <Text>
+                CHANNEL ID: {viewControllerState.viewerDisplaying.channelId}
+              </Text>
+            </Flex>
+          ) : null}
 
-          <HStack>
-            <AvatarGroup size="md" max={3} pl={2}>
-              {viewControllerState.viewerDisplaying.header?.map(
-                ({ id, username }) => {
-                  return (
-                    <Avatar
-                      key={id}
-                      name={username ? username : undefined}
-                      // src="https://bit.ly/broken-link"
-                    />
-                  );
-                }
-              )}
-            </AvatarGroup>
-          </HStack>
+          {viewControllerState.viewerDisplaying.viewing ===
+          "direct_messages" ? (
+            <HStack>
+              <AvatarGroup size="md" max={3} pl={2}>
+                {viewControllerState.viewerDisplaying.header?.map(
+                  ({ id, username }) => {
+                    return (
+                      <Avatar
+                        key={id}
+                        name={username ? username : undefined}
+                        // src="https://bit.ly/broken-link"
+                      />
+                    );
+                  }
+                )}
+              </AvatarGroup>
+            </HStack>
+          ) : null}
         </Flex>
       </GridItem>
 
