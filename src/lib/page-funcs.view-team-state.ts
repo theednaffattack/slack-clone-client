@@ -1,17 +1,38 @@
 export type ViewControllerStateType = {
   teamIdShowing: null | string;
-  viewerDisplayed: null | string;
+  viewerDisplaying: {
+    viewing: null | string;
+    dmThreadId: null | string;
+    channelId: null | string;
+    header: null | any[];
+  };
 };
 
 export type ViewerType = "channel_browser" | "messages_browser";
 
+export type ParsedUrlParam = string | null;
+
 export type ActionType =
   | { type: "changeTeamId"; payload: string | null }
-  | { type: "changeDisplayToMatchRoute"; payload: ViewerType };
+  | {
+      type: "changeDisplayToMatchRoute";
+      payload: {
+        action: ParsedUrlParam;
+        channelId: ParsedUrlParam;
+        threadId: ParsedUrlParam;
+        viewing: ViewerType;
+        header: any | null;
+      };
+    };
 
 export const viewControllerInitialState: ViewControllerStateType = {
   teamIdShowing: null,
-  viewerDisplayed: null
+  viewerDisplaying: {
+    channelId: null,
+    dmThreadId: null,
+    header: null,
+    viewing: null
+  }
 };
 
 export function viewControllerReducer(
@@ -21,19 +42,24 @@ export function viewControllerReducer(
   switch (action.type) {
     case "changeTeamId":
       return {
-        viewerDisplayed: state.viewerDisplayed,
+        viewerDisplaying: state.viewerDisplaying,
         teamIdShowing: action.payload
       };
 
     case "changeDisplayToMatchRoute":
       return {
-        viewerDisplayed: action.payload,
+        viewerDisplaying: {
+          channelId: action.payload.channelId,
+          dmThreadId: action.payload.threadId,
+          header: action.payload.header,
+          viewing: action.payload.viewing
+        },
         teamIdShowing: state.teamIdShowing
       };
 
     default:
       return {
-        viewerDisplayed: state.viewerDisplayed,
+        viewerDisplaying: state.viewerDisplaying,
         teamIdShowing: state.teamIdShowing
       };
   }
@@ -41,7 +67,12 @@ export function viewControllerReducer(
 
 export function viewControllerInit(): ViewControllerStateType {
   return {
-    viewerDisplayed: null,
+    viewerDisplaying: {
+      channelId: null,
+      dmThreadId: null,
+      header: null,
+      viewing: null
+    },
     teamIdShowing: null
   };
 }
