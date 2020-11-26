@@ -142,11 +142,11 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
         borderBottom="1px solid #eee"
       >
         <Flex>
-          <Heading>{viewControllerState.viewerDisplayed.viewing}</Heading>
+          <Heading>{viewControllerState.viewerDisplaying.viewing}</Heading>
 
           <HStack>
             <AvatarGroup size="md" max={3} pl={2}>
-              {viewControllerState.viewerDisplayed.header?.map(
+              {viewControllerState.viewerDisplaying.header?.map(
                 ({ id, username }) => {
                   return (
                     <Avatar
@@ -163,7 +163,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
       </GridItem>
 
       {viewControllerState.teamIdShowing &&
-      viewControllerState.viewerDisplayed.viewing === "channel_browser" ? (
+      viewControllerState.viewerDisplaying.viewing === "channel_browser" ? (
         <RenderChannelStack>
           {action === "add_channel" ? (
             <Flex>
@@ -172,21 +172,21 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
           ) : null}
         </RenderChannelStack>
       ) : null}
-      {viewControllerState.viewerDisplayed.viewing === "messages_browser" ? (
+      {viewControllerState.viewerDisplaying.viewing === "messages_browser" ? (
         <Center>ADD TEAMMATE EXPLORER</Center>
       ) : null}
       {viewControllerState.teamIdShowing &&
       // typeof handleUrlParam(threadId) === "string" &&
-      viewControllerState.viewerDisplayed.dmThreadId &&
-      viewControllerState.viewerDisplayed.viewing === "direct_messages" ? (
+      viewControllerState.viewerDisplaying.dmThreadId &&
+      viewControllerState.viewerDisplaying.viewing === "direct_messages" ? (
         <RenderMessagesStack
           teamId={viewControllerState.teamIdShowing}
-          threadId={viewControllerState.viewerDisplayed.dmThreadId}
+          threadId={viewControllerState.viewerDisplaying.dmThreadId}
         />
       ) : null}
 
       <Flex id="input" gridColumn={3} gridRow={3}>
-        {viewControllerState.viewerDisplayed.dmThreadId &&
+        {viewControllerState.viewerDisplaying.dmThreadId &&
         viewControllerState.teamIdShowing ? (
           <AddMessageForm
             invitees={
@@ -196,11 +196,11 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
             }
             name="message_text"
             teamId={viewControllerState.teamIdShowing}
-            threadId={viewControllerState.viewerDisplayed.dmThreadId}
+            threadId={viewControllerState.viewerDisplaying.dmThreadId}
           />
         ) : null}
 
-        {viewControllerState.viewerDisplayed.channelId &&
+        {viewControllerState.viewerDisplaying.channelId &&
         viewControllerState.teamIdShowing ? (
           <>
             <Flex flexDirection="column" w="100%">
