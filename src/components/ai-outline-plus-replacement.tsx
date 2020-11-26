@@ -21,7 +21,7 @@ export const AiOutlinePlusReplacement = (props: any) => {
       // get rid of no-unused-vars lint errors.
       const wasteObj = { pId, pathId };
       delete wasteObj.pId;
-      React.createElement(type, pathProps);
+      return React.createElement(type, pathProps);
     }
   );
   const SAFE_CHILDREN = React.Children.toArray([defs, ...SAFE_PATHS]);
