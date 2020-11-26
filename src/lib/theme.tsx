@@ -9,6 +9,7 @@ const breakpoints = ["30em", "48em", "62em", "80em"];
 const colors = {
   ...chakraTheme.colors,
   black: "#16161D",
+  dark: "#222",
   fade_light: "rgba(255,255,255,0.3)"
 };
 
