@@ -36,6 +36,7 @@
     "formik": "^2.2.0",
     "framer-motion": "^2.9.4",
     "graphql": "^15.3.0",
+    "immer": "^8.0.0",
     "next": "latest",
     "next-urql": "^2.0.0",
     "react": "^16.13.1",
