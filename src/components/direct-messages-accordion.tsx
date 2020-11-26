@@ -3,15 +3,16 @@ import {
   AccordionButton,
   AccordionItem,
   AccordionPanel,
+  Avatar,
+  AvatarBadge,
   Box,
   Button,
   ButtonGroup,
   Flex,
-  Link,
   IconButton,
+  Link,
   Text
 } from "@chakra-ui/react";
-import NextLink from "next/link";
 import { Router } from "next/router";
 import React from "react";
 import {
@@ -57,11 +58,17 @@ export function DirectMessagesAccordion({
   }
 
   function handleExploreChannelClick() {
-    router.push("/view-team/?viewing=channel_browser&action=find_channel");
+    router.push({
+      href: "/view-team/",
+      query: { viewing: "channel_browser", action: "search_direct_messages" }
+    });
   }
 
-  function handleAddChannelClick() {
-    router.push("/view-team/?viewing=channel_browser&action=add_channel");
+  function handleAddNewDirectMessageClick() {
+    router.push({
+      href: "/view-team",
+      query: { viewing: "messages_browser", action: "add_teammates" }
+    });
   }
   return (
     <AccordionItem>
@@ -120,7 +127,7 @@ export function DirectMessagesAccordion({
                 <Flex key="direct messages error">{errorThreads?.message}</Flex>
               ) : null}
               {!errorThreads && message_threads ? (
-                message_threads.map(({ id, last_message }, index) => {
+                message_threads.map(({ id, last_message, invitees }, index) => {
                   const {
                     accordionItem: { event, highlightIndex, highlightName }
                   } = state;
@@ -132,45 +139,74 @@ export function DirectMessagesAccordion({
                     highlightColor: "rgba(0,0,0,0.175)"
                   };
                   return (
-                    <Flex
-                      px={4}
-                      py={1}
+                    <Link
                       key={id}
-                      bg={
-                        thread === id
-                          ? "#319795"
-                          : enterBg.highlight
-                          ? enterBg.highlightColor
-                          : "transparent"
-                      }
-                      onMouseEnter={() =>
-                        dispatch({
-                          type: "accordionItemHover",
-                          payload: {
-                            accordionName: "direct_messages",
-                            event: "enter",
-                            index: index
+                      href={`/view-team/?viewing=direct_messages&thread=${id}&invitees=${invitees
+                        .map(({ id }) => id)
+                        .join(",")}`}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        router.push({
+                          href: "/view-team",
+                          query: {
+                            viewing: "direct_messages",
+                            thread: id,
+                            invitees: JSON.stringify(invitees)
                           }
-                        })
-                      }
-                      onMouseLeave={() =>
-                        dispatch({
-                          type: "accordionItemHover",
-                          payload: {
-                            accordionName: "direct_messages",
-                            event: "leave",
-                            index: index
-                          }
-                        })
-                      }
+                        });
+                      }}
                     >
-                      <NextLink
-                        href={`/view-team/?viewing=direct_messages&thread=${id}`}
-                        passHref
+                      <Flex
+                        px={4}
+                        py={1}
+                        alignItems="center"
+                        bg={
+                          thread === id
+                            ? "#319795"
+                            : enterBg.highlight
+                            ? enterBg.highlightColor
+                            : "transparent"
+                        }
+                        // color={thread === id ? "dark" : "inherit"}
+                        onMouseEnter={() =>
+                          dispatch({
+                            type: "accordionItemHover",
+                            payload: {
+                              accordionName: "direct_messages",
+                              event: "enter",
+                              index: index
+                            }
+                          })
+                        }
+                        onMouseLeave={() =>
+                          dispatch({
+                            type: "accordionItemHover",
+                            payload: {
+                              accordionName: "direct_messages",
+                              event: "leave",
+                              index: index
+                            }
+                          })
+                        }
                       >
-                        <Link>{last_message}</Link>
-                      </NextLink>
-                    </Flex>
+                        <Avatar boxSize="1.5em" mr={2}>
+                          <AvatarBadge
+                            borderColor="papayawhip"
+                            bg="tomato"
+                            boxSize=".75em"
+                          />
+                        </Avatar>
+
+                        {/* <NextLink
+                        href={`/view-team/?viewing=direct_messages&thread=${id}&invitees=${invitees
+                          .map(({ id }) => id)
+                          .join(",")}`}
+                        passHref
+                      > */}
+                        <Text isTruncated>{last_message}</Text>
+                        {/* </NextLink> */}
+                      </Flex>
+                    </Link>
                   );
                 })
               ) : (
@@ -181,12 +217,12 @@ export function DirectMessagesAccordion({
                   <IconButton
                     aria-label="Add to friends"
                     icon={<AiOutlinePlusReplacement />}
-                    onClick={handleAddChannelClick}
+                    onClick={handleAddNewDirectMessageClick}
                   />
                   <Button
                     type="button"
                     mr="-px"
-                    onClick={handleAddChannelClick}
+                    onClick={handleAddNewDirectMessageClick}
                   >
                     Create direct message
                   </Button>
