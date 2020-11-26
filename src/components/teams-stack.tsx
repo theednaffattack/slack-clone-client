@@ -7,9 +7,16 @@ import {
   VStack
 } from "@chakra-ui/react";
 import React from "react";
+import { GetAllTeamsForUserQuery } from "../generated/graphql";
+import { ActionType } from "../lib/page-funcs.view-team-state";
 import { AiOutlinePlusReplacement } from "./ai-outline-plus-replacement";
 
-export function TeamsStack({ data, viewerDispatch }) {
+interface TeamStackProps {
+  data: GetAllTeamsForUserQuery | undefined;
+  viewerDispatch: React.Dispatch<ActionType>;
+}
+
+export function TeamsStack({ data, viewerDispatch }: TeamStackProps) {
   return (
     <VStack id="teams-list" spacing={4} align="stretch" as="ul">
       {data &&
