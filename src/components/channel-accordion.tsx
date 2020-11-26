@@ -19,7 +19,7 @@ import {
   AiFillCaretRight,
   AiOutlineSearch
 } from "react-icons/ai";
-import { Channel } from "../generated/graphql";
+import { Channel, Maybe, User } from "../generated/graphql";
 import { AiOutlinePlusReplacement } from "./ai-outline-plus-replacement";
 import { ChannelHoverBox } from "./channel-hover-box_v2";
 import { ChannelHoverButton } from "./channel-hover-button_v2";
@@ -32,9 +32,21 @@ export function ChannelAccordion({
   router,
   state
 }: {
-  channels: ({
-    __typename?: "Channel" | undefined;
-  } & Pick<Channel, "id" | "name">)[];
+  channels:
+    | ({
+        __typename?: "Channel" | undefined;
+      } & Pick<Channel, "id" | "name"> & {
+          invitees?:
+            | Maybe<
+                {
+                  __typename?: "User" | undefined;
+                } & Pick<User, "id" | "username" | "profileImageUri">
+              >[]
+            | null
+            | undefined;
+        })[]
+    | undefined;
+
   dispatch: (value: ControllerAction) => void;
   errorFromChannels: ApolloError | undefined;
   router: Router;
@@ -116,7 +128,7 @@ export function ChannelAccordion({
                 <Flex key="channels error">{errorFromChannels?.message}</Flex>
               ) : null}
               {!errorFromChannels && channels ? (
-                channels.map(({ id, name }, index) => {
+                channels.map(({ id, invitees, name }, index) => {
                   const {
                     accordionItem: { event, highlightIndex, highlightName }
                   } = state;
@@ -161,7 +173,18 @@ export function ChannelAccordion({
                       }
                     >
                       <NextLink
-                        href={`/view-team/?viewing=channel&channel=${id}`}
+                        // href={`/view-team/?viewing=channel&channel=${id}`}
+                        href={`/view-team/?viewing=channel&channel=${id}&invitees=${
+                          invitees
+                            ? invitees
+                                .map(({ id }) => {
+                                  console.log("VIEW ID IN NEXTLINK MAP", id);
+
+                                  return id;
+                                })
+                                .join(",")
+                            : undefined
+                        }`}
                         passHref
                       >
                         <Link># {name}</Link>
