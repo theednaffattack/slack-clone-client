@@ -1,6 +1,19 @@
-import { Button, Flex, Grid, GridItem, Input, Text } from "@chakra-ui/react";
+import {
+  Avatar,
+  AvatarGroup,
+  Button,
+  Center,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  HStack,
+  Input,
+  Text
+} from "@chakra-ui/react";
 import { Router } from "next/router";
 import React, { useEffect, useReducer } from "react";
+import { AddMessageForm } from "../../components/add-direct-message-form";
 import {
   ControllerAccordion,
   OtherNames
@@ -19,6 +32,8 @@ import { CreateChannelForm } from "./create-channel-form";
 
 const otherStuff: OtherNames[] = ["Threads", "Saved", "Mentioned", "More"];
 
+type UrlParamType = string | string[] | undefined;
+
 const ViewTeamIndex = ({ router }: { router: Router }) => {
   const [viewControllerState, viewControllerDispatch] = useReducer(
     viewControllerReducer,
@@ -31,7 +46,18 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
     loading: loadingTeams
   } = useGetAllTeamsForUserQuery();
 
-  const { action, viewing } = router.query;
+  const { action, channel, invitees, thread, viewing } = router.query;
+
+  function handleUrlParam(param: UrlParamType): string | null {
+    if (typeof param === "string") {
+      return param;
+    }
+    if (Array.isArray(param)) {
+      return param[0];
+    } else {
+      return null;
+    }
+  }
 
   useEffect(() => {
     viewControllerDispatch({
@@ -42,7 +68,13 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
     if (typeof viewing === "string") {
       viewControllerDispatch({
         type: "changeDisplayToMatchRoute",
-        payload: viewing as ViewerType
+        payload: {
+          action: handleUrlParam(action),
+          channelId: handleUrlParam(channel),
+          header: invitees ? JSON.parse(invitees as string) : null,
+          threadId: handleUrlParam(thread),
+          viewing: viewing as ViewerType
+        }
       });
     }
   }, [viewControllerDispatch, dataTeams, router.pathname, router.query]);
@@ -90,6 +122,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
         gridRow="1/4"
         color="#fff"
         bg="#4e3a4c"
+        overflow="auto"
       >
         <Flex p={2} pl={3} flexDirection="column">
           {otherStuff.map((item) => (
@@ -100,8 +133,6 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
           router={router}
           teamId={viewControllerState.teamIdShowing}
         />
-        {/* <ChannelsList teamId={viewControllerState.teamIdShowing} /> */}
-        {/* <DirectMessagesList teamId={viewControllerState.teamIdShowing} /> */}
       </Flex>
 
       <GridItem
@@ -110,11 +141,29 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
         gridRow={1}
         borderBottom="1px solid #eee"
       >
-        Header
+        <Flex>
+          <Heading>{viewControllerState.viewerDisplayed.viewing}</Heading>
+
+          <HStack>
+            <AvatarGroup size="md" max={3} pl={2}>
+              {viewControllerState.viewerDisplayed.header?.map(
+                ({ id, username }) => {
+                  return (
+                    <Avatar
+                      key={id}
+                      name={username ? username : undefined}
+                      // src="https://bit.ly/broken-link"
+                    />
+                  );
+                }
+              )}
+            </AvatarGroup>
+          </HStack>
+        </Flex>
       </GridItem>
 
       {viewControllerState.teamIdShowing &&
-      viewControllerState.viewerDisplayed === "channel_browser" ? (
+      viewControllerState.viewerDisplayed.viewing === "channel_browser" ? (
         <RenderChannelStack>
           {action === "add_channel" ? (
             <Flex>
@@ -123,13 +172,46 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
           ) : null}
         </RenderChannelStack>
       ) : null}
-      {viewControllerState.viewerDisplayed === "messages_browser" ? (
-        <RenderMessagesStack messages={messagesData} />
+      {viewControllerState.viewerDisplayed.viewing === "messages_browser" ? (
+        <Center>ADD TEAMMATE EXPLORER</Center>
+      ) : null}
+      {viewControllerState.teamIdShowing &&
+      // typeof handleUrlParam(threadId) === "string" &&
+      viewControllerState.viewerDisplayed.dmThreadId &&
+      viewControllerState.viewerDisplayed.viewing === "direct_messages" ? (
+        <RenderMessagesStack
+          teamId={viewControllerState.teamIdShowing}
+          threadId={viewControllerState.viewerDisplayed.dmThreadId}
+        />
       ) : null}
 
       <Flex id="input" gridColumn={3} gridRow={3}>
-        <Input type="text" placeholder="CSS Grid layout module" />
-        <Button>submit</Button>
+        {viewControllerState.viewerDisplayed.dmThreadId &&
+        viewControllerState.teamIdShowing ? (
+          <AddMessageForm
+            invitees={
+              invitees && typeof invitees === "string"
+                ? JSON.parse(invitees).map(({ id }) => id)
+                : []
+            }
+            name="message_text"
+            teamId={viewControllerState.teamIdShowing}
+            threadId={viewControllerState.viewerDisplayed.dmThreadId}
+          />
+        ) : null}
+
+        {viewControllerState.viewerDisplayed.channelId &&
+        viewControllerState.teamIdShowing ? (
+          <>
+            <Flex flexDirection="column" w="100%">
+              <Input type="text" placeholder="CSS Grid layout module" />
+              <Flex id="message-bar" height="2ch" px={3} mb={1}>
+                <Text>Example helper message</Text>
+              </Flex>
+            </Flex>
+            <Button>submit</Button>
+          </>
+        ) : null}
       </Flex>
     </Grid>
   );
