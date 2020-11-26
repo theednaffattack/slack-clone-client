@@ -33,15 +33,13 @@ export function DirectMessagesAccordion({
   router,
   state
 }: {
-  message_threads:
-    | ({
-        __typename?: "Thread" | undefined;
-      } & Pick<Thread, "id" | "last_message"> & {
-          invitees: ({
-            __typename?: "User" | undefined;
-          } & Pick<User, "id" | "username">)[];
-        })[]
-    | undefined;
+  message_threads: Array<
+    { __typename?: "Thread" } & Pick<Thread, "id" | "last_message"> & {
+        invitees: Array<
+          { __typename?: "User" } & Pick<User, "id" | "username">
+        >;
+      }
+  >;
   dispatch: React.Dispatch<ControllerAction>;
   errorThreads: ApolloError | undefined;
   router: Router;
