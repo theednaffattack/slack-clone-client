@@ -1,0 +1,3 @@
+mutation AddChannelMember($channelId: String!, $userId: String!) {
+  addChannelMember(channelId: $channelId, userId: $userId)
+}
