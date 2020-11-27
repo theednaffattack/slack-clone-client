@@ -7,7 +7,6 @@ import {
   Button,
   ButtonGroup,
   Flex,
-  Link,
   IconButton,
   Text
 } from "@chakra-ui/react";
@@ -19,7 +18,7 @@ import {
   AiFillCaretRight,
   AiOutlineSearch
 } from "react-icons/ai";
-import { Channel, Maybe, User } from "../generated/graphql";
+import { LoadChannelsByTeamIdQuery } from "../generated/graphql";
 import { AiOutlinePlusReplacement } from "./ai-outline-plus-replacement";
 import { ChannelHoverBox } from "./channel-hover-box_v2";
 import { ChannelHoverButton } from "./channel-hover-button_v2";
@@ -32,20 +31,7 @@ export function ChannelAccordion({
   router,
   state
 }: {
-  channels:
-    | ({
-        __typename?: "Channel" | undefined;
-      } & Pick<Channel, "id" | "name"> & {
-          invitees?:
-            | Maybe<
-                {
-                  __typename?: "User" | undefined;
-                } & Pick<User, "id" | "username" | "profileImageUri">
-              >[]
-            | null
-            | undefined;
-        })[]
-    | undefined;
+  channels: LoadChannelsByTeamIdQuery["loadChannelsByTeamId"];
 
   dispatch: (value: ControllerAction) => void;
   errorFromChannels: ApolloError | undefined;
@@ -71,6 +57,7 @@ export function ChannelAccordion({
   function handleAddChannelClick() {
     router.push("/view-team/?viewing=channel_browser&action=add_channel");
   }
+
   return (
     <AccordionItem>
       {({ isExpanded }) => {
@@ -139,57 +126,57 @@ export function ChannelAccordion({
                       event === "enter",
                     highlightColor: "rgba(0,0,0,0.175)"
                   };
-                  return (
-                    <Flex
-                      px={4}
-                      py={1}
-                      key={id}
-                      bg={
-                        channel === id
-                          ? "#319795"
-                          : enterBg.highlight
-                          ? enterBg.highlightColor
-                          : "transparent"
-                      }
-                      onMouseEnter={() =>
-                        dispatch({
-                          type: "accordionItemHover",
-                          payload: {
-                            accordionName: "channels",
-                            event: "enter",
-                            index: index
-                          }
-                        })
-                      }
-                      onMouseLeave={() =>
-                        dispatch({
-                          type: "accordionItemHover",
-                          payload: {
-                            accordionName: "channels",
-                            event: "leave",
-                            index: index
-                          }
-                        })
-                      }
-                    >
-                      <NextLink
-                        // href={`/view-team/?viewing=channel&channel=${id}`}
-                        href={`/view-team/?viewing=channel&channel=${id}&invitees=${
-                          invitees
-                            ? invitees
-                                .map(({ id }) => {
-                                  console.log("VIEW ID IN NEXTLINK MAP", id);
 
-                                  return id;
-                                })
-                                .join(",")
-                            : undefined
-                        }`}
-                        passHref
-                      >
-                        <Link># {name}</Link>
-                      </NextLink>
-                    </Flex>
+                  return (
+                    <NextLink
+                      key={id}
+                      href={{
+                        pathname: `/view-team`,
+                        query: {
+                          viewing: "channel",
+                          channel: id,
+                          name: name,
+                          invitees: JSON.stringify(invitees)
+                        }
+                      }}
+                      passHref
+                    >
+                      <a>
+                        <Flex
+                          px={4}
+                          py={1}
+                          bg={
+                            channel === id
+                              ? "#319795"
+                              : enterBg.highlight
+                              ? enterBg.highlightColor
+                              : "transparent"
+                          }
+                          onMouseEnter={() =>
+                            dispatch({
+                              type: "accordionItemHover",
+                              payload: {
+                                accordionName: "channels",
+                                event: "enter",
+                                index: index
+                              }
+                            })
+                          }
+                          onMouseLeave={() =>
+                            dispatch({
+                              type: "accordionItemHover",
+                              payload: {
+                                accordionName: "channels",
+                                event: "leave",
+                                index: index
+                              }
+                            })
+                          }
+                        >
+                          <Text isTruncated># {name}</Text>
+                        </Flex>
+                      </a>
+                    </NextLink>
                   );
                 })
               ) : (
