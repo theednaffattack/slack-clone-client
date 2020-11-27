@@ -1,12 +1,25 @@
+import { User } from "../generated/graphql";
+
 export type ViewControllerStateType = {
   teamIdShowing: null | string;
   viewerDisplaying: {
     viewing: null | string;
     dmThreadId: null | string;
     channelId: null | string;
-    header: null | any[];
+    header: null | HeaderProps;
   };
 };
+
+interface UserType {
+  id: User["id"];
+  name: User["name"];
+  username: User["username"];
+}
+
+interface HeaderProps {
+  name: string | null;
+  invitees: UserType[];
+}
 
 export type ViewerType = "channel_browser" | "messages_browser";
 
@@ -21,7 +34,7 @@ export type ActionType =
         channelId: ParsedUrlParam;
         threadId: ParsedUrlParam;
         viewing: ViewerType;
-        header: any | null;
+        header: HeaderProps;
       };
     };
 
