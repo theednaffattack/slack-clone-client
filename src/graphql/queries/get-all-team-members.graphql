@@ -1,0 +1,11 @@
+query GetAllTeamMembers($teamId: String!) {
+  getAllTeamMembers(teamId: $teamId) {
+    user {
+      id
+      name
+      username
+      profileImageUri
+    }
+    teamRoleAuthorizations
+  }
+}

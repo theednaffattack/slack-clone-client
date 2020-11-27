@@ -1,0 +1,21 @@
+query GetAllMyMessages {
+  getAllMyMessages {
+    id
+    username
+    profileImageUri
+    mappedMessages {
+      id
+      created_at
+      message
+      images {
+        id
+        uri
+      }
+      files {
+        id
+        uri
+        file_type
+      }
+    }
+  }
+}
