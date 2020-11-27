@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { Router } from "next/router";
 import React, { useEffect, useReducer } from "react";
+import { AddChannelMessageForm } from "../../components/add-channel-message-form";
 import { AddMessageForm } from "../../components/add-direct-message-form";
 import {
   ControllerAccordion,
@@ -45,7 +46,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
     loading: loadingTeams
   } = useGetAllTeamsForUserQuery();
 
-  const { action, channel, invitees, thread, viewing } = router.query;
+  const { action, channel, name, invitees, thread, viewing } = router.query;
 
   function handleUrlParam(param: UrlParamType): string | null {
     if (typeof param === "string") {
@@ -65,12 +66,22 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
     });
 
     if (typeof viewing === "string") {
+      const buildHeader = channel
+        ? {
+            name: name ? (name as string) : null,
+            invitees: invitees ? JSON.parse(invitees as string) : null
+          }
+        : {
+            name: null,
+            invitees: invitees ? JSON.parse(invitees as string) : null
+          };
+
       viewControllerDispatch({
         type: "changeDisplayToMatchRoute",
         payload: {
           action: handleUrlParam(action),
           channelId: handleUrlParam(channel),
-          header: invitees ? JSON.parse(invitees as string) : null,
+          header: buildHeader,
           threadId: handleUrlParam(thread),
           viewing: viewing as ViewerType
         }
@@ -124,11 +135,27 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
       >
         <Flex>
           {viewControllerState.viewerDisplaying.viewing === "channel" ? (
-            <Flex flexDirection="column">
-              <Text>CHANNEL NAME: </Text>
+            <Flex>
               <Text>
-                CHANNEL ID: {viewControllerState.viewerDisplaying.channelId}
+                CHANNEL NAME:{" "}
+                {viewControllerState.viewerDisplaying.header?.name}
               </Text>
+
+              <HStack>
+                <AvatarGroup size="md" max={3} pl={2}>
+                  {viewControllerState.viewerDisplaying.header?.invitees?.map(
+                    ({ id, username }) => {
+                      return (
+                        <Avatar
+                          key={id}
+                          name={username ? username : undefined}
+                          // src="https://bit.ly/broken-link"
+                        />
+                      );
+                    }
+                  )}
+                </AvatarGroup>
+              </HStack>
             </Flex>
           ) : null}
 
@@ -136,7 +163,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
           "direct_messages" ? (
             <HStack>
               <AvatarGroup size="md" max={3} pl={2}>
-                {viewControllerState.viewerDisplaying.header?.map(
+                {viewControllerState.viewerDisplaying.header?.invitees?.map(
                   ({ id, username }) => {
                     return (
                       <Avatar
@@ -194,6 +221,16 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
         {viewControllerState.viewerDisplaying.channelId &&
         viewControllerState.teamIdShowing ? (
           <>
+            <AddChannelMessageForm
+              invitees={
+                invitees && typeof invitees === "string"
+                  ? JSON.parse(invitees).map(({ id }) => id)
+                  : []
+              }
+              name="message_text"
+              teamId={viewControllerState.teamIdShowing}
+              channelId={viewControllerState.viewerDisplaying.channelId}
+            />
             <Flex flexDirection="column" w="100%">
               <Input type="text" placeholder="CSS Grid layout module" />
               <Flex id="message-bar" height="2ch" px={3} mb={1}>
