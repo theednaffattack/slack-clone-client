@@ -10,10 +10,10 @@ import {
   ButtonGroup,
   Flex,
   IconButton,
-  Link,
   Text
 } from "@chakra-ui/react";
 import { Router } from "next/router";
+import NextLink from "next/link";
 import React from "react";
 import {
   AiFillCaretDown,
@@ -136,75 +136,89 @@ export function DirectMessagesAccordion({
                       event === "enter",
                     highlightColor: "rgba(0,0,0,0.175)"
                   };
-                  return (
-                    <Link
-                      key={id}
-                      href={`/view-team/?viewing=direct_messages&thread=${id}&invitees=${invitees
-                        .map(({ id }) => id)
-                        .join(",")}`}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        router.push({
-                          href: "/view-team",
-                          query: {
-                            viewing: "direct_messages",
-                            thread: id,
-                            invitees: JSON.stringify(invitees)
-                          }
-                        });
-                      }}
-                    >
-                      <Flex
-                        px={4}
-                        py={1}
-                        alignItems="center"
-                        bg={
-                          thread === id
-                            ? "#319795"
-                            : enterBg.highlight
-                            ? enterBg.highlightColor
-                            : "transparent"
-                        }
-                        // color={thread === id ? "dark" : "inherit"}
-                        onMouseEnter={() =>
-                          dispatch({
-                            type: "accordionItemHover",
-                            payload: {
-                              accordionName: "direct_messages",
-                              event: "enter",
-                              index: index
-                            }
-                          })
-                        }
-                        onMouseLeave={() =>
-                          dispatch({
-                            type: "accordionItemHover",
-                            payload: {
-                              accordionName: "direct_messages",
-                              event: "leave",
-                              index: index
-                            }
-                          })
-                        }
-                      >
-                        <Avatar boxSize="1.5em" mr={2}>
-                          <AvatarBadge
-                            borderColor="papayawhip"
-                            bg="tomato"
-                            boxSize=".75em"
-                          />
-                        </Avatar>
 
-                        {/* <NextLink
-                        href={`/view-team/?viewing=direct_messages&thread=${id}&invitees=${invitees
-                          .map(({ id }) => id)
-                          .join(",")}`}
-                        passHref
-                      > */}
-                        <Text isTruncated>{last_message}</Text>
-                        {/* </NextLink> */}
-                      </Flex>
-                    </Link>
+                  // const params = {
+                  //   viewing: "direct_messages",
+                  //   thread: id,
+                  //   invitees: invitees?.map(({ id: inviteId }) => {
+                  //     return inviteId;
+                  //   })
+                  // };
+
+                  // const url = qs.stringify(params, { encodeValuesOnly: true });
+
+                  return (
+                    <NextLink
+                      key={id}
+                      href={{
+                        pathname: `/view-team`,
+                        query: {
+                          viewing: "direct_messages",
+                          thread: id,
+                          invitees: JSON.stringify(invitees)
+                        }
+                      }}
+                      passHref
+                    >
+                      <a
+                      // href={`/view-team/?${url}`}
+                      // onClick={(event) => {
+                      //   event.preventDefault();
+                      //   router.push({
+                      //     href: "/view-team",
+                      //     query: {
+                      //       viewing: "direct_messages",
+                      //       thread: id,
+                      //       invitees: JSON.stringify(invitees)
+                      //     }
+                      //   });
+                      // }}
+                      >
+                        <Flex
+                          px={4}
+                          py={1}
+                          alignItems="center"
+                          bg={
+                            thread === id
+                              ? "#319795"
+                              : enterBg.highlight
+                              ? enterBg.highlightColor
+                              : "transparent"
+                          }
+                          // color={thread === id ? "dark" : "inherit"}
+                          onMouseEnter={() =>
+                            dispatch({
+                              type: "accordionItemHover",
+                              payload: {
+                                accordionName: "direct_messages",
+                                event: "enter",
+                                index: index
+                              }
+                            })
+                          }
+                          onMouseLeave={() =>
+                            dispatch({
+                              type: "accordionItemHover",
+                              payload: {
+                                accordionName: "direct_messages",
+                                event: "leave",
+                                index: index
+                              }
+                            })
+                          }
+                        >
+                          <Avatar boxSize="1.5em" mr={2}>
+                            <AvatarBadge
+                              borderColor="papayawhip"
+                              bg="tomato"
+                              boxSize=".75em"
+                            />
+                          </Avatar>
+
+                          <Text isTruncated>{last_message}</Text>
+                        </Flex>
+                      </a>
+                    </NextLink>
                   );
                 })
               ) : (
