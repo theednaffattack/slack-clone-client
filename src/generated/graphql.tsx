@@ -216,7 +216,8 @@ export type Mutation = {
   __typename?: "Mutation";
   createProduct: Product;
   createUser: User;
-  addTeamMember: UserToTeamIdReferencesOnlyClass;
+  addTeamMemberByEmail: UserToTeamIdReferencesOnlyClass;
+  addTeamMemberById: UserToTeamIdReferencesOnlyClass;
   createTeam: Team;
   teamLogin?: Maybe<User>;
   changePasswordFromContextUserid?: Maybe<User>;
@@ -249,10 +250,16 @@ export type MutationCreateUserArgs = {
   data: RegisterInput;
 };
 
-export type MutationAddTeamMemberArgs = {
+export type MutationAddTeamMemberByEmailArgs = {
   roles: Array<TeamRoleEnum>;
   teamId: Scalars["String"];
   email: Scalars["String"];
+};
+
+export type MutationAddTeamMemberByIdArgs = {
+  roles: Array<TeamRoleEnum>;
+  teamId: Scalars["String"];
+  userId: Scalars["String"];
 };
 
 export type MutationCreateTeamArgs = {
@@ -462,7 +469,6 @@ export type AddMessageToChannelInput = {
   channelId: Scalars["ID"];
   teamId: Scalars["ID"];
   created_at?: Maybe<Scalars["DateTime"]>;
-  sentTo: Scalars["String"];
   invitees?: Maybe<Array<Maybe<Scalars["ID"]>>>;
   message: Scalars["String"];
   images?: Maybe<Array<Maybe<Scalars["String"]>>>;
@@ -577,16 +583,37 @@ export type AddDirectMessageToThreadMutation = { __typename?: "Mutation" } & {
     };
 };
 
-export type AddTeamMemberMutationVariables = Exact<{
+export type AddMessageToChannelMutationVariables = Exact<{
+  data: AddMessageToChannelInput;
+}>;
+
+export type AddMessageToChannelMutation = { __typename?: "Mutation" } & {
+  addMessageToChannel: { __typename?: "AddMessagePayload" } & Pick<
+    AddMessagePayload,
+    "success" | "channelId"
+  > & {
+      message: { __typename?: "Message" } & Pick<Message, "id" | "message">;
+      user: { __typename?: "User" } & Pick<User, "id" | "name" | "username">;
+      invitees?: Maybe<
+        Array<
+          Maybe<
+            { __typename?: "User" } & Pick<User, "id" | "name" | "username">
+          >
+        >
+      >;
+    };
+};
+
+export type AddTeamMemberByIdMutationVariables = Exact<{
+  userId: Scalars["String"];
   teamId: Scalars["String"];
-  email: Scalars["String"];
   roles: Array<TeamRoleEnum>;
 }>;
 
-export type AddTeamMemberMutation = { __typename?: "Mutation" } & {
-  addTeamMember: { __typename?: "UserToTeamIdReferencesOnlyClass" } & Pick<
+export type AddTeamMemberByIdMutation = { __typename?: "Mutation" } & {
+  addTeamMemberById: { __typename?: "UserToTeamIdReferencesOnlyClass" } & Pick<
     UserToTeamIdReferencesOnlyClass,
-    "userToTeamId" | "userId" | "teamId" | "teamRoleAuthorizations"
+    "userId" | "teamId" | "userToTeamId" | "teamRoleAuthorizations"
   >;
 };
 
@@ -666,6 +693,64 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: "Mutation" } & {
   register: { __typename?: "User" } & Pick<User, "id" | "name" | "username">;
+};
+
+export type GetAllMyMessagesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetAllMyMessagesQuery = { __typename?: "Query" } & {
+  getAllMyMessages?: Maybe<
+    { __typename?: "User" } & Pick<
+      User,
+      "id" | "username" | "profileImageUri"
+    > & {
+        mappedMessages?: Maybe<
+          Array<
+            Maybe<
+              { __typename?: "Message" } & Pick<
+                Message,
+                "id" | "created_at" | "message"
+              > & {
+                  images?: Maybe<
+                    Array<
+                      Maybe<
+                        { __typename?: "Image" } & Pick<Image, "id" | "uri">
+                      >
+                    >
+                  >;
+                  files?: Maybe<
+                    Array<
+                      Maybe<
+                        { __typename?: "FileEntity" } & Pick<
+                          FileEntity,
+                          "id" | "uri" | "file_type"
+                        >
+                      >
+                    >
+                  >;
+                }
+            >
+          >
+        >;
+      }
+  >;
+};
+
+export type GetAllTeamMembersQueryVariables = Exact<{
+  teamId: Scalars["String"];
+}>;
+
+export type GetAllTeamMembersQuery = { __typename?: "Query" } & {
+  getAllTeamMembers: Array<
+    { __typename?: "UserToTeam" } & Pick<
+      UserToTeam,
+      "teamRoleAuthorizations"
+    > & {
+        user: { __typename?: "User" } & Pick<
+          User,
+          "id" | "name" | "username" | "profileImageUri"
+        >;
+      }
+  >;
 };
 
 export type GetAllTeamsForUserQueryVariables = Exact<{ [key: string]: never }>;
@@ -867,64 +952,129 @@ export type AddDirectMessageToThreadMutationOptions = Apollo.BaseMutationOptions
   AddDirectMessageToThreadMutation,
   AddDirectMessageToThreadMutationVariables
 >;
-export const AddTeamMemberDocument = gql`
-  mutation AddTeamMember(
-    $teamId: String!
-    $email: String!
-    $roles: [TeamRoleEnum!]!
-  ) {
-    addTeamMember(teamId: $teamId, email: $email, roles: $roles) {
-      userToTeamId
-      userId
-      teamId
-      teamRoleAuthorizations
+export const AddMessageToChannelDocument = gql`
+  mutation AddMessageToChannel($data: AddMessageToChannelInput!) {
+    addMessageToChannel(data: $data) {
+      success
+      channelId
+      message {
+        id
+        message
+      }
+      user {
+        id
+        name
+        username
+      }
+      invitees {
+        id
+        name
+        username
+      }
     }
   }
 `;
-export type AddTeamMemberMutationFn = Apollo.MutationFunction<
-  AddTeamMemberMutation,
-  AddTeamMemberMutationVariables
+export type AddMessageToChannelMutationFn = Apollo.MutationFunction<
+  AddMessageToChannelMutation,
+  AddMessageToChannelMutationVariables
 >;
 
 /**
- * __useAddTeamMemberMutation__
+ * __useAddMessageToChannelMutation__
  *
- * To run a mutation, you first call `useAddTeamMemberMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useAddTeamMemberMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useAddMessageToChannelMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddMessageToChannelMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [addTeamMemberMutation, { data, loading, error }] = useAddTeamMemberMutation({
+ * const [addMessageToChannelMutation, { data, loading, error }] = useAddMessageToChannelMutation({
  *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useAddMessageToChannelMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    AddMessageToChannelMutation,
+    AddMessageToChannelMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    AddMessageToChannelMutation,
+    AddMessageToChannelMutationVariables
+  >(AddMessageToChannelDocument, baseOptions);
+}
+export type AddMessageToChannelMutationHookResult = ReturnType<
+  typeof useAddMessageToChannelMutation
+>;
+export type AddMessageToChannelMutationResult = Apollo.MutationResult<
+  AddMessageToChannelMutation
+>;
+export type AddMessageToChannelMutationOptions = Apollo.BaseMutationOptions<
+  AddMessageToChannelMutation,
+  AddMessageToChannelMutationVariables
+>;
+export const AddTeamMemberByIdDocument = gql`
+  mutation AddTeamMemberById(
+    $userId: String!
+    $teamId: String!
+    $roles: [TeamRoleEnum!]!
+  ) {
+    addTeamMemberById(userId: $userId, teamId: $teamId, roles: $roles) {
+      userId
+      teamId
+      userToTeamId
+      teamRoleAuthorizations
+    }
+  }
+`;
+export type AddTeamMemberByIdMutationFn = Apollo.MutationFunction<
+  AddTeamMemberByIdMutation,
+  AddTeamMemberByIdMutationVariables
+>;
+
+/**
+ * __useAddTeamMemberByIdMutation__
+ *
+ * To run a mutation, you first call `useAddTeamMemberByIdMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddTeamMemberByIdMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addTeamMemberByIdMutation, { data, loading, error }] = useAddTeamMemberByIdMutation({
+ *   variables: {
+ *      userId: // value for 'userId'
  *      teamId: // value for 'teamId'
- *      email: // value for 'email'
  *      roles: // value for 'roles'
  *   },
  * });
  */
-export function useAddTeamMemberMutation(
+export function useAddTeamMemberByIdMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    AddTeamMemberMutation,
-    AddTeamMemberMutationVariables
+    AddTeamMemberByIdMutation,
+    AddTeamMemberByIdMutationVariables
   >
 ) {
   return Apollo.useMutation<
-    AddTeamMemberMutation,
-    AddTeamMemberMutationVariables
-  >(AddTeamMemberDocument, baseOptions);
+    AddTeamMemberByIdMutation,
+    AddTeamMemberByIdMutationVariables
+  >(AddTeamMemberByIdDocument, baseOptions);
 }
-export type AddTeamMemberMutationHookResult = ReturnType<
-  typeof useAddTeamMemberMutation
+export type AddTeamMemberByIdMutationHookResult = ReturnType<
+  typeof useAddTeamMemberByIdMutation
 >;
-export type AddTeamMemberMutationResult = Apollo.MutationResult<
-  AddTeamMemberMutation
+export type AddTeamMemberByIdMutationResult = Apollo.MutationResult<
+  AddTeamMemberByIdMutation
 >;
-export type AddTeamMemberMutationOptions = Apollo.BaseMutationOptions<
-  AddTeamMemberMutation,
-  AddTeamMemberMutationVariables
+export type AddTeamMemberByIdMutationOptions = Apollo.BaseMutationOptions<
+  AddTeamMemberByIdMutation,
+  AddTeamMemberByIdMutationVariables
 >;
 export const ChangePasswordFromContextUseridDocument = gql`
   mutation ChangePasswordFromContextUserid($data: PasswordInput!) {
@@ -1330,6 +1480,139 @@ export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<
   RegisterMutation,
   RegisterMutationVariables
+>;
+export const GetAllMyMessagesDocument = gql`
+  query GetAllMyMessages {
+    getAllMyMessages {
+      id
+      username
+      profileImageUri
+      mappedMessages {
+        id
+        created_at
+        message
+        images {
+          id
+          uri
+        }
+        files {
+          id
+          uri
+          file_type
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * __useGetAllMyMessagesQuery__
+ *
+ * To run a query within a React component, call `useGetAllMyMessagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllMyMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllMyMessagesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAllMyMessagesQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    GetAllMyMessagesQuery,
+    GetAllMyMessagesQueryVariables
+  >
+) {
+  return Apollo.useQuery<GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables>(
+    GetAllMyMessagesDocument,
+    baseOptions
+  );
+}
+export function useGetAllMyMessagesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetAllMyMessagesQuery,
+    GetAllMyMessagesQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    GetAllMyMessagesQuery,
+    GetAllMyMessagesQueryVariables
+  >(GetAllMyMessagesDocument, baseOptions);
+}
+export type GetAllMyMessagesQueryHookResult = ReturnType<
+  typeof useGetAllMyMessagesQuery
+>;
+export type GetAllMyMessagesLazyQueryHookResult = ReturnType<
+  typeof useGetAllMyMessagesLazyQuery
+>;
+export type GetAllMyMessagesQueryResult = Apollo.QueryResult<
+  GetAllMyMessagesQuery,
+  GetAllMyMessagesQueryVariables
+>;
+export const GetAllTeamMembersDocument = gql`
+  query GetAllTeamMembers($teamId: String!) {
+    getAllTeamMembers(teamId: $teamId) {
+      user {
+        id
+        name
+        username
+        profileImageUri
+      }
+      teamRoleAuthorizations
+    }
+  }
+`;
+
+/**
+ * __useGetAllTeamMembersQuery__
+ *
+ * To run a query within a React component, call `useGetAllTeamMembersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllTeamMembersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllTeamMembersQuery({
+ *   variables: {
+ *      teamId: // value for 'teamId'
+ *   },
+ * });
+ */
+export function useGetAllTeamMembersQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    GetAllTeamMembersQuery,
+    GetAllTeamMembersQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    GetAllTeamMembersQuery,
+    GetAllTeamMembersQueryVariables
+  >(GetAllTeamMembersDocument, baseOptions);
+}
+export function useGetAllTeamMembersLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetAllTeamMembersQuery,
+    GetAllTeamMembersQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    GetAllTeamMembersQuery,
+    GetAllTeamMembersQueryVariables
+  >(GetAllTeamMembersDocument, baseOptions);
+}
+export type GetAllTeamMembersQueryHookResult = ReturnType<
+  typeof useGetAllTeamMembersQuery
+>;
+export type GetAllTeamMembersLazyQueryHookResult = ReturnType<
+  typeof useGetAllTeamMembersLazyQuery
+>;
+export type GetAllTeamMembersQueryResult = Apollo.QueryResult<
+  GetAllTeamMembersQuery,
+  GetAllTeamMembersQueryVariables
 >;
 export const GetAllTeamsForUserDocument = gql`
   query GetAllTeamsForUser {

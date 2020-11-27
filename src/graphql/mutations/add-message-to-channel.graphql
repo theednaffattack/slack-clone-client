@@ -1,0 +1,20 @@
+mutation AddMessageToChannel($data: AddMessageToChannelInput!) {
+  addMessageToChannel(data: $data) {
+    success
+    channelId
+    message {
+      id
+      message
+    }
+    user {
+      id
+      name
+      username
+    }
+    invitees {
+      id
+      name
+      username
+    }
+  }
+}
