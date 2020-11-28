@@ -37,6 +37,7 @@ export const AddChannelMessageForm: React.FC<AddChannelMessageFormProps> = ({
                 channelId,
                 teamId,
                 invitees,
+                sentTo: "",
                 message: values.message_text
               }
             },
