@@ -2,27 +2,31 @@ import { Flex, Box, Text } from "@chakra-ui/react";
 import Link from "next/link";
 import React, { useState } from "react";
 import { BsBookmark, BsThreeDots } from "react-icons/bs";
-import { GrChat } from "react-icons/gr";
-
 import { TopOptions } from "./controller-accordion";
 import { GrChatReplacement } from "./gr-chat-replacement";
+import { MentionIcon } from "./mention-icon";
 
 const options: TopOptions[] = [
   { text: "Threads", name: "threads", icon: GrChatReplacement },
   { text: "Saved", name: "saved", icon: BsBookmark },
-  { text: "Mentioned", name: "mentioned", icon: GrChat },
+  { text: "Mentioned", name: "mentioned", icon: MentionIcon },
   { text: "More", name: "more", icon: BsThreeDots }
 ];
 
 export function OptionsPanel() {
   return (
-    <Flex id="top-options" flexDirection="column">
+    <Flex id="top-options" flexDirection="column" py={2}>
       {options.map((item, index) => (
         <Link href="#" key={`${index}-${item.name}`} passHref>
           <HoverLink>
             <Flex pl={3} py={1} key={item.name} alignItems="center">
               <Box pr={2}>
-                <item.icon color="#fff" size="1.2em" />
+                <item.icon
+                  color="#fff"
+                  size={item.name === "mentioned" ? "2em" : "1.2em"}
+                  w={"1.3em"}
+                  h={"1.3em"}
+                />
               </Box>
 
               <Text isTruncated>{item.text}</Text>
