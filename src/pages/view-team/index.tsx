@@ -1,15 +1,4 @@
-import {
-  Avatar,
-  AvatarGroup,
-  Button,
-  Center,
-  Flex,
-  Grid,
-  GridItem,
-  HStack,
-  Input,
-  Text
-} from "@chakra-ui/react";
+import { Center, Flex, Grid, GridItem, Text } from "@chakra-ui/react";
 import { Router } from "next/router";
 import React, { useEffect, useReducer } from "react";
 import { AddChannelMessageForm } from "../../components/add-channel-message-form";
@@ -19,6 +8,7 @@ import { OptionsPanel } from "../../components/options-panel";
 import { RenderChannelStack } from "../../components/render-channel-stack";
 import { RenderMessagesStack } from "../../components/render-messages-stack";
 import { TeamsStack } from "../../components/teams-stack";
+import { ViewHeader } from "../../components/view-header";
 import { useGetAllTeamsForUserQuery } from "../../generated/graphql";
 import {
   viewControllerInit,
@@ -87,7 +77,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
       });
     }
   }, [viewControllerDispatch, dataTeams, router.pathname, router.query]);
-
+  const favoritedAlready = false;
   return (
     <Grid
       height="100%"
@@ -128,51 +118,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
         gridRow={1}
         borderBottom="1px solid #eee"
       >
-        <Flex>
-          {viewControllerState.viewerDisplaying.viewing === "channel" ? (
-            <Flex>
-              <Text>
-                CHANNEL NAME:{" "}
-                {viewControllerState.viewerDisplaying.header?.name}
-              </Text>
-
-              <HStack>
-                <AvatarGroup size="md" max={3} pl={2}>
-                  {viewControllerState.viewerDisplaying.header?.invitees?.map(
-                    ({ id, username }) => {
-                      return (
-                        <Avatar
-                          key={id}
-                          name={username ? username : undefined}
-                          // src="https://bit.ly/broken-link"
-                        />
-                      );
-                    }
-                  )}
-                </AvatarGroup>
-              </HStack>
-            </Flex>
-          ) : null}
-
-          {viewControllerState.viewerDisplaying.viewing ===
-          "direct_messages" ? (
-            <HStack>
-              <AvatarGroup size="md" max={3} pl={2}>
-                {viewControllerState.viewerDisplaying.header?.invitees?.map(
-                  ({ id, username }) => {
-                    return (
-                      <Avatar
-                        key={id}
-                        name={username ? username : undefined}
-                        // src="https://bit.ly/broken-link"
-                      />
-                    );
-                  }
-                )}
-              </AvatarGroup>
-            </HStack>
-          ) : null}
-        </Flex>
+        <ViewHeader viewControllerState={viewControllerState} />
       </GridItem>
 
       {viewControllerState.teamIdShowing &&
@@ -200,6 +146,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
 
       <Flex id="input" gridColumn={3} gridRow={3}>
         {viewControllerState.viewerDisplaying.dmThreadId &&
+        viewControllerState.viewerDisplaying.dmThreadId !== null &&
         viewControllerState.teamIdShowing ? (
           <AddMessageForm
             invitees={
@@ -226,13 +173,6 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
               teamId={viewControllerState.teamIdShowing}
               channelId={viewControllerState.viewerDisplaying.channelId}
             />
-            <Flex flexDirection="column" w="100%">
-              <Input type="text" placeholder="CSS Grid layout module" />
-              <Flex id="message-bar" height="2ch" px={3} mb={1}>
-                <Text>Example helper message</Text>
-              </Flex>
-            </Flex>
-            <Button>submit</Button>
           </>
         ) : null}
       </Flex>
