@@ -1,6 +1,7 @@
 import { Accordion } from "@chakra-ui/react";
 import { Router } from "next/router";
 import React, { useReducer } from "react";
+import { IconType } from "react-icons";
 import {
   useLoadChannelsByTeamIdQuery,
   useLoadDirectMessageThreadsByTeamAndUserQuery
@@ -92,10 +93,16 @@ type AccordionItemType = {
   event: AccordionMouseEvents | undefined;
 };
 
-export type OtherNames = "Threads" | "Mentioned" | "Saved" | "More";
+type TopOptionNames = "Threads" | "Mentioned" | "Saved" | "More";
+
+export interface TopOptions {
+  text: TopOptionNames;
+  name: "threads" | "mentioned" | "saved" | "more";
+  icon: IconType | any;
+}
 
 type OtherItemType = {
-  highlightName: OtherNames | null;
+  highlightName: TopOptionNames | null;
   highlightIndex: number | null;
 };
 
@@ -139,7 +146,7 @@ export type ControllerAction =
   | {
       type: "otherItemHover";
       payload: {
-        name: OtherNames;
+        options: TopOptions;
         event: AccordionMouseEvents;
         index: number;
       };
@@ -247,7 +254,7 @@ function controllerReducer(
         messagesAccordion: state.messagesAccordion,
         otherItemHover: {
           highlightIndex: 0,
-          highlightName: action.payload.name
+          highlightName: action.payload.options.text
         }
       };
     default:
