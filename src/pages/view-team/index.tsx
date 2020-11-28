@@ -14,10 +14,8 @@ import { Router } from "next/router";
 import React, { useEffect, useReducer } from "react";
 import { AddChannelMessageForm } from "../../components/add-channel-message-form";
 import { AddMessageForm } from "../../components/add-direct-message-form";
-import {
-  ControllerAccordion,
-  OtherNames
-} from "../../components/controller-accordion";
+import { ControllerAccordion } from "../../components/controller-accordion";
+import { OptionsPanel } from "../../components/options-panel";
 import { RenderChannelStack } from "../../components/render-channel-stack";
 import { RenderMessagesStack } from "../../components/render-messages-stack";
 import { TeamsStack } from "../../components/teams-stack";
@@ -29,10 +27,11 @@ import {
   ViewerType
 } from "../../lib/page-funcs.view-team-state";
 import { CreateChannelForm } from "./create-channel-form";
-
-const otherStuff: OtherNames[] = ["Threads", "Saved", "Mentioned", "More"];
-
 type UrlParamType = string | string[] | undefined;
+
+interface ParseDestructure {
+  id: any;
+}
 
 const ViewTeamIndex = ({ router }: { router: Router }) => {
   const [viewControllerState, viewControllerDispatch] = useReducer(
@@ -108,7 +107,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
         <TeamsStack data={dataTeams} viewerDispatch={viewControllerDispatch} />
       </GridItem>
       <Flex
-        id="channels"
+        id="controller"
         flexDirection="column"
         gridColumn={2}
         gridRow="1/4"
@@ -116,11 +115,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
         bg="#4e3a4c"
         overflow="auto"
       >
-        <Flex p={2} pl={3} flexDirection="column">
-          {otherStuff.map((item) => (
-            <Flex key={item}>ICON {item}</Flex>
-          ))}
-        </Flex>
+        <OptionsPanel />
         <ControllerAccordion
           router={router}
           teamId={viewControllerState.teamIdShowing}
@@ -209,7 +204,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
           <AddMessageForm
             invitees={
               invitees && typeof invitees === "string"
-                ? JSON.parse(invitees).map(({ id }) => id)
+                ? JSON.parse(invitees).map(({ id }: ParseDestructure) => id)
                 : []
             }
             name="message_text"
@@ -224,7 +219,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
             <AddChannelMessageForm
               invitees={
                 invitees && typeof invitees === "string"
-                  ? JSON.parse(invitees).map(({ id }) => id)
+                  ? JSON.parse(invitees).map(({ id }: ParseDestructure) => id)
                   : []
               }
               name="message_text"
