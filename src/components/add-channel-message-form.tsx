@@ -1,7 +1,9 @@
-import { Button, Flex, Input, Text } from "@chakra-ui/react";
+import { Flex, Text } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import produce from "immer";
-import React from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import { createEditor, Node } from "slate";
+import { Editable, Slate, withReact } from "slate-react";
 import {
   LoadDirectMessagesThreadByIdDocument,
   LoadDirectMessagesThreadByIdQuery,
@@ -11,6 +13,8 @@ import {
   LoadDirectMessageThreadsByTeamAndUserQueryVariables,
   useAddMessageToChannelMutation
 } from "../generated/graphql";
+import { Leaf } from "./rte.leaf";
+import { Element, RichTextInput } from "./rte_v2";
 
 interface AddChannelMessageFormProps {
   name: string;
@@ -20,6 +24,17 @@ interface AddChannelMessageFormProps {
   invitees: string[];
 }
 
+const RESET: Node[] = [
+  {
+    children: [
+      {
+        text: ""
+      }
+    ],
+    type: "paragraph"
+  }
+];
+
 export const AddChannelMessageForm: React.FC<AddChannelMessageFormProps> = ({
   placeholder,
   teamId,
@@ -27,6 +42,14 @@ export const AddChannelMessageForm: React.FC<AddChannelMessageFormProps> = ({
   invitees
 }) => {
   const [addMessage, { client }] = useAddMessageToChannelMutation();
+
+  const editor = useMemo(() => withReact(createEditor()), []);
+  const [formValue, setFormValue] = useState<Node[]>(RESET);
+
+  const renderElement = useCallback((props: any) => <Element {...props} />, []);
+
+  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+
   return (
     <Formik
       onSubmit={async (values, formikBag) => {
@@ -107,30 +130,51 @@ export const AddChannelMessageForm: React.FC<AddChannelMessageFormProps> = ({
               }
             }
           });
-          formikBag.resetForm({ values: { message_text: "" } });
+          formikBag.resetForm({
+            values: {
+              message_text: RESET
+            }
+          });
         } catch (error) {
           console.warn("ERROR ADDING MESSAGE TO DM THREAD", error);
         }
       }}
-      initialValues={{ message_text: "" }}
+      initialValues={{
+        message_text: [
+          {
+            children: [
+              {
+                text: ""
+              }
+            ]
+          }
+        ]
+      }}
     >
-      {({ handleSubmit, handleBlur, handleChange, values }) => {
+      {({ handleSubmit, handleBlur, handleChange, setFieldValue, values }) => {
         return (
           <Form
             onSubmit={handleSubmit}
             style={{ display: "flex", flexDirection: "column", width: "100%" }}
           >
-            <Flex id="dm-form-wrapper">
-              <Input
-                onBlur={handleBlur}
-                onChange={handleChange}
-                type="text"
-                placeholder={placeholder}
-                name="message_text"
-                value={values.message_text}
+            <Slate
+              editor={editor}
+              value={formValue}
+              onChange={(value) => setFormValue(value)}
+            >
+              <Editable
+                renderElement={renderElement}
+                renderLeaf={renderLeaf}
+                readOnly
+                placeholder="Enter some plain text..."
               />
-              <Button type="submit">submit</Button>
-            </Flex>
+            </Slate>
+            {/* <RichTextInput
+              id="dm-form-wrapper"
+              name="message_text"
+              onChange={() => console.log("HANDLE CHANGE")}
+            /> */}
+            <RichTextInput value={formValue} setValue={setFormValue} />
 
             <Flex id="message-bar" height="2ch" px={3} mb={1}>
               <Text>Example helper message</Text>
