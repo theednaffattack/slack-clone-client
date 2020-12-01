@@ -20,7 +20,6 @@ export const RenderChannelStack: React.FC<RenderChannelStackProps> = ({
       {children}
       <Flex
         w="100%"
-        border="2px dashed limegreen"
         flexDirection="column"
         alignItems="center"
         justifyContent="center"
