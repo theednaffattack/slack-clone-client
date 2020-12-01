@@ -4,7 +4,7 @@ import React, { useEffect, useReducer } from "react";
 import { AddChannelMessageForm } from "../../components/add-channel-message-form";
 import { AddMessageForm } from "../../components/add-direct-message-form";
 import { ControllerAccordion } from "../../components/controller-accordion";
-import { OptionsPanel } from "../../components/options-panel";
+import { ShortcutsPanel } from "../../components/shortcuts-panel";
 import { RenderChannelStack } from "../../components/render-channel-stack";
 import { RenderMessagesStack } from "../../components/render-messages-stack";
 import { TeamsStack } from "../../components/teams-stack";
@@ -105,7 +105,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
         bg="#4e3a4c"
         overflow="auto"
       >
-        <OptionsPanel />
+        <ShortcutsPanel />
         <ControllerAccordion
           router={router}
           teamId={viewControllerState.teamIdShowing}
