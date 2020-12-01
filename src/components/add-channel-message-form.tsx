@@ -1,9 +1,8 @@
 import { Flex, Text } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import produce from "immer";
-import React, { useCallback, useMemo, useState } from "react";
-import { createEditor, Node } from "slate";
-import { Editable, Slate, withReact } from "slate-react";
+import React, { useState } from "react";
+import { Node } from "slate";
 import {
   LoadDirectMessagesThreadByIdDocument,
   LoadDirectMessagesThreadByIdQuery,
@@ -13,8 +12,8 @@ import {
   LoadDirectMessageThreadsByTeamAndUserQueryVariables,
   useAddMessageToChannelMutation
 } from "../generated/graphql";
-import { Leaf } from "./rte.leaf";
-import { Element, RichTextInput } from "./rte_v2";
+import { Preview } from "./rte.preview";
+import { RichTextInput } from "./rte_v2";
 
 interface AddChannelMessageFormProps {
   name: string;
@@ -43,12 +42,7 @@ export const AddChannelMessageForm: React.FC<AddChannelMessageFormProps> = ({
 }) => {
   const [addMessage, { client }] = useAddMessageToChannelMutation();
 
-  const editor = useMemo(() => withReact(createEditor()), []);
   const [formValue, setFormValue] = useState<Node[]>(RESET);
-
-  const renderElement = useCallback((props: any) => <Element {...props} />, []);
-
-  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
 
   return (
     <Formik
@@ -157,23 +151,8 @@ export const AddChannelMessageForm: React.FC<AddChannelMessageFormProps> = ({
             onSubmit={handleSubmit}
             style={{ display: "flex", flexDirection: "column", width: "100%" }}
           >
-            <Slate
-              editor={editor}
-              value={formValue}
-              onChange={(value) => setFormValue(value)}
-            >
-              <Editable
-                renderElement={renderElement}
-                renderLeaf={renderLeaf}
-                readOnly
-                placeholder="Enter some plain text..."
-              />
-            </Slate>
-            {/* <RichTextInput
-              id="dm-form-wrapper"
-              name="message_text"
-              onChange={() => console.log("HANDLE CHANGE")}
-            /> */}
+            <Preview formValue={formValue} />
+
             <RichTextInput value={formValue} setValue={setFormValue} />
 
             <Flex id="message-bar" height="2ch" px={3} mb={1}>
