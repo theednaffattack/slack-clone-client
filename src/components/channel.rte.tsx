@@ -7,18 +7,6 @@ import React, {
   useRef,
   useState
 } from "react";
-import {
-  MdCode,
-  MdFormatBold,
-  MdFormatItalic,
-  MdFormatListBulleted,
-  MdFormatListNumbered,
-  MdFormatQuote,
-  MdFormatUnderlined,
-  MdInsertLink,
-  MdLooksOne,
-  MdLooksTwo
-} from "react-icons/md";
 import { createEditor, Editor, Node, Range, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import {
@@ -29,15 +17,15 @@ import {
   Slate,
   withReact
 } from "slate-react";
-import { useAddMessageToChannelMutation } from "../generated/graphql";
+import { useAddThreadToChannelMutation } from "../generated/graphql";
 import { withLinks } from "../lib/rte.with-links";
 import { CHARACTERS } from "../lib/temp.character-names";
-import { BlockButton } from "./rte.block-button";
-import { Leaf } from "./rte.leaf";
-import { MarkButton, toggleMark } from "./rte.mark-button";
-import { Portal } from "./slate-components";
 import { Element } from "./rte.element";
-import { LinkButton } from "./rte.link-button";
+import { Leaf } from "./rte.leaf";
+import { toggleMark } from "./rte.mark-button";
+import { serialize } from "./rte.serialize";
+import { Toolbar } from "./rte.toolbar";
+import { Portal } from "./slate-components";
 
 interface HOTKEYINT {
   [key: string]: string;
@@ -53,16 +41,24 @@ const HOTKEYS: HOTKEYINT = {
 const isEnterHotkey = isHotkey("Enter");
 const isShiftEnterHotkey = isHotkey("Shift+Enter");
 
-interface RichTextInputProps {
-  value: Node[];
+interface ChannelRichTextInputProps {
+  channelId: string;
+  invitees: string[];
   setValue: React.Dispatch<React.SetStateAction<Node[]>>;
+  teamId: string;
+  value: Node[];
 }
 
-export const RichTextInput: React.FC<RichTextInputProps> = ({
-  value: formValue,
-  setValue: setFormValue
+export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
+  channelId,
+  invitees,
+  setValue: setFormValue,
+  teamId,
+  value: formValue
 }) => {
-  const [addMessage, { client }] = useAddMessageToChannelMutation();
+  // const [addMessage, { client }] = useAddMessageToChannelMutation();
+
+  const [addThreadMessage] = useAddThreadToChannelMutation();
 
   const ref = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState<Node[]>(initialValue);
@@ -88,30 +84,55 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
   ).slice(0, 10);
 
   const onKeyDown = useCallback(
-    (event, formValue) => {
-      // Trap and prevent the "Enter" key
-      if (isEnterHotkey(event)) {
-        event.preventDefault();
+    (event, formValue, invitees) => {
+      const { selection } = editor;
+      if (selection) {
+        const [start] = Range.edges(selection);
 
-        const strValues = JSON.stringify(formValue);
-
-        const parsedValues = JSON.parse(strValues);
-
-        console.log("SERIALIZE VALUES", {
-          ser: strValues, // formValue.map((item: NodeExample) => serialize(item)).join(","),
-          parse: parsedValues,
-          formValue,
-          value
+        Transforms.select(editor, {
+          anchor: start,
+          focus: start
         });
-
-        // addMessage({
-        //   variables: { data: { message: serialize(value[0]) } }
-        // });
       }
+
       // Insert line breaks for "Shift + Enter" keys
       if (isShiftEnterHotkey(event)) {
         event.preventDefault();
         editor.insertBreak();
+      }
+
+      // Trap and prevent the "Enter" key
+      if (isEnterHotkey(event)) {
+        event.preventDefault();
+
+        const strValues = value.map((node) => serialize(node)).join(""); // serialize(value); // JSON.stringify(value);
+
+        console.log("SUBMIT FORM", {
+          // strValues,
+          // formValue,
+          data: {
+            channelId,
+            teamId,
+            created_at: "",
+            invitees: [...invitees],
+            message: strValues
+          }
+        });
+
+        // addMessage({
+        //   variables: { data: { message: strValues, channelId, teamId } }
+        // });
+        addThreadMessage({
+          variables: {
+            data: {
+              channelId,
+              teamId,
+              created_at: "",
+              invitees: [...invitees],
+              message: strValues
+            }
+          }
+        });
       }
 
       // Add text style hotkeys
@@ -150,7 +171,7 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
         }
       }
     },
-    [index, search, target]
+    [index, search, target, value]
   );
 
   useEffect(() => {
@@ -169,6 +190,7 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
       border="1px solid #888"
       mx={3}
       borderRadius="4px"
+      overflow="hidden"
     >
       <Slate
         editor={editor as ReactEditor}
@@ -204,7 +226,7 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
       >
         <Editable
           renderElement={renderElement}
-          onKeyDown={(event) => onKeyDown(event, formValue)}
+          onKeyDown={(event) => onKeyDown(event, formValue, invitees)}
           renderLeaf={renderLeaf}
           placeholder="Enter some rich text…"
           spellCheck
@@ -245,39 +267,7 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
             </div>
           </Portal>
         )}
-        <Flex alignItems="center" bg="#f5f6f7">
-          <Flex>
-            <MarkButton format="bold" icon={MdFormatBold} label="bold" />
-            <MarkButton format="italic" icon={MdFormatItalic} label="italic" />
-            <MarkButton
-              format="underline"
-              icon={MdFormatUnderlined}
-              label="underline"
-            />
-            <MarkButton format="code" icon={MdCode} label="code" />
-            <LinkButton format="link" icon={MdInsertLink} label="anchor" />
-            {/* <MarkButton format="link" icon={MdInsertLink} label="anchor" /> */}
-            <BlockButton format="heading-one" icon={MdLooksOne} label="h1" />
-            <BlockButton format="heading-two" icon={MdLooksTwo} label="h2" />
-            <BlockButton
-              format="block-quote"
-              icon={MdFormatQuote}
-              label="block-quote"
-            />
-            <BlockButton
-              format="numbered-list"
-              icon={MdFormatListNumbered}
-              label="numbered list"
-            />
-            <BlockButton
-              format="bulleted-list"
-              icon={MdFormatListBulleted}
-              label="bulleted list"
-            />
-          </Flex>
-
-          <Flex ml="auto">OTHER BUTTONS</Flex>
-        </Flex>
+        <Toolbar editor={editor} />
       </Slate>
     </Flex>
   );
