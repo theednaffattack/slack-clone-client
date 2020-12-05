@@ -5,7 +5,7 @@ import { AddChannelMessageForm } from "../../components/add-channel-message-form
 import { AddMessageForm } from "../../components/add-direct-message-form";
 import { ControllerAccordion } from "../../components/controller-accordion";
 import { ShortcutsPanel } from "../../components/shortcuts-panel";
-import { RenderChannelStack } from "../../components/render-channel-stack";
+import { RenderChannelBrowser } from "../../components/render-channel-browser";
 import { RenderMessagesStack } from "../../components/render-messages-stack";
 import { TeamsStack } from "../../components/teams-stack";
 import { ViewHeader } from "../../components/view-header";
@@ -17,6 +17,7 @@ import {
   ViewerType
 } from "../../lib/page-funcs.view-team-state";
 import { CreateChannelForm } from "./create-channel-form";
+import { RenderChannelStack } from "../../components/render-channel-stack";
 type UrlParamType = string | string[] | undefined;
 
 interface ParseDestructure {
@@ -123,13 +124,13 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
 
       {viewControllerState.teamIdShowing &&
       viewControllerState.viewerDisplaying.viewing === "channel_browser" ? (
-        <RenderChannelStack>
+        <RenderChannelBrowser>
           {action === "add_channel" ? (
             <Flex>
               <CreateChannelForm teamId={viewControllerState.teamIdShowing} />
             </Flex>
           ) : null}
-        </RenderChannelStack>
+        </RenderChannelBrowser>
       ) : null}
       {viewControllerState.viewerDisplaying.viewing === "messages_browser" ? (
         <Center>ADD TEAMMATE EXPLORER</Center>
@@ -143,7 +144,14 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
           threadId={viewControllerState.viewerDisplaying.dmThreadId}
         />
       ) : null}
-
+      {viewControllerState.teamIdShowing &&
+      viewControllerState.viewerDisplaying.channelId ? (
+        <RenderChannelStack
+          teamId={viewControllerState.teamIdShowing}
+          channelId={viewControllerState.viewerDisplaying.channelId}
+        />
+      ) : // <pre>{JSON.stringify(viewControllerState, null, 2)}</pre>
+      null}
       <Flex id="input" gridColumn={3} gridRow={3}>
         {viewControllerState.viewerDisplaying.dmThreadId &&
         viewControllerState.viewerDisplaying.dmThreadId !== null &&
