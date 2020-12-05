@@ -1,21 +1,23 @@
 import { IconButton } from "@chakra-ui/react";
 import React from "react";
 import { IconType } from "react-icons";
-import { Editor } from "slate";
+import { Editor, Range, Transforms } from "slate";
 import { ReactEditor, useSlate } from "slate-react";
 
 export interface MarkButtonProps {
+  editor: ReactEditor;
   format: string;
   icon: IconType;
   label: string;
 }
 
 export const MarkButton: React.FC<MarkButtonProps> = ({
+  editor,
   format,
   icon: Icon,
   label = "inline style"
 }) => {
-  const editor = useSlate();
+  const internalEditor = useSlate();
   return (
     <IconButton
       aria-label={label}
@@ -38,11 +40,7 @@ export const MarkButton: React.FC<MarkButtonProps> = ({
         transform: "scale(0.98)",
         borderColor: "#bec3c9"
       }}
-      _focus={{
-        boxShadow:
-          "0 0 1px 2px rgba(88, 144, 255, .75), 0 1px 1px rgba(0, 0, 0, .15)"
-      }}
-      onClick={(event) => {
+      onMouseDown={(event) => {
         event.preventDefault();
         // if(format === "link"){
 
@@ -50,26 +48,33 @@ export const MarkButton: React.FC<MarkButtonProps> = ({
         // if (!url) return
         // insertLink(editor, url)
         // }
-        toggleMark(editor, format);
+
+        const { selection } = editor;
+        if (selection) {
+          const [start] = Range.edges(selection);
+          Transforms.select(editor, {
+            anchor: start,
+            focus: selection.focus
+          });
+        }
+        toggleMark(internalEditor, format);
       }}
     />
-    // <Button
-    //   onMouseDown={(event) => {
-    //     event.preventDefault();
-    //     toggleMark(editor, format);
-    //   }}
-    // >
-    // </Button>
   );
 };
 
 export const toggleMark = (editor: ReactEditor, format: any) => {
   const isActive = isMarkActive(editor, format);
+  const { selection } = editor;
+  if (selection) {
+    // const [start] = Range.edges(selection);
 
-  if (isActive) {
-    Editor.removeMark(editor, format);
-  } else {
-    Editor.addMark(editor, format, true);
+    selection.anchor;
+    if (isActive) {
+      Editor.removeMark(editor, format);
+    } else {
+      Editor.addMark(editor, format, true);
+    }
   }
 };
 
