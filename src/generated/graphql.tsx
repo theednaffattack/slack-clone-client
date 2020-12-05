@@ -29,6 +29,7 @@ export type Query = {
   getChannelName: Scalars["String"];
   getAllChannelMembers: Array<User>;
   getAllChannelMessages: Array<Message>;
+  getAllChannelThreads: Array<Thread>;
   loadChannelsByTeamId: Array<Channel>;
   channelMembers?: Maybe<Array<Maybe<User>>>;
   loadDirectMessagesThreadById: Thread;
@@ -60,6 +61,11 @@ export type QueryGetAllChannelMembersArgs = {
 };
 
 export type QueryGetAllChannelMessagesArgs = {
+  teamId?: Maybe<Scalars["String"]>;
+  channelId?: Maybe<Scalars["String"]>;
+};
+
+export type QueryGetAllChannelThreadsArgs = {
   teamId?: Maybe<Scalars["String"]>;
   channelId?: Maybe<Scalars["String"]>;
 };
@@ -128,6 +134,7 @@ export type Channel = {
   public?: Maybe<Scalars["Boolean"]>;
   team: Array<Team>;
   invitees?: Maybe<Array<Maybe<User>>>;
+  threads?: Maybe<Array<Maybe<Thread>>>;
   created_by: User;
   created_at?: Maybe<Scalars["DateTime"]>;
   updated_at?: Maybe<Scalars["DateTime"]>;
@@ -185,6 +192,7 @@ export type Thread = {
   user: User;
   team?: Maybe<Team>;
   invitees: Array<User>;
+  channel?: Maybe<Channel>;
   created_at?: Maybe<Scalars["DateTime"]>;
   updated_at?: Maybe<Scalars["DateTime"]>;
 };
@@ -233,6 +241,7 @@ export type Mutation = {
   signS3: SignedS3Payload;
   signS3GetObject: SignedS3Payload;
   addMessageToChannel: AddMessagePayload;
+  addThreadToChannel: AddMessagePayload;
   addChannelMember: Scalars["Boolean"];
   removeChannelMember: Scalars["Boolean"];
   createChannel: Channel;
@@ -320,6 +329,10 @@ export type MutationSignS3GetObjectArgs = {
 };
 
 export type MutationAddMessageToChannelArgs = {
+  data: AddMessageToChannelInput;
+};
+
+export type MutationAddThreadToChannelArgs = {
   data: AddMessageToChannelInput;
 };
 
@@ -469,7 +482,7 @@ export type AddMessageToChannelInput = {
   channelId: Scalars["ID"];
   teamId: Scalars["ID"];
   created_at?: Maybe<Scalars["DateTime"]>;
-  invitees?: Maybe<Array<Maybe<Scalars["ID"]>>>;
+  invitees: Array<Scalars["ID"]>;
   message: Scalars["String"];
   images?: Maybe<Array<Maybe<Scalars["String"]>>>;
   files?: Maybe<Array<Maybe<FileInputHelper>>>;
@@ -617,6 +630,17 @@ export type AddTeamMemberByIdMutation = { __typename?: "Mutation" } & {
   >;
 };
 
+export type AddThreadToChannelMutationVariables = Exact<{
+  data: AddMessageToChannelInput;
+}>;
+
+export type AddThreadToChannelMutation = { __typename?: "Mutation" } & {
+  addThreadToChannel: { __typename?: "AddMessagePayload" } & Pick<
+    AddMessagePayload,
+    "success" | "channelId"
+  > & { message: { __typename?: "Message" } & Pick<Message, "id" | "message"> };
+};
+
 export type ChangePasswordFromContextUseridMutationVariables = Exact<{
   data: PasswordInput;
 }>;
@@ -693,6 +717,31 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: "Mutation" } & {
   register: { __typename?: "User" } & Pick<User, "id" | "name" | "username">;
+};
+
+export type GetAllChannelThreadsQueryVariables = Exact<{
+  channelId: Scalars["String"];
+  teamId: Scalars["String"];
+}>;
+
+export type GetAllChannelThreadsQuery = { __typename?: "Query" } & {
+  getAllChannelThreads: Array<
+    { __typename?: "Thread" } & Pick<Thread, "id" | "last_message"> & {
+        invitees: Array<
+          { __typename?: "User" } & Pick<User, "id" | "username" | "name">
+        >;
+        messages?: Maybe<
+          Array<
+            Maybe<
+              { __typename?: "Message" } & Pick<
+                Message,
+                "id" | "message" | "created_at"
+              >
+            >
+          >
+        >;
+      }
+  >;
 };
 
 export type GetAllMyMessagesQueryVariables = Exact<{ [key: string]: never }>;
@@ -1075,6 +1124,61 @@ export type AddTeamMemberByIdMutationResult = Apollo.MutationResult<
 export type AddTeamMemberByIdMutationOptions = Apollo.BaseMutationOptions<
   AddTeamMemberByIdMutation,
   AddTeamMemberByIdMutationVariables
+>;
+export const AddThreadToChannelDocument = gql`
+  mutation AddThreadToChannel($data: AddMessageToChannelInput!) {
+    addThreadToChannel(data: $data) {
+      success
+      channelId
+      message {
+        id
+        message
+      }
+    }
+  }
+`;
+export type AddThreadToChannelMutationFn = Apollo.MutationFunction<
+  AddThreadToChannelMutation,
+  AddThreadToChannelMutationVariables
+>;
+
+/**
+ * __useAddThreadToChannelMutation__
+ *
+ * To run a mutation, you first call `useAddThreadToChannelMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddThreadToChannelMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addThreadToChannelMutation, { data, loading, error }] = useAddThreadToChannelMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useAddThreadToChannelMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    AddThreadToChannelMutation,
+    AddThreadToChannelMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    AddThreadToChannelMutation,
+    AddThreadToChannelMutationVariables
+  >(AddThreadToChannelDocument, baseOptions);
+}
+export type AddThreadToChannelMutationHookResult = ReturnType<
+  typeof useAddThreadToChannelMutation
+>;
+export type AddThreadToChannelMutationResult = Apollo.MutationResult<
+  AddThreadToChannelMutation
+>;
+export type AddThreadToChannelMutationOptions = Apollo.BaseMutationOptions<
+  AddThreadToChannelMutation,
+  AddThreadToChannelMutationVariables
 >;
 export const ChangePasswordFromContextUseridDocument = gql`
   mutation ChangePasswordFromContextUserid($data: PasswordInput!) {
@@ -1480,6 +1584,74 @@ export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<
   RegisterMutation,
   RegisterMutationVariables
+>;
+export const GetAllChannelThreadsDocument = gql`
+  query GetAllChannelThreads($channelId: String!, $teamId: String!) {
+    getAllChannelThreads(teamId: $teamId, channelId: $channelId) {
+      id
+      invitees {
+        id
+        username
+        name
+      }
+      last_message
+      messages {
+        id
+        message
+        created_at
+      }
+    }
+  }
+`;
+
+/**
+ * __useGetAllChannelThreadsQuery__
+ *
+ * To run a query within a React component, call `useGetAllChannelThreadsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllChannelThreadsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllChannelThreadsQuery({
+ *   variables: {
+ *      channelId: // value for 'channelId'
+ *      teamId: // value for 'teamId'
+ *   },
+ * });
+ */
+export function useGetAllChannelThreadsQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    GetAllChannelThreadsQuery,
+    GetAllChannelThreadsQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    GetAllChannelThreadsQuery,
+    GetAllChannelThreadsQueryVariables
+  >(GetAllChannelThreadsDocument, baseOptions);
+}
+export function useGetAllChannelThreadsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetAllChannelThreadsQuery,
+    GetAllChannelThreadsQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    GetAllChannelThreadsQuery,
+    GetAllChannelThreadsQueryVariables
+  >(GetAllChannelThreadsDocument, baseOptions);
+}
+export type GetAllChannelThreadsQueryHookResult = ReturnType<
+  typeof useGetAllChannelThreadsQuery
+>;
+export type GetAllChannelThreadsLazyQueryHookResult = ReturnType<
+  typeof useGetAllChannelThreadsLazyQuery
+>;
+export type GetAllChannelThreadsQueryResult = Apollo.QueryResult<
+  GetAllChannelThreadsQuery,
+  GetAllChannelThreadsQueryVariables
 >;
 export const GetAllMyMessagesDocument = gql`
   query GetAllMyMessages {

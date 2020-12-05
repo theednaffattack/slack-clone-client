@@ -1,0 +1,16 @@
+query GetAllChannelThreads($channelId: String!, $teamId: String!) {
+  getAllChannelThreads(teamId: $teamId, channelId: $channelId) {
+    id
+    invitees {
+      id
+      username
+      name
+    }
+    last_message
+    messages {
+      id
+      message
+      created_at
+    }
+  }
+}

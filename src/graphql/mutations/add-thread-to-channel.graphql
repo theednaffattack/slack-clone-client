@@ -1,0 +1,10 @@
+mutation AddThreadToChannel($data: AddMessageToChannelInput!) {
+  addThreadToChannel(data: $data) {
+    success
+    channelId
+    message {
+      id
+      message
+    }
+  }
+}
