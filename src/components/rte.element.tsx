@@ -1,36 +1,58 @@
 import { Heading, Link } from "@chakra-ui/react";
-import React from "react";
+import React, { Ref, PropsWithChildren } from "react";
 import { RenderElementProps, useFocused, useSelected } from "slate-react";
 
-const MentionElement = ({ attributes, children, element }: any) => {
-  const selected = useSelected();
-  const focused = useFocused();
-  return (
-    <span
-      {...attributes}
-      contentEditable={false}
-      style={{
-        padding: "3px 3px 2px",
-        margin: "0 1px",
-        verticalAlign: "baseline",
-        display: "inline-block",
-        borderRadius: "4px",
-        backgroundColor: "#eee",
-        fontSize: "0.9em",
-        boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
-      }}
-    >
-      @{element.character}
-      {children}
-    </span>
-  );
-};
+interface BaseProps {
+  className: string;
+  [key: string]: unknown;
+}
+
+const MentionElement = React.forwardRef(
+  (
+    {
+      attributes,
+      children,
+      element,
+      ...props
+    }: PropsWithChildren<
+      {
+        element: any;
+      } & BaseProps
+    >,
+    ref: Ref<HTMLSpanElement>
+  ) => {
+    const selected = useSelected();
+    const focused = useFocused();
+
+    return (
+      <span
+        ref={ref}
+        {...attributes}
+        {...props}
+        contentEditable={false}
+        style={{
+          padding: "3px 3px 2px",
+          margin: "0 1px",
+          verticalAlign: "baseline",
+          display: "inline-block",
+          borderRadius: "4px",
+          backgroundColor: "#eee",
+          fontSize: "0.9em",
+          boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
+        }}
+      >
+        @{element.character}
+        {children}
+      </span>
+    );
+  }
+);
 
 export const Element = (props: RenderElementProps) => {
   const { attributes, children, element } = props;
 
   switch (element.type) {
-    case "block-quote":
+    case "quote":
       return (
         <blockquote
           {...attributes}
@@ -75,6 +97,7 @@ export const Element = (props: RenderElementProps) => {
           target="_blank"
           rel="noreferrer"
           isExternal
+          color="blue.500"
           // style={{ textDecoration: "underline", color: "crimson" }}
         >
           {children}
@@ -83,6 +106,7 @@ export const Element = (props: RenderElementProps) => {
     case "list-item":
       return <li {...attributes}>{children}</li>;
     case "mention":
+      // delete attributes.ref;
       return <MentionElement {...attributes} {...props} />;
     case "numbered-list":
       return (
@@ -95,13 +119,14 @@ export const Element = (props: RenderElementProps) => {
       // of a 'p' tag.
       if (
         element.children.filter((item) => Object.keys(item).includes("code"))
+          .length > 0
       ) {
         return <span {...attributes}>{children}</span>;
       }
-      return <p {...attributes}> {children}</p>;
-    default:
-      console.log("ELEMENT - DEFAULT CASE", element);
 
+      return <p {...attributes}>{children}</p>;
+    default:
+      console.log("DEFAULT FIRING", children);
       return <span {...attributes}>{children}</span>;
   }
 };
