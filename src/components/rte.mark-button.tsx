@@ -22,6 +22,7 @@ export const MarkButton: React.FC<MarkButtonProps> = ({
     <IconButton
       aria-label={label}
       size="sm"
+      isDisabled={!ReactEditor.isFocused(editor)}
       isActive={isMarkActive(editor, format)}
       icon={<Icon size="1.6em" />}
       lineHeight="1.2"
@@ -58,6 +59,14 @@ export const MarkButton: React.FC<MarkButtonProps> = ({
           });
         }
         toggleMark(internalEditor, format);
+
+        if (selection) {
+          const [start] = Range.edges(selection);
+          Transforms.select(editor, {
+            anchor: start,
+            focus: selection.focus
+          });
+        }
       }}
     />
   );

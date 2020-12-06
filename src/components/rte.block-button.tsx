@@ -1,6 +1,6 @@
 import { IconButton } from "@chakra-ui/react";
 import React from "react";
-import { Editor, Element as SlateElement, Transforms } from "slate";
+import { Editor, Element as SlateElement, Range, Transforms } from "slate";
 import { ReactEditor, useSlate } from "slate-react";
 
 export const BlockButton = ({
@@ -13,6 +13,7 @@ export const BlockButton = ({
     <IconButton
       aria-label={label}
       size="sm"
+      isDisabled={!ReactEditor.isFocused(editor)}
       isActive={isBlockActive(editor, format)}
       // colorScheme="transparent"
       // color="#222"
@@ -38,8 +39,13 @@ export const BlockButton = ({
         boxShadow:
           "0 0 1px 2px rgba(88, 144, 255, .75), 0 1px 1px rgba(0, 0, 0, .15)"
       }}
-      onClick={(event) => {
+      // onClick={(event) => {
+      //   event.preventDefault();
+      //   toggleBlock(editor, format);
+      // }}
+      onMouseDown={(event) => {
         event.preventDefault();
+
         toggleBlock(editor, format);
       }}
     />
