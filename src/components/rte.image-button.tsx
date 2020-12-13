@@ -1,15 +1,15 @@
 import { IconButton } from "@chakra-ui/react";
 import React from "react";
-import { Editor } from "slate";
+import { MdImage } from "react-icons/md";
 import { ReactEditor, useSlate } from "slate-react";
-import { isLinkActive, wrapLink } from "../lib/rte.with-links";
+import { isLinkActive } from "../lib/rte.with-links";
 import { MarkButtonProps } from "./rte.mark-button";
+import { insertImage } from "./rte.with-images";
 
-type LinkButtonProps = MarkButtonProps;
+type ImageButtonProps = Omit<MarkButtonProps, "icon">;
 
-export const LinkButton: React.FC<LinkButtonProps> = ({
-  icon: Icon,
-  label = "insert link"
+export const ImageButton: React.FC<ImageButtonProps> = ({
+  label = "insert image"
 }) => {
   const editor = useSlate();
   return (
@@ -18,7 +18,7 @@ export const LinkButton: React.FC<LinkButtonProps> = ({
       isActive={isLinkActive(editor)}
       isDisabled={!ReactEditor.isFocused(editor)}
       size="sm"
-      icon={<Icon size="1.6em" />}
+      icon={<MdImage size="1.6em" />}
       lineHeight="1.2"
       transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
       border="1px"
@@ -41,18 +41,12 @@ export const LinkButton: React.FC<LinkButtonProps> = ({
       }}
       onMouseDown={(event) => {
         event.preventDefault();
-        const url = window.prompt("Enter the URL of the link:");
+        const url = window.prompt("Enter the URL of the image:");
         if (!url) return;
-        insertLink(editor, url);
+        insertImage(editor, url);
       }}
     >
       link
     </IconButton>
   );
-};
-
-const insertLink = (editor: Editor, url: string) => {
-  if (editor.selection) {
-    wrapLink(editor, url);
-  }
 };

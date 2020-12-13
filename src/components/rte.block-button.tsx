@@ -1,20 +1,21 @@
 import { IconButton } from "@chakra-ui/react";
 import React from "react";
-import { Editor, Element as SlateElement, Range, Transforms } from "slate";
+import { Editor, Element as SlateElement, Transforms } from "slate";
 import { ReactEditor, useSlate } from "slate-react";
+import { ToolbarButtonProps } from "./rte.toolbar";
 
 export const BlockButton = ({
   format,
   icon: Icon,
   label = "bad label"
-}: any) => {
+}: ToolbarButtonProps) => {
   const editor = useSlate();
   return (
     <IconButton
       aria-label={label}
       size="sm"
-      isDisabled={!ReactEditor.isFocused(editor)}
       isActive={isBlockActive(editor, format)}
+      isDisabled={!ReactEditor.isFocused(editor)}
       // colorScheme="transparent"
       // color="#222"
       icon={<Icon size="1.6em" />}
