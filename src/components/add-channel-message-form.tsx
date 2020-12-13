@@ -9,6 +9,7 @@ interface AddChannelMessageFormProps {
   teamId: string;
   channelId: string;
   invitees: string[];
+  channelName: string;
 }
 
 const RESET: Node[] = [
@@ -25,6 +26,7 @@ const RESET: Node[] = [
 export const AddChannelMessageForm: React.FC<AddChannelMessageFormProps> = ({
   teamId,
   channelId,
+  channelName,
   invitees
 }) => {
   const [formValue, setFormValue] = useState<Node[]>(RESET);
@@ -34,13 +36,17 @@ export const AddChannelMessageForm: React.FC<AddChannelMessageFormProps> = ({
       <ChannelRichTextInput
         invitees={invitees}
         channelId={channelId}
+        channelName={channelName}
         setValue={setFormValue}
         teamId={teamId}
         value={formValue}
       />
 
-      <Flex id="message-bar" height="2ch" px={3} mb={1}>
-        <Text>Example helper message</Text>
+      <Flex id="message-bar" height="2ch" px={3} ml="auto">
+        <Text fontSize="xs" color="rgb(97,96,97)">
+          Press <b>Enter</b> to submit. Press <b>Shift + Enter</b> for a
+          newline.
+        </Text>
       </Flex>
     </Flex>
   );
