@@ -1,7 +1,8 @@
 import { Link } from "@chakra-ui/react";
 import escapeHtml from "escape-html";
-import { Fragment } from "react";
+import React, { Fragment } from "react";
 import { Node, Text } from "slate";
+import { Emoji } from "emoji-mart";
 
 type NodeType =
   | "quote"
@@ -85,6 +86,24 @@ const deserializeFunc = (el: any, key: string) => {
           {children}
         </Link>
       );
+    case "SPAN":
+      if (el.className.includes("emoji")) {
+        return (
+          <Emoji
+            key={"emoji-key-" + Math.random()}
+            set={"apple"}
+            emoji={el.id}
+            size={24}
+            onClick={(emoji) => {
+              console.log("CHECK EMOJI EVENT", emoji);
+              return;
+            }}
+          />
+        );
+      } else {
+        return <span key={Math.random()}>{children}</span>;
+      }
+      break;
     default:
       return el.textContent;
   }
@@ -115,6 +134,12 @@ export function serialize(node: Node): string {
       return `<blockquote><p>${children}</p></blockquote>`;
     case "paragraph":
       return `<p>${children}</p>`;
+    case "emoji":
+      return `<span id="${
+        (node as any).character.id
+      }" class="emoji" role="img" aria-label="${
+        (node as any).character.name
+      }">${children}</span>`;
     case "heading-one":
       return `<h1>${children}</h1>`;
     case "heading-two":
