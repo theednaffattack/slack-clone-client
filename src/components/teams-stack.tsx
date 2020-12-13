@@ -6,17 +6,29 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
+import { Router } from "next/router";
 import React from "react";
 import { GetAllTeamsForUserQuery } from "../generated/graphql";
-import { ActionType } from "../lib/page-funcs.view-team-state";
 import { AiOutlinePlusReplacement } from "./ai-outline-plus-replacement";
 
 interface TeamStackProps {
   data: GetAllTeamsForUserQuery | undefined;
-  viewerDispatch: React.Dispatch<ActionType>;
+  router: Router;
 }
 
-export function TeamsStack({ data, viewerDispatch }: TeamStackProps) {
+export function TeamsStack({ data, router }: TeamStackProps) {
+  function handleExploreTeamClick(
+    event: React.MouseEvent<HTMLButtonElement>,
+    id: string
+  ) {
+    event.preventDefault();
+    // router.push(`/view-team/${id}?viewing=teams_browser&action=find_channel`);
+
+    router.push({
+      href: "/view-team/",
+      query: { viewing: null, id }
+    });
+  }
   return (
     <VStack id="teams-list" spacing={4} align="stretch" as="ul">
       {data &&
@@ -27,12 +39,7 @@ export function TeamsStack({ data, viewerDispatch }: TeamStackProps) {
             <Button
               type="button"
               colorScheme="transparent"
-              onClick={() =>
-                viewerDispatch({
-                  type: "changeTeamId",
-                  payload: id
-                })
-              }
+              onClick={(event) => handleExploreTeamClick(event, id)}
             >
               <Heading>{name.charAt(0)}</Heading>
             </Button>
@@ -51,7 +58,12 @@ export function TeamsStack({ data, viewerDispatch }: TeamStackProps) {
           }}
           icon={<AiOutlinePlusReplacement size={20} />}
           type="button"
-          onClick={() => console.log("ADD TEAM CLICKED")}
+          onClick={() => {
+            router.push({
+              href: "/view-team/",
+              query: { viewing: "teams_browser" }
+            });
+          }}
         />
       </Flex>
     </VStack>
