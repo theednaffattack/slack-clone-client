@@ -2,5 +2,9 @@ mutation CreateChannel($input: AddChannelInput!) {
   createChannel(input: $input) {
     id
     name
+    invitees {
+      id
+      username
+    }
   }
 }

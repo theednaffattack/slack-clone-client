@@ -5,6 +5,7 @@ query GetAllChannelThreads($channelId: String!, $teamId: String!) {
       id
       username
       name
+      profileImageUri
     }
     last_message
     messages {

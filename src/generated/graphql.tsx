@@ -226,7 +226,7 @@ export type Mutation = {
   createUser: User;
   addTeamMemberByEmail: UserToTeamIdReferencesOnlyClass;
   addTeamMemberById: UserToTeamIdReferencesOnlyClass;
-  createTeam: Team;
+  createTeam: TeamResponse;
   teamLogin?: Maybe<User>;
   changePasswordFromContextUserid?: Maybe<User>;
   changePasswordFromToken?: Maybe<User>;
@@ -241,7 +241,7 @@ export type Mutation = {
   signS3: SignedS3Payload;
   signS3GetObject: SignedS3Payload;
   addMessageToChannel: AddMessagePayload;
-  addThreadToChannel: AddMessagePayload;
+  addThreadToChannel: AddThreadPayload;
   addChannelMember: Scalars["Boolean"];
   removeChannelMember: Scalars["Boolean"];
   createChannel: Channel;
@@ -394,6 +394,26 @@ export type UserToTeamIdReferencesOnlyClass = {
   teamRoleAuthorizations: Array<TeamRoleEnum>;
 };
 
+export type TeamResponse = {
+  __typename?: "TeamResponse";
+  errors?: Maybe<Array<FieldError>>;
+  uttData?: Maybe<UttData>;
+};
+
+export type FieldError = {
+  __typename?: "FieldError";
+  field: Scalars["String"];
+  message: Scalars["String"];
+};
+
+export type UttData = {
+  __typename?: "UttData";
+  name: Scalars["String"];
+  teamId: Scalars["String"];
+  userId: Scalars["String"];
+  userToTeamId: Scalars["String"];
+};
+
 export type PasswordInput = {
   password: Scalars["String"];
 };
@@ -499,6 +519,16 @@ export type AddMessagePayload = {
   channelId: Scalars["ID"];
   message: Message;
   user: User;
+  invitees?: Maybe<Array<Maybe<User>>>;
+};
+
+export type AddThreadPayload = {
+  __typename?: "AddThreadPayload";
+  success: Scalars["Boolean"];
+  channelId: Scalars["ID"];
+  threadId: Scalars["ID"];
+  message: Message;
+  sentBy: User;
   invitees?: Maybe<Array<Maybe<User>>>;
 };
 
@@ -635,10 +665,22 @@ export type AddThreadToChannelMutationVariables = Exact<{
 }>;
 
 export type AddThreadToChannelMutation = { __typename?: "Mutation" } & {
-  addThreadToChannel: { __typename?: "AddMessagePayload" } & Pick<
-    AddMessagePayload,
-    "success" | "channelId"
-  > & { message: { __typename?: "Message" } & Pick<Message, "id" | "message"> };
+  addThreadToChannel: { __typename?: "AddThreadPayload" } & Pick<
+    AddThreadPayload,
+    "success" | "channelId" | "threadId"
+  > & {
+      invitees?: Maybe<
+        Array<
+          Maybe<
+            { __typename?: "User" } & Pick<
+              User,
+              "id" | "name" | "username" | "profileImageUri"
+            >
+          >
+        >
+      >;
+      message: { __typename?: "Message" } & Pick<Message, "id" | "message">;
+    };
 };
 
 export type ChangePasswordFromContextUseridMutationVariables = Exact<{
@@ -667,7 +709,11 @@ export type CreateChannelMutationVariables = Exact<{
 }>;
 
 export type CreateChannelMutation = { __typename?: "Mutation" } & {
-  createChannel: { __typename?: "Channel" } & Pick<Channel, "id" | "name">;
+  createChannel: { __typename?: "Channel" } & Pick<Channel, "id" | "name"> & {
+      invitees?: Maybe<
+        Array<Maybe<{ __typename?: "User" } & Pick<User, "id" | "username">>>
+      >;
+    };
 };
 
 export type CreateDirectMessageMutationVariables = Exact<{
@@ -692,7 +738,19 @@ export type CreateTeamMutationVariables = Exact<{
 }>;
 
 export type CreateTeamMutation = { __typename?: "Mutation" } & {
-  createTeam: { __typename?: "Team" } & Pick<Team, "id" | "name">;
+  createTeam: { __typename?: "TeamResponse" } & {
+    errors?: Maybe<
+      Array<
+        { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
+      >
+    >;
+    uttData?: Maybe<
+      { __typename?: "UttData" } & Pick<
+        UttData,
+        "name" | "teamId" | "userId" | "userToTeamId"
+      >
+    >;
+  };
 };
 
 export type ForgotPasswordMutationVariables = Exact<{
@@ -728,7 +786,10 @@ export type GetAllChannelThreadsQuery = { __typename?: "Query" } & {
   getAllChannelThreads: Array<
     { __typename?: "Thread" } & Pick<Thread, "id" | "last_message"> & {
         invitees: Array<
-          { __typename?: "User" } & Pick<User, "id" | "username" | "name">
+          { __typename?: "User" } & Pick<
+            User,
+            "id" | "username" | "name" | "profileImageUri"
+          >
         >;
         messages?: Maybe<
           Array<
@@ -1130,6 +1191,13 @@ export const AddThreadToChannelDocument = gql`
     addThreadToChannel(data: $data) {
       success
       channelId
+      threadId
+      invitees {
+        id
+        name
+        username
+        profileImageUri
+      }
       message {
         id
         message
@@ -1285,6 +1353,10 @@ export const CreateChannelDocument = gql`
     createChannel(input: $input) {
       id
       name
+      invitees {
+        id
+        username
+      }
     }
   }
 `;
@@ -1398,8 +1470,16 @@ export type CreateDirectMessageMutationOptions = Apollo.BaseMutationOptions<
 export const CreateTeamDocument = gql`
   mutation CreateTeam($name: String!) {
     createTeam(name: $name) {
-      id
-      name
+      errors {
+        field
+        message
+      }
+      uttData {
+        name
+        teamId
+        userId
+        userToTeamId
+      }
     }
   }
 `;
@@ -1593,6 +1673,7 @@ export const GetAllChannelThreadsDocument = gql`
         id
         username
         name
+        profileImageUri
       }
       last_message
       messages {

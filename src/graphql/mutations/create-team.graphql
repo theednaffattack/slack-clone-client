@@ -1,6 +1,14 @@
 mutation CreateTeam($name: String!) {
   createTeam(name: $name) {
-    id
-    name
+    errors {
+      field
+      message
+    }
+    uttData {
+      name
+      teamId
+      userId
+      userToTeamId
+    }
   }
 }
