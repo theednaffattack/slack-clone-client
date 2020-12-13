@@ -4,9 +4,11 @@ import React, { useEffect, useReducer } from "react";
 import { AddChannelMessageForm } from "../../components/add-channel-message-form";
 import { AddMessageForm } from "../../components/add-direct-message-form";
 import { ControllerAccordion } from "../../components/controller-accordion";
-import { ShortcutsPanel } from "../../components/shortcuts-panel";
 import { RenderChannelBrowser } from "../../components/render-channel-browser";
+import { RenderChannelStack } from "../../components/render-channel-stack";
 import { RenderMessagesStack } from "../../components/render-messages-stack";
+import { ShortcutsPanel } from "../../components/shortcuts-panel";
+import { TeamExplorer } from "../../components/team-explorer";
 import { TeamsStack } from "../../components/teams-stack";
 import { ViewHeader } from "../../components/view-header";
 import { useGetAllTeamsForUserQuery } from "../../generated/graphql";
@@ -17,7 +19,6 @@ import {
   ViewerType
 } from "../../lib/page-funcs.view-team-state";
 import { CreateChannelForm } from "./create-channel-form";
-import { RenderChannelStack } from "../../components/render-channel-stack";
 type UrlParamType = string | string[] | undefined;
 
 interface ParseDestructure {
@@ -30,13 +31,9 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
     viewControllerInitialState,
     viewControllerInit
   );
-  const {
-    data: dataTeams,
-    error: errorTeams,
-    loading: loadingTeams
-  } = useGetAllTeamsForUserQuery();
+  const { data: dataTeams } = useGetAllTeamsForUserQuery();
 
-  const { action, channel, name, invitees, thread, viewing } = router.query;
+  const { action, channel, id, name, invitees, thread, viewing } = router.query;
 
   function handleUrlParam(param: UrlParamType): string | null {
     if (typeof param === "string") {
@@ -50,9 +47,13 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
   }
 
   useEffect(() => {
+    const realId = handleUrlParam(id)
+      ? handleUrlParam(id)
+      : dataTeams?.getAllTeamsForUser?.[0]?.teamId;
+
     viewControllerDispatch({
       type: "changeTeamId",
-      payload: dataTeams?.getAllTeamsForUser?.[0].teamId ?? null
+      payload: realId ?? null
     });
 
     if (typeof viewing === "string") {
@@ -82,7 +83,13 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
   return (
     <Grid
       height="100%"
-      gridTemplateColumns="100px 250px 1fr"
+      gridTemplateColumns={
+        dataTeams &&
+        dataTeams.getAllTeamsForUser?.length > 0 &&
+        viewControllerState.viewerDisplaying.viewing !== "teams_browser"
+          ? "100px 250px 1fr"
+          : "100px 1fr"
+      }
       gridTemplateRows="auto 1fr auto"
     >
       <GridItem
@@ -95,32 +102,51 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
         <Flex alignItems="center" justifyContent="center">
           <Text>Teams</Text>
         </Flex>
-        <TeamsStack data={dataTeams} viewerDispatch={viewControllerDispatch} />
+        <TeamsStack data={dataTeams} router={router} />
       </GridItem>
-      <Flex
-        id="controller"
-        flexDirection="column"
-        gridColumn={2}
-        gridRow="1/4"
-        color="#fff"
-        bg="#4e3a4c"
-        overflow="auto"
-      >
-        <ShortcutsPanel />
-        <ControllerAccordion
-          router={router}
-          teamId={viewControllerState.teamIdShowing}
-        />
-      </Flex>
-
-      <GridItem
-        id="header"
-        gridColumn={3}
-        gridRow={1}
-        borderBottom="1px solid #eee"
-      >
-        <ViewHeader viewControllerState={viewControllerState} />
-      </GridItem>
+      {viewControllerState.teamIdShowing !== null &&
+      viewControllerState.viewerDisplaying.viewing !== "teams_browser" ? (
+        <Flex
+          id="controller"
+          flexDirection="column"
+          gridColumn={2}
+          gridRow="1/4"
+          color="#fff"
+          bg="#4e3a4c"
+          overflow="auto"
+        >
+          <ShortcutsPanel />
+          <ControllerAccordion
+            router={router}
+            teamId={viewControllerState.teamIdShowing}
+          />
+        </Flex>
+      ) : null}
+      {viewControllerState.teamIdShowing !== null &&
+      viewControllerState.viewerDisplaying.viewing !== "teams_browser" ? (
+        <GridItem
+          id="header"
+          gridColumn={
+            dataTeams && dataTeams.getAllTeamsForUser?.length > 0 ? 3 : 2
+          }
+          gridRow={1}
+          borderBottom="1px solid #eee"
+        >
+          <ViewHeader viewControllerState={viewControllerState} />
+        </GridItem>
+      ) : null}
+      {viewControllerState.teamIdShowing === null ||
+      viewControllerState.viewerDisplaying.viewing === "teams_browser" ? (
+        <Flex
+          gridColumn={2}
+          gridRow="2/3"
+          flexDirection="column"
+          height="100%"
+          alignItems="center"
+        >
+          <TeamExplorer />
+        </Flex>
+      ) : null}
 
       {viewControllerState.teamIdShowing &&
       viewControllerState.viewerDisplaying.viewing === "channel_browser" ? (
@@ -136,7 +162,6 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
         <Center>ADD TEAMMATE EXPLORER</Center>
       ) : null}
       {viewControllerState.teamIdShowing &&
-      // typeof handleUrlParam(threadId) === "string" &&
       viewControllerState.viewerDisplaying.dmThreadId &&
       viewControllerState.viewerDisplaying.viewing === "direct_messages" ? (
         <RenderMessagesStack
@@ -150,8 +175,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
           teamId={viewControllerState.teamIdShowing}
           channelId={viewControllerState.viewerDisplaying.channelId}
         />
-      ) : // <pre>{JSON.stringify(viewControllerState, null, 2)}</pre>
-      null}
+      ) : null}
       <Flex id="input" gridColumn={3} gridRow={3}>
         {viewControllerState.viewerDisplaying.dmThreadId &&
         viewControllerState.viewerDisplaying.dmThreadId !== null &&
@@ -180,6 +204,9 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
               name="message_text"
               teamId={viewControllerState.teamIdShowing}
               channelId={viewControllerState.viewerDisplaying.channelId}
+              channelName={
+                viewControllerState.viewerDisplaying.header?.name ?? ""
+              }
             />
           </>
         ) : null}
