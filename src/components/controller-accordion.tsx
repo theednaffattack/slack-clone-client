@@ -48,7 +48,7 @@ export const ControllerAccordion: React.FC<ControllerAccordionProps> = ({
     error: errorFromChannels
   } = useLoadChannelsByTeamIdQuery({
     skip: teamId === null,
-    variables: { teamId: teamId || "" }
+    variables: { teamId: teamId ? teamId : "" }
   });
 
   const {
