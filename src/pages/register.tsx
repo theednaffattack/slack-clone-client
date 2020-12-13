@@ -18,6 +18,8 @@ function Register() {
       initialValues={{
         email: "",
         username: "",
+        firstName: "",
+        lastName: "",
         password: "",
         keepMeSignedIn: true,
         termsAndConditions: true
@@ -28,12 +30,12 @@ function Register() {
             variables: {
               data: {
                 password: values.password,
-                // firstName: "iti2",
-                // lastName: "itiToo",
+                firstName: values.firstName,
+                lastName: values.lastName,
                 email: values.email,
-                username: values.username,
-                termsAndConditions: true, //values.termsAndConditions,
-                keepMeSignedIn: true // values.keepMeSignedIn
+                username: values.username
+                // termsAndConditions: true, //values.termsAndConditions,
+                // keepMeSignedIn: true // values.keepMeSignedIn
               }
             }
           });
@@ -100,6 +102,26 @@ function RegisterForm({
           autoComplete="username"
         />
 
+        <Box my={4}>
+          <InputField
+            isRequired={true}
+            label="First Name"
+            name="firstName"
+            placeholder="first name"
+            type="text"
+            autoComplete="firstName"
+          />
+        </Box>
+        <Box my={4}>
+          <InputField
+            isRequired={true}
+            label="Last Name"
+            name="lastName"
+            placeholder="last name"
+            type="text"
+            autoComplete="lastName"
+          />
+        </Box>
         <Box my={4}>
           <InputField
             isRequired={true}
