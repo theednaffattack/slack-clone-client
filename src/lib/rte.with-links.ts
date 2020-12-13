@@ -37,9 +37,8 @@ export const wrapLink = (editor: Editor, url: string) => {
 
   const { selection } = editor;
   const isCollapsed = selection && Range.isCollapsed(selection);
-  console.log("VIEW IS COLLAPSED (SELECTION)", isCollapsed);
 
-  const link = {
+  const link: SlateElement = {
     type: "link",
     url,
     children: isCollapsed ? [{ text: url }] : []
