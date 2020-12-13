@@ -1,6 +1,8 @@
 import { Heading, Link } from "@chakra-ui/react";
 import React, { Ref, PropsWithChildren } from "react";
 import { RenderElementProps, useFocused, useSelected } from "slate-react";
+import { Emoji } from "emoji-mart";
+import { ImageElement } from "./rte.with-images";
 
 interface BaseProps {
   className: string;
@@ -76,6 +78,24 @@ export const Element = (props: RenderElementProps) => {
           {children}
         </ul>
       );
+    case "emoji":
+      return (
+        <span {...attributes} id="emoji-checker">
+          <Emoji
+            set={"apple"}
+            emoji={(element as any).character.id}
+            size={24}
+            onClick={(emoji) => {
+              console.log("CHECK EMOJI EVENT", emoji);
+
+              return;
+            }}
+            fallback={(emoji, props) => {
+              return emoji ? `:${emoji.short_names[0]}:` : props.emoji;
+            }}
+          />
+        </span>
+      );
     case "heading-one":
       return (
         <Heading {...attributes} as="h1" size="xl" isTruncated>
@@ -89,6 +109,11 @@ export const Element = (props: RenderElementProps) => {
           {children}
         </Heading>
       );
+
+    case "image":
+      return <ImageElement {...props} />;
+    case "data-image":
+      return <ImageElement {...props} />;
     case "link":
       return (
         <Link
@@ -106,7 +131,6 @@ export const Element = (props: RenderElementProps) => {
     case "list-item":
       return <li {...attributes}>{children}</li>;
     case "mention":
-      // delete attributes.ref;
       return <MentionElement {...attributes} {...props} />;
     case "numbered-list":
       return (
