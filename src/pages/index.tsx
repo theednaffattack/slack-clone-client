@@ -1,42 +1,11 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Image,
-  Link,
-  Stack,
-  Text
-} from "@chakra-ui/react";
-import NextLink from "next/link";
+import { Flex } from "@chakra-ui/react";
 import React from "react";
 
-import { LikesAndCommentsSummary } from "../components/home.global-feed.likes";
-import { useGetGlobalPostsRelayQuery } from "../generated/graphql";
 function Index() {
-  const initialGlobalPostsVariables = {
-    after: null,
-    before: null,
-    first: 2,
-    last: null
-  };
-  // const [variables, setVariables] = useState<{
-  //   after?: null | string;
-  //   before?: null | string;
-  //   first: number | null;
-  //   last?: number | null;
-  // }>(initialGlobalPostsVariables);
-
-  const {
-    data: dataPosts,
-    // error,
-    fetchMore: fetchMorePosts
-  } = useGetGlobalPostsRelayQuery({
-    variables: initialGlobalPostsVariables
-  });
-
   return (
     <Flex flexDirection="column" alignItems="center">
+      Lame
+      {/*       
       <Flex alignItems="center" width={[1 / 2, 1 / 2, 1 / 2, "900px"]}>
         <Heading>Branding</Heading>
 
@@ -101,7 +70,7 @@ function Index() {
             load more
           </Button>
         ) : null}
-      </Stack>
+      </Stack> */}
       {/* <GlobalPostsStack
         posts={dataPosts?.getGlobalPostsRelay?.edges}
         postsError={errorPosts}
