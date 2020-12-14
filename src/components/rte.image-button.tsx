@@ -43,7 +43,7 @@ export const ImageButton: React.FC<ImageButtonProps> = ({
         event.preventDefault();
         const url = window.prompt("Enter the URL of the image:");
         if (!url) return;
-        insertImage(editor, url);
+        insertImage({ editor, type: "image", url });
       }}
     >
       link
