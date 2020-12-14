@@ -43,7 +43,6 @@ import {
   insertEmoji,
   withEmoji
 } from "../lib/rte.plugin.with-emoji";
-import { Thumbnails } from "./rte.thumbnails";
 import { withUploadedImages } from "./rte.with-uploaded-images";
 
 interface HOTKEYINT {
@@ -55,13 +54,6 @@ const HOTKEYS: HOTKEYINT = {
   "mod+i": "italic",
   "mod+u": "underline",
   "mod+`": "code"
-};
-
-const thumbsContainer = {
-  display: "flex" as CSSProperties["display"],
-  flexDirection: "row" as CSSProperties["flexDirection"],
-  flexWrap: "wrap" as CSSProperties["flexWrap"],
-  marginTop: 16
 };
 
 const isEnterHotkey = isHotkey("Enter");
@@ -147,8 +139,11 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
       if (isEnterHotkey(event)) {
         event.preventDefault();
         if (!target) {
-          const strValues = value.map((node) => serialize(node)).join(""); // serialize(value); // JSON.stringify(value);
-
+          const strValues = value
+            .map((node) => {
+              return serialize(node);
+            })
+            .join("");
           addThreadMessage({
             update: (cache, data) => {
               let threadsInCache;
@@ -321,17 +316,6 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
     noDragEventsBubbling: true,
 
     onDrop: (acceptedFiles: File[]) => {
-      acceptedFiles.forEach((file) => {
-        console.log("VIEW FILE TYPE", file.type);
-        // Place images in  Editor
-        insertImage({
-          editor,
-          type: "data-image",
-          url: URL.createObjectURL(file)
-        });
-        setFiles;
-      });
-
       // Place images in local state for later
       // submission.
       setFiles(
@@ -344,13 +328,19 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
     }
   });
 
-  React.useEffect(
-    () => () => {
+  React.useEffect(() => {
+    files.forEach((file) => {
+      insertImage({
+        editor,
+        type: "data-image",
+        url: URL.createObjectURL(file)
+      });
+    });
+    return () => {
       // Make sure to revoke the data uris to avoid memory leaks
       files.forEach((file) => URL.revokeObjectURL(file.preview));
-    },
-    [files]
-  );
+    };
+  }, [files]);
 
   // END DROPZONE SECTION
 
