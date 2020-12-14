@@ -57,6 +57,18 @@ const deserializeFunc = (el: any, key: string) => {
           {children}
         </blockquote>
       );
+    case "IMG":
+      return (
+        <img
+          key={key}
+          src={el.getAttribute("src")}
+          style={{
+            display: "block",
+            maxWidth: "100%",
+            maxHeight: "20em"
+          }}
+        />
+      );
     case "OL":
       return (
         <ol key={key} style={{ marginLeft: "20px" }}>
@@ -144,6 +156,18 @@ export function serialize(node: Node): string {
       return `<h1>${children}</h1>`;
     case "heading-two":
       return `<h2>${children}</h2>`;
+    case "image":
+      if (node.url) {
+        return `<img src=${node.url} />`;
+      } else {
+        return `<img src="//via.placeholder.com/350x150" />`;
+      }
+    case "image-data":
+      if (node.url) {
+        return `<img src=${node.url} />`;
+      } else {
+        return `<img src="//via.placeholder.com/350x150" />`;
+      }
     case "bulleted-list":
       return `<ul>${children}</ul>`;
     case "list-item":
