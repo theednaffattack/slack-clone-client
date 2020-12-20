@@ -46,16 +46,97 @@ export function withImages(editor: ReactEditor) {
   return editor;
 }
 
-interface InsertImageProps {
-  editor: ReactEditor;
-  type?: "image" | "data-image";
+export interface ImageProps {
+  type?: "image" | "data-image" | "data-image-list";
   url: string;
+  file?: File;
+}
+interface InsertImageProps extends ImageProps {
+  editor: ReactEditor;
 }
 
-export function insertImage({ editor, type, url }: InsertImageProps): void {
+interface InsertMultipleImagesProps {
+  editor: ReactEditor;
+
+  imageNodes: ImageProps[] | null;
+}
+
+export function insertImage({
+  editor,
+  file,
+  type,
+  url
+}: InsertImageProps): void {
   const text = { text: "" };
-  const image = { type: type ? type : "image", url, children: [text] };
+  const image = [
+    {
+      type: type ? type : "image",
+      file,
+      url,
+      children: [text]
+    },
+    {
+      type: "paragraph",
+      children: [text]
+    }
+  ];
+
   Transforms.insertNodes(editor, image);
+  Transforms.move(editor);
+}
+
+export function insertInlineImage({
+  editor,
+  file,
+  type,
+  url
+}: InsertImageProps): void {
+  const text = { text: "" };
+  const image = [
+    {
+      type: type ? type : "data-image-list",
+      file,
+      url,
+      children: [text]
+    },
+    {
+      type: "paragraph",
+      children: [text]
+    }
+  ];
+
+  Transforms.insertNodes(editor, image);
+  Transforms.move(editor);
+}
+
+export function insertMultipleImages({
+  editor,
+  imageNodes
+}: InsertMultipleImagesProps): void {
+  const text = { text: "" };
+  const newLine = {
+    type: "paragraph",
+    children: [text]
+  };
+
+  const listNode = [
+    {
+      type: "data-image-list",
+      images: imageNodes?.map((picture) => {
+        return {
+          type: "data-image-list-node",
+          url: picture.url,
+          file: picture.file,
+          children: [text]
+        };
+      }),
+      children: [text]
+    }
+    // newLine
+  ];
+
+  Transforms.insertNodes(editor, listNode);
+  Transforms.move(editor);
 }
 
 export function ImageElement({
@@ -70,7 +151,29 @@ export function ImageElement({
       <div contentEditable={false}>
         <Image
           src={element.url as string}
-          display="block"
+          // display="block"
+          maxWidth="100%"
+          maxHeight="20em"
+          boxShadow={selected && focused ? "0 0 0 3px #B4D5FF" : "none"}
+        />
+      </div>
+      {children}
+    </div>
+  );
+}
+
+export function ImageInline({
+  attributes,
+  children,
+  element
+}: RenderElementProps) {
+  const selected = useSelected();
+  const focused = useFocused();
+  return (
+    <div {...attributes}>
+      <div contentEditable={false}>
+        <Image
+          src={element.url as string}
           maxWidth="100%"
           maxHeight="20em"
           boxShadow={selected && focused ? "0 0 0 3px #B4D5FF" : "none"}
