@@ -1,7 +1,13 @@
 import { Button, Flex, Input, Text } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
+import produce from "immer";
 import React from "react";
-import { useCreateChannelMutation } from "../../generated/graphql";
+import {
+  LoadChannelsByTeamIdDocument,
+  LoadChannelsByTeamIdQuery,
+  LoadChannelsByTeamIdQueryVariables,
+  useCreateChannelMutation
+} from "../../generated/graphql";
 
 type CreateChannelFormProps = {
   children?: React.ReactNode;
@@ -9,17 +15,48 @@ type CreateChannelFormProps = {
 };
 
 export function CreateChannelForm({ teamId }: CreateChannelFormProps) {
-  const [createChannel, { data, error: errorGql }] = useCreateChannelMutation();
+  const [
+    createChannel,
+    { client, data, error: errorGql }
+  ] = useCreateChannelMutation();
   return (
     <Formik
       initialValues={{ name: "" }}
-      onSubmit={async ({ name }) => {
+      onSubmit={async ({ name }, formikBag) => {
         try {
           await createChannel({
+            update: (cache, { data }) => {
+              const channelCache = cache.readQuery<
+                LoadChannelsByTeamIdQuery,
+                LoadChannelsByTeamIdQueryVariables
+              >({
+                query: LoadChannelsByTeamIdDocument,
+                variables: { teamId }
+              });
+
+              if (channelCache && data) {
+                client.writeQuery<
+                  LoadChannelsByTeamIdQuery,
+                  LoadChannelsByTeamIdQueryVariables
+                >({
+                  query: LoadChannelsByTeamIdDocument,
+                  variables: { teamId },
+                  data: produce(channelCache, (staged) => {
+                    staged.loadChannelsByTeamId.push({
+                      __typename: "Channel",
+                      name: data.createChannel.name,
+                      id: data.createChannel.id,
+                      invitees: data.createChannel.invitees
+                    });
+                  })
+                });
+              }
+            },
             variables: {
               input: { name: name, teamId }
             }
           });
+          formikBag.resetForm({ values: { name: "" } });
         } catch (error) {
           console.warn("CREATE CHANNEL ERROR", error);
         }

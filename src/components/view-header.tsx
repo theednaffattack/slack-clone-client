@@ -28,10 +28,18 @@ export function ViewHeader({ viewControllerState }: ViewHeaderProps) {
             <IconButton
               colorScheme="transparent"
               aria-label="favorite icon"
-              as={favoritedAlready ? AiFillStar : AiOutlineStar}
+              icon={
+                favoritedAlready ? (
+                  <AiFillStar size={15} />
+                ) : (
+                  <AiOutlineStar size={15} />
+                )
+              }
+              // as={favoritedAlready ? AiFillStar : AiOutlineStar}
               color={favoritedAlready ? "goldenrod" : "ThreeDShadow"}
               h={5}
               w={5}
+              onClick={() => console.log("FAVORITE BUTTON CLICKED")}
             />
           </Flex>
           <Flex ml="auto" pr={3} alignItems="center">

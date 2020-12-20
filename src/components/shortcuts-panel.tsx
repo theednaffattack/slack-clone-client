@@ -13,12 +13,30 @@ const options: TopOptions[] = [
   { text: "More", name: "more", icon: BsThreeDots }
 ];
 
-export function OptionsPanel() {
+export function ShortcutsPanel() {
+  const [hoverState, setHoverState] = useState<
+    "is_hovering" | "is_not_hovering"
+  >("is_not_hovering");
+  function handleMouseEnter() {
+    setHoverState("is_hovering");
+  }
+  function handleMouseLeave() {
+    setHoverState("is_not_hovering");
+  }
   return (
     <Flex id="top-options" flexDirection="column" py={2}>
       {options.map((item, index) => (
         <Link href="#" key={`${index}-${item.name}`} passHref>
-          <HoverLink>
+          <a
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            style={{
+              backgroundColor:
+                hoverState === "is_hovering"
+                  ? "rgba(0,0,0,0.25)"
+                  : "transparent"
+            }}
+          >
             <Flex pl={3} py={1} key={item.name} alignItems="center">
               <Box pr={2}>
                 <item.icon
@@ -31,7 +49,7 @@ export function OptionsPanel() {
 
               <Text isTruncated>{item.text}</Text>
             </Flex>
-          </HoverLink>
+          </a>
         </Link>
       ))}
     </Flex>

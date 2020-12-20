@@ -76,8 +76,6 @@ const authLink = setContext((_, { headers, req }) => {
 });
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
-  console.log("VIEW GQL ERRORS", graphQLErrors);
-
   // We don't want the home page to re-route so don't include
   // "createOrUpdateLikes" mutations to be filtered out and
   // redirected.
@@ -90,12 +88,9 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     );
 
   if (filteredAuthErrors && filteredAuthErrors.length > 0) {
-    console.log("GOD KNOWS FILTERED AUTH ERRORS", filteredAuthErrors);
     !isServer() && Router.push("/login?flash=You must be authenticated");
     return;
   }
-
-  console.log("STILL GOING?");
 
   const filteredRoutes =
     graphQLErrors &&

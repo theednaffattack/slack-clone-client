@@ -29,6 +29,7 @@ export type Query = {
   getChannelName: Scalars["String"];
   getAllChannelMembers: Array<User>;
   getAllChannelMessages: Array<Message>;
+  getAllChannelThreads: Array<Thread>;
   loadChannelsByTeamId: Array<Channel>;
   channelMembers?: Maybe<Array<Maybe<User>>>;
   loadDirectMessagesThreadById: Thread;
@@ -60,6 +61,11 @@ export type QueryGetAllChannelMembersArgs = {
 };
 
 export type QueryGetAllChannelMessagesArgs = {
+  teamId?: Maybe<Scalars["String"]>;
+  channelId?: Maybe<Scalars["String"]>;
+};
+
+export type QueryGetAllChannelThreadsArgs = {
   teamId?: Maybe<Scalars["String"]>;
   channelId?: Maybe<Scalars["String"]>;
 };
@@ -128,6 +134,7 @@ export type Channel = {
   public?: Maybe<Scalars["Boolean"]>;
   team: Array<Team>;
   invitees?: Maybe<Array<Maybe<User>>>;
+  threads?: Maybe<Array<Maybe<Thread>>>;
   created_by: User;
   created_at?: Maybe<Scalars["DateTime"]>;
   updated_at?: Maybe<Scalars["DateTime"]>;
@@ -185,6 +192,7 @@ export type Thread = {
   user: User;
   team?: Maybe<Team>;
   invitees: Array<User>;
+  channel?: Maybe<Channel>;
   created_at?: Maybe<Scalars["DateTime"]>;
   updated_at?: Maybe<Scalars["DateTime"]>;
 };
@@ -218,7 +226,7 @@ export type Mutation = {
   createUser: User;
   addTeamMemberByEmail: UserToTeamIdReferencesOnlyClass;
   addTeamMemberById: UserToTeamIdReferencesOnlyClass;
-  createTeam: Team;
+  createTeam: TeamResponse;
   teamLogin?: Maybe<User>;
   changePasswordFromContextUserid?: Maybe<User>;
   changePasswordFromToken?: Maybe<User>;
@@ -231,8 +239,10 @@ export type Mutation = {
   editUserInfo: User;
   adminEditUserInfo: UserClassTypeWithReferenceIds;
   signS3: SignedS3Payload;
+  signS3Files: SignedS3Payload;
   signS3GetObject: SignedS3Payload;
   addMessageToChannel: AddMessagePayload;
+  addThreadToChannel: AddThreadPayload;
   addChannelMember: Scalars["Boolean"];
   removeChannelMember: Scalars["Boolean"];
   createChannel: Channel;
@@ -314,12 +324,21 @@ export type MutationSignS3Args = {
   action: S3SignatureAction;
 };
 
+export type MutationSignS3FilesArgs = {
+  files: Array<FileInput_V2>;
+  action: S3SignatureAction;
+};
+
 export type MutationSignS3GetObjectArgs = {
   files: Array<FileInput>;
   action?: Maybe<S3SignatureAction>;
 };
 
 export type MutationAddMessageToChannelArgs = {
+  data: AddMessageToChannelInput;
+};
+
+export type MutationAddThreadToChannelArgs = {
   data: AddMessageToChannelInput;
 };
 
@@ -379,6 +398,26 @@ export type UserToTeamIdReferencesOnlyClass = {
   userId: Scalars["ID"];
   teamId: Scalars["ID"];
   teamRoleAuthorizations: Array<TeamRoleEnum>;
+};
+
+export type TeamResponse = {
+  __typename?: "TeamResponse";
+  errors?: Maybe<Array<FieldError>>;
+  uttData?: Maybe<UttData>;
+};
+
+export type FieldError = {
+  __typename?: "FieldError";
+  field: Scalars["String"];
+  message: Scalars["String"];
+};
+
+export type UttData = {
+  __typename?: "UttData";
+  name: Scalars["String"];
+  teamId: Scalars["String"];
+  userId: Scalars["String"];
+  userToTeamId: Scalars["String"];
 };
 
 export type PasswordInput = {
@@ -460,6 +499,15 @@ export type SignedS3SubPayload = {
   signedRequest: Scalars["String"];
 };
 
+export type FileInput_V2 = {
+  type: Scalars["String"];
+  lastModified: Scalars["Float"];
+  lastModifiedDate: Scalars["String"];
+  size: Scalars["Int"];
+  name: Scalars["String"];
+  webkitRelativePath: Scalars["String"];
+};
+
 export type FileInput = {
   id: Scalars["ID"];
   uri: Scalars["String"];
@@ -469,7 +517,7 @@ export type AddMessageToChannelInput = {
   channelId: Scalars["ID"];
   teamId: Scalars["ID"];
   created_at?: Maybe<Scalars["DateTime"]>;
-  invitees?: Maybe<Array<Maybe<Scalars["ID"]>>>;
+  invitees: Array<Scalars["ID"]>;
   message: Scalars["String"];
   images?: Maybe<Array<Maybe<Scalars["String"]>>>;
   files?: Maybe<Array<Maybe<FileInputHelper>>>;
@@ -486,6 +534,16 @@ export type AddMessagePayload = {
   channelId: Scalars["ID"];
   message: Message;
   user: User;
+  invitees?: Maybe<Array<Maybe<User>>>;
+};
+
+export type AddThreadPayload = {
+  __typename?: "AddThreadPayload";
+  success: Scalars["Boolean"];
+  channelId: Scalars["ID"];
+  threadId: Scalars["ID"];
+  message: Message;
+  sentBy: User;
   invitees?: Maybe<Array<Maybe<User>>>;
 };
 
@@ -617,6 +675,29 @@ export type AddTeamMemberByIdMutation = { __typename?: "Mutation" } & {
   >;
 };
 
+export type AddThreadToChannelMutationVariables = Exact<{
+  data: AddMessageToChannelInput;
+}>;
+
+export type AddThreadToChannelMutation = { __typename?: "Mutation" } & {
+  addThreadToChannel: { __typename?: "AddThreadPayload" } & Pick<
+    AddThreadPayload,
+    "success" | "channelId" | "threadId"
+  > & {
+      invitees?: Maybe<
+        Array<
+          Maybe<
+            { __typename?: "User" } & Pick<
+              User,
+              "id" | "name" | "username" | "profileImageUri"
+            >
+          >
+        >
+      >;
+      message: { __typename?: "Message" } & Pick<Message, "id" | "message">;
+    };
+};
+
 export type ChangePasswordFromContextUseridMutationVariables = Exact<{
   data: PasswordInput;
 }>;
@@ -643,7 +724,11 @@ export type CreateChannelMutationVariables = Exact<{
 }>;
 
 export type CreateChannelMutation = { __typename?: "Mutation" } & {
-  createChannel: { __typename?: "Channel" } & Pick<Channel, "id" | "name">;
+  createChannel: { __typename?: "Channel" } & Pick<Channel, "id" | "name"> & {
+      invitees?: Maybe<
+        Array<Maybe<{ __typename?: "User" } & Pick<User, "id" | "username">>>
+      >;
+    };
 };
 
 export type CreateDirectMessageMutationVariables = Exact<{
@@ -668,7 +753,19 @@ export type CreateTeamMutationVariables = Exact<{
 }>;
 
 export type CreateTeamMutation = { __typename?: "Mutation" } & {
-  createTeam: { __typename?: "Team" } & Pick<Team, "id" | "name">;
+  createTeam: { __typename?: "TeamResponse" } & {
+    errors?: Maybe<
+      Array<
+        { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
+      >
+    >;
+    uttData?: Maybe<
+      { __typename?: "UttData" } & Pick<
+        UttData,
+        "name" | "teamId" | "userId" | "userToTeamId"
+      >
+    >;
+  };
 };
 
 export type ForgotPasswordMutationVariables = Exact<{
@@ -693,6 +790,82 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: "Mutation" } & {
   register: { __typename?: "User" } & Pick<User, "id" | "name" | "username">;
+};
+
+export type SignS3FilesMutationVariables = Exact<{
+  files: Array<FileInput_V2>;
+  action: S3SignatureAction;
+}>;
+
+export type SignS3FilesMutation = { __typename?: "Mutation" } & {
+  signS3Files: { __typename?: "SignedS3Payload" } & {
+    signatures: Array<
+      { __typename?: "SignedS3SubPayload" } & Pick<
+        SignedS3SubPayload,
+        "uri" | "signedRequest"
+      >
+    >;
+  };
+};
+
+export type SignS3GetObjectMutationVariables = Exact<{
+  files: Array<FileInput>;
+  action?: Maybe<S3SignatureAction>;
+}>;
+
+export type SignS3GetObjectMutation = { __typename?: "Mutation" } & {
+  signS3GetObject: { __typename?: "SignedS3Payload" } & {
+    signatures: Array<
+      { __typename?: "SignedS3SubPayload" } & Pick<
+        SignedS3SubPayload,
+        "uri" | "signedRequest"
+      >
+    >;
+  };
+};
+
+export type SignS3MutationVariables = Exact<{
+  files: Array<ImageSubInput>;
+  action: S3SignatureAction;
+}>;
+
+export type SignS3Mutation = { __typename?: "Mutation" } & {
+  signS3: { __typename?: "SignedS3Payload" } & {
+    signatures: Array<
+      { __typename?: "SignedS3SubPayload" } & Pick<
+        SignedS3SubPayload,
+        "uri" | "signedRequest"
+      >
+    >;
+  };
+};
+
+export type GetAllChannelThreadsQueryVariables = Exact<{
+  channelId: Scalars["String"];
+  teamId: Scalars["String"];
+}>;
+
+export type GetAllChannelThreadsQuery = { __typename?: "Query" } & {
+  getAllChannelThreads: Array<
+    { __typename?: "Thread" } & Pick<Thread, "id" | "last_message"> & {
+        invitees: Array<
+          { __typename?: "User" } & Pick<
+            User,
+            "id" | "username" | "name" | "profileImageUri"
+          >
+        >;
+        messages?: Maybe<
+          Array<
+            Maybe<
+              { __typename?: "Message" } & Pick<
+                Message,
+                "id" | "message" | "created_at"
+              >
+            >
+          >
+        >;
+      }
+  >;
 };
 
 export type GetAllMyMessagesQueryVariables = Exact<{ [key: string]: never }>;
@@ -1076,6 +1249,68 @@ export type AddTeamMemberByIdMutationOptions = Apollo.BaseMutationOptions<
   AddTeamMemberByIdMutation,
   AddTeamMemberByIdMutationVariables
 >;
+export const AddThreadToChannelDocument = gql`
+  mutation AddThreadToChannel($data: AddMessageToChannelInput!) {
+    addThreadToChannel(data: $data) {
+      success
+      channelId
+      threadId
+      invitees {
+        id
+        name
+        username
+        profileImageUri
+      }
+      message {
+        id
+        message
+      }
+    }
+  }
+`;
+export type AddThreadToChannelMutationFn = Apollo.MutationFunction<
+  AddThreadToChannelMutation,
+  AddThreadToChannelMutationVariables
+>;
+
+/**
+ * __useAddThreadToChannelMutation__
+ *
+ * To run a mutation, you first call `useAddThreadToChannelMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddThreadToChannelMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addThreadToChannelMutation, { data, loading, error }] = useAddThreadToChannelMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useAddThreadToChannelMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    AddThreadToChannelMutation,
+    AddThreadToChannelMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    AddThreadToChannelMutation,
+    AddThreadToChannelMutationVariables
+  >(AddThreadToChannelDocument, baseOptions);
+}
+export type AddThreadToChannelMutationHookResult = ReturnType<
+  typeof useAddThreadToChannelMutation
+>;
+export type AddThreadToChannelMutationResult = Apollo.MutationResult<
+  AddThreadToChannelMutation
+>;
+export type AddThreadToChannelMutationOptions = Apollo.BaseMutationOptions<
+  AddThreadToChannelMutation,
+  AddThreadToChannelMutationVariables
+>;
 export const ChangePasswordFromContextUseridDocument = gql`
   mutation ChangePasswordFromContextUserid($data: PasswordInput!) {
     changePasswordFromContextUserid(data: $data) {
@@ -1181,6 +1416,10 @@ export const CreateChannelDocument = gql`
     createChannel(input: $input) {
       id
       name
+      invitees {
+        id
+        username
+      }
     }
   }
 `;
@@ -1294,8 +1533,16 @@ export type CreateDirectMessageMutationOptions = Apollo.BaseMutationOptions<
 export const CreateTeamDocument = gql`
   mutation CreateTeam($name: String!) {
     createTeam(name: $name) {
-      id
-      name
+      errors {
+        field
+        message
+      }
+      uttData {
+        name
+        teamId
+        userId
+        userToTeamId
+      }
     }
   }
 `;
@@ -1480,6 +1727,236 @@ export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<
   RegisterMutation,
   RegisterMutationVariables
+>;
+export const SignS3FilesDocument = gql`
+  mutation SignS3Files($files: [FileInput_v2!]!, $action: S3SignatureAction!) {
+    signS3Files(files: $files, action: $action) {
+      signatures {
+        uri
+        signedRequest
+      }
+    }
+  }
+`;
+export type SignS3FilesMutationFn = Apollo.MutationFunction<
+  SignS3FilesMutation,
+  SignS3FilesMutationVariables
+>;
+
+/**
+ * __useSignS3FilesMutation__
+ *
+ * To run a mutation, you first call `useSignS3FilesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignS3FilesMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signS3FilesMutation, { data, loading, error }] = useSignS3FilesMutation({
+ *   variables: {
+ *      files: // value for 'files'
+ *      action: // value for 'action'
+ *   },
+ * });
+ */
+export function useSignS3FilesMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    SignS3FilesMutation,
+    SignS3FilesMutationVariables
+  >
+) {
+  return Apollo.useMutation<SignS3FilesMutation, SignS3FilesMutationVariables>(
+    SignS3FilesDocument,
+    baseOptions
+  );
+}
+export type SignS3FilesMutationHookResult = ReturnType<
+  typeof useSignS3FilesMutation
+>;
+export type SignS3FilesMutationResult = Apollo.MutationResult<
+  SignS3FilesMutation
+>;
+export type SignS3FilesMutationOptions = Apollo.BaseMutationOptions<
+  SignS3FilesMutation,
+  SignS3FilesMutationVariables
+>;
+export const SignS3GetObjectDocument = gql`
+  mutation SignS3GetObject(
+    $files: [FileInput!]!
+    $action: S3SignatureAction = getObject
+  ) {
+    signS3GetObject(files: $files, action: $action) {
+      signatures {
+        uri
+        signedRequest
+      }
+    }
+  }
+`;
+export type SignS3GetObjectMutationFn = Apollo.MutationFunction<
+  SignS3GetObjectMutation,
+  SignS3GetObjectMutationVariables
+>;
+
+/**
+ * __useSignS3GetObjectMutation__
+ *
+ * To run a mutation, you first call `useSignS3GetObjectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignS3GetObjectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signS3GetObjectMutation, { data, loading, error }] = useSignS3GetObjectMutation({
+ *   variables: {
+ *      files: // value for 'files'
+ *      action: // value for 'action'
+ *   },
+ * });
+ */
+export function useSignS3GetObjectMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    SignS3GetObjectMutation,
+    SignS3GetObjectMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    SignS3GetObjectMutation,
+    SignS3GetObjectMutationVariables
+  >(SignS3GetObjectDocument, baseOptions);
+}
+export type SignS3GetObjectMutationHookResult = ReturnType<
+  typeof useSignS3GetObjectMutation
+>;
+export type SignS3GetObjectMutationResult = Apollo.MutationResult<
+  SignS3GetObjectMutation
+>;
+export type SignS3GetObjectMutationOptions = Apollo.BaseMutationOptions<
+  SignS3GetObjectMutation,
+  SignS3GetObjectMutationVariables
+>;
+export const SignS3Document = gql`
+  mutation SignS3($files: [ImageSubInput!]!, $action: S3SignatureAction!) {
+    signS3(files: $files, action: $action) {
+      signatures {
+        uri
+        signedRequest
+      }
+    }
+  }
+`;
+export type SignS3MutationFn = Apollo.MutationFunction<
+  SignS3Mutation,
+  SignS3MutationVariables
+>;
+
+/**
+ * __useSignS3Mutation__
+ *
+ * To run a mutation, you first call `useSignS3Mutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignS3Mutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signS3Mutation, { data, loading, error }] = useSignS3Mutation({
+ *   variables: {
+ *      files: // value for 'files'
+ *      action: // value for 'action'
+ *   },
+ * });
+ */
+export function useSignS3Mutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    SignS3Mutation,
+    SignS3MutationVariables
+  >
+) {
+  return Apollo.useMutation<SignS3Mutation, SignS3MutationVariables>(
+    SignS3Document,
+    baseOptions
+  );
+}
+export type SignS3MutationHookResult = ReturnType<typeof useSignS3Mutation>;
+export type SignS3MutationResult = Apollo.MutationResult<SignS3Mutation>;
+export type SignS3MutationOptions = Apollo.BaseMutationOptions<
+  SignS3Mutation,
+  SignS3MutationVariables
+>;
+export const GetAllChannelThreadsDocument = gql`
+  query GetAllChannelThreads($channelId: String!, $teamId: String!) {
+    getAllChannelThreads(teamId: $teamId, channelId: $channelId) {
+      id
+      invitees {
+        id
+        username
+        name
+        profileImageUri
+      }
+      last_message
+      messages {
+        id
+        message
+        created_at
+      }
+    }
+  }
+`;
+
+/**
+ * __useGetAllChannelThreadsQuery__
+ *
+ * To run a query within a React component, call `useGetAllChannelThreadsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllChannelThreadsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllChannelThreadsQuery({
+ *   variables: {
+ *      channelId: // value for 'channelId'
+ *      teamId: // value for 'teamId'
+ *   },
+ * });
+ */
+export function useGetAllChannelThreadsQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    GetAllChannelThreadsQuery,
+    GetAllChannelThreadsQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    GetAllChannelThreadsQuery,
+    GetAllChannelThreadsQueryVariables
+  >(GetAllChannelThreadsDocument, baseOptions);
+}
+export function useGetAllChannelThreadsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetAllChannelThreadsQuery,
+    GetAllChannelThreadsQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    GetAllChannelThreadsQuery,
+    GetAllChannelThreadsQueryVariables
+  >(GetAllChannelThreadsDocument, baseOptions);
+}
+export type GetAllChannelThreadsQueryHookResult = ReturnType<
+  typeof useGetAllChannelThreadsQuery
+>;
+export type GetAllChannelThreadsLazyQueryHookResult = ReturnType<
+  typeof useGetAllChannelThreadsLazyQuery
+>;
+export type GetAllChannelThreadsQueryResult = Apollo.QueryResult<
+  GetAllChannelThreadsQuery,
+  GetAllChannelThreadsQueryVariables
 >;
 export const GetAllMyMessagesDocument = gql`
   query GetAllMyMessages {

@@ -24,20 +24,21 @@ import { ChannelHoverBox } from "./channel-hover-box_v2";
 import { ChannelHoverButton } from "./channel-hover-button_v2";
 import { ControllerAction, ControllerState } from "./controller-accordion";
 
+interface ChannelAccordionProps {
+  channels: LoadChannelsByTeamIdQuery["loadChannelsByTeamId"];
+  dispatch: (value: ControllerAction) => void;
+  errorFromChannels: ApolloError | undefined;
+  router: Router;
+  state: ControllerState;
+}
+
 export function ChannelAccordion({
   channels,
   dispatch,
   errorFromChannels,
   router,
   state
-}: {
-  channels: LoadChannelsByTeamIdQuery["loadChannelsByTeamId"];
-
-  dispatch: (value: ControllerAction) => void;
-  errorFromChannels: ApolloError | undefined;
-  router: Router;
-  state: ControllerState;
-}) {
+}: ChannelAccordionProps) {
   const { channel: channelBase } = router.query;
 
   let channel: string;

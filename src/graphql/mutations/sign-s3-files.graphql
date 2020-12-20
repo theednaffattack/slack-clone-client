@@ -1,0 +1,8 @@
+mutation SignS3Files($files: [FileInput_v2!]!, $action: S3SignatureAction!) {
+  signS3Files(files: $files, action: $action) {
+    signatures {
+      uri
+      signedRequest
+    }
+  }
+}

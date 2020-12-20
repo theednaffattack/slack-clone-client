@@ -1,0 +1,11 @@
+mutation SignS3GetObject(
+  $files: [FileInput!]!
+  $action: S3SignatureAction = getObject
+) {
+  signS3GetObject(files: $files, action: $action) {
+    signatures {
+      uri
+      signedRequest
+    }
+  }
+}

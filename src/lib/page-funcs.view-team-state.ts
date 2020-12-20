@@ -21,7 +21,10 @@ interface HeaderProps {
   invitees: UserType[];
 }
 
-export type ViewerType = "channel_browser" | "messages_browser";
+export type ViewerType =
+  | "channel_browser"
+  | "messages_browser"
+  | "team_browser";
 
 export type ParsedUrlParam = string | null;
 
