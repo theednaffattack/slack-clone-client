@@ -239,6 +239,7 @@ export type Mutation = {
   editUserInfo: User;
   adminEditUserInfo: UserClassTypeWithReferenceIds;
   signS3: SignedS3Payload;
+  signS3Files: SignedS3Payload;
   signS3GetObject: SignedS3Payload;
   addMessageToChannel: AddMessagePayload;
   addThreadToChannel: AddThreadPayload;
@@ -320,6 +321,11 @@ export type MutationAdminEditUserInfoArgs = {
 
 export type MutationSignS3Args = {
   files: Array<ImageSubInput>;
+  action: S3SignatureAction;
+};
+
+export type MutationSignS3FilesArgs = {
+  files: Array<FileInput_V2>;
   action: S3SignatureAction;
 };
 
@@ -491,6 +497,15 @@ export type SignedS3SubPayload = {
   __typename?: "SignedS3SubPayload";
   uri: Scalars["String"];
   signedRequest: Scalars["String"];
+};
+
+export type FileInput_V2 = {
+  type: Scalars["String"];
+  lastModified: Scalars["Float"];
+  lastModifiedDate: Scalars["String"];
+  size: Scalars["Int"];
+  name: Scalars["String"];
+  webkitRelativePath: Scalars["String"];
 };
 
 export type FileInput = {
@@ -775,6 +790,54 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: "Mutation" } & {
   register: { __typename?: "User" } & Pick<User, "id" | "name" | "username">;
+};
+
+export type SignS3FilesMutationVariables = Exact<{
+  files: Array<FileInput_V2>;
+  action: S3SignatureAction;
+}>;
+
+export type SignS3FilesMutation = { __typename?: "Mutation" } & {
+  signS3Files: { __typename?: "SignedS3Payload" } & {
+    signatures: Array<
+      { __typename?: "SignedS3SubPayload" } & Pick<
+        SignedS3SubPayload,
+        "uri" | "signedRequest"
+      >
+    >;
+  };
+};
+
+export type SignS3GetObjectMutationVariables = Exact<{
+  files: Array<FileInput>;
+  action?: Maybe<S3SignatureAction>;
+}>;
+
+export type SignS3GetObjectMutation = { __typename?: "Mutation" } & {
+  signS3GetObject: { __typename?: "SignedS3Payload" } & {
+    signatures: Array<
+      { __typename?: "SignedS3SubPayload" } & Pick<
+        SignedS3SubPayload,
+        "uri" | "signedRequest"
+      >
+    >;
+  };
+};
+
+export type SignS3MutationVariables = Exact<{
+  files: Array<ImageSubInput>;
+  action: S3SignatureAction;
+}>;
+
+export type SignS3Mutation = { __typename?: "Mutation" } & {
+  signS3: { __typename?: "SignedS3Payload" } & {
+    signatures: Array<
+      { __typename?: "SignedS3SubPayload" } & Pick<
+        SignedS3SubPayload,
+        "uri" | "signedRequest"
+      >
+    >;
+  };
 };
 
 export type GetAllChannelThreadsQueryVariables = Exact<{
@@ -1664,6 +1727,167 @@ export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<
   RegisterMutation,
   RegisterMutationVariables
+>;
+export const SignS3FilesDocument = gql`
+  mutation SignS3Files($files: [FileInput_v2!]!, $action: S3SignatureAction!) {
+    signS3Files(files: $files, action: $action) {
+      signatures {
+        uri
+        signedRequest
+      }
+    }
+  }
+`;
+export type SignS3FilesMutationFn = Apollo.MutationFunction<
+  SignS3FilesMutation,
+  SignS3FilesMutationVariables
+>;
+
+/**
+ * __useSignS3FilesMutation__
+ *
+ * To run a mutation, you first call `useSignS3FilesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignS3FilesMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signS3FilesMutation, { data, loading, error }] = useSignS3FilesMutation({
+ *   variables: {
+ *      files: // value for 'files'
+ *      action: // value for 'action'
+ *   },
+ * });
+ */
+export function useSignS3FilesMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    SignS3FilesMutation,
+    SignS3FilesMutationVariables
+  >
+) {
+  return Apollo.useMutation<SignS3FilesMutation, SignS3FilesMutationVariables>(
+    SignS3FilesDocument,
+    baseOptions
+  );
+}
+export type SignS3FilesMutationHookResult = ReturnType<
+  typeof useSignS3FilesMutation
+>;
+export type SignS3FilesMutationResult = Apollo.MutationResult<
+  SignS3FilesMutation
+>;
+export type SignS3FilesMutationOptions = Apollo.BaseMutationOptions<
+  SignS3FilesMutation,
+  SignS3FilesMutationVariables
+>;
+export const SignS3GetObjectDocument = gql`
+  mutation SignS3GetObject(
+    $files: [FileInput!]!
+    $action: S3SignatureAction = getObject
+  ) {
+    signS3GetObject(files: $files, action: $action) {
+      signatures {
+        uri
+        signedRequest
+      }
+    }
+  }
+`;
+export type SignS3GetObjectMutationFn = Apollo.MutationFunction<
+  SignS3GetObjectMutation,
+  SignS3GetObjectMutationVariables
+>;
+
+/**
+ * __useSignS3GetObjectMutation__
+ *
+ * To run a mutation, you first call `useSignS3GetObjectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignS3GetObjectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signS3GetObjectMutation, { data, loading, error }] = useSignS3GetObjectMutation({
+ *   variables: {
+ *      files: // value for 'files'
+ *      action: // value for 'action'
+ *   },
+ * });
+ */
+export function useSignS3GetObjectMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    SignS3GetObjectMutation,
+    SignS3GetObjectMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    SignS3GetObjectMutation,
+    SignS3GetObjectMutationVariables
+  >(SignS3GetObjectDocument, baseOptions);
+}
+export type SignS3GetObjectMutationHookResult = ReturnType<
+  typeof useSignS3GetObjectMutation
+>;
+export type SignS3GetObjectMutationResult = Apollo.MutationResult<
+  SignS3GetObjectMutation
+>;
+export type SignS3GetObjectMutationOptions = Apollo.BaseMutationOptions<
+  SignS3GetObjectMutation,
+  SignS3GetObjectMutationVariables
+>;
+export const SignS3Document = gql`
+  mutation SignS3($files: [ImageSubInput!]!, $action: S3SignatureAction!) {
+    signS3(files: $files, action: $action) {
+      signatures {
+        uri
+        signedRequest
+      }
+    }
+  }
+`;
+export type SignS3MutationFn = Apollo.MutationFunction<
+  SignS3Mutation,
+  SignS3MutationVariables
+>;
+
+/**
+ * __useSignS3Mutation__
+ *
+ * To run a mutation, you first call `useSignS3Mutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignS3Mutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signS3Mutation, { data, loading, error }] = useSignS3Mutation({
+ *   variables: {
+ *      files: // value for 'files'
+ *      action: // value for 'action'
+ *   },
+ * });
+ */
+export function useSignS3Mutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    SignS3Mutation,
+    SignS3MutationVariables
+  >
+) {
+  return Apollo.useMutation<SignS3Mutation, SignS3MutationVariables>(
+    SignS3Document,
+    baseOptions
+  );
+}
+export type SignS3MutationHookResult = ReturnType<typeof useSignS3Mutation>;
+export type SignS3MutationResult = Apollo.MutationResult<SignS3Mutation>;
+export type SignS3MutationOptions = Apollo.BaseMutationOptions<
+  SignS3Mutation,
+  SignS3MutationVariables
 >;
 export const GetAllChannelThreadsDocument = gql`
   query GetAllChannelThreads($channelId: String!, $teamId: String!) {
