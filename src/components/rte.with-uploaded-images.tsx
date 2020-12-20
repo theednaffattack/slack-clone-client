@@ -20,9 +20,13 @@ export function withUploadedImages(editor: ReactEditor) {
         if (mime === "image") {
           reader.addEventListener("load", () => {
             const url = reader.result;
-            console.log("VIEW URL INFO", { url, type: typeof url });
 
-            insertImage({ editor, type: "data-image", url: url as string });
+            insertImage({
+              editor,
+              type: "data-image",
+              url: url as string,
+              file: file
+            });
           });
 
           reader.readAsDataURL(file);
