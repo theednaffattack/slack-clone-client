@@ -2,7 +2,7 @@ import { Flex, IconButton } from "@chakra-ui/react";
 import produce from "immer";
 import React from "react";
 import { IconType } from "react-icons";
-import { IoIosAttach, IoIosSend } from "react-icons/io";
+import { IoIosSend } from "react-icons/io";
 import {
   MdCode,
   MdFormatBold,
