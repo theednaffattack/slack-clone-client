@@ -158,13 +158,13 @@ export function serialize(node: Node): string {
       return `<h2>${children}</h2>`;
     case "image":
       if (node.url) {
-        return `<img src=${node.url} />`;
+        return `<img src="${node.url}" />`;
       } else {
         return `<img src="//via.placeholder.com/350x150" />`;
       }
-    case "image-data":
+    case "data-image":
       if (node.url) {
-        return `<img src=${node.url} />`;
+        return `<img src="${node.url}" />`;
       } else {
         return `<img src="//via.placeholder.com/350x150" />`;
       }
