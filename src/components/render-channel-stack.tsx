@@ -7,6 +7,7 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
+import { clearAllBodyScrollLocks, disableBodyScroll } from "body-scroll-lock";
 import React, { useEffect, useRef } from "react";
 import { useGetAllChannelThreadsQuery } from "../generated/graphql";
 import { deserialize_v2 } from "./rte.serialize";
@@ -38,6 +39,13 @@ export function RenderChannelStack({
       behavior: "auto",
       top: messageBottomEl.current?.offsetTop
     });
+
+    if (messageEl && messageEl.current) {
+      disableBodyScroll(messageEl.current);
+    }
+    return () => {
+      clearAllBodyScrollLocks();
+    };
   }, [data]);
 
   if (!teamId || !channelId) {
