@@ -847,7 +847,10 @@ export type GetAllChannelThreadsQueryVariables = Exact<{
 
 export type GetAllChannelThreadsQuery = { __typename?: "Query" } & {
   getAllChannelThreads: Array<
-    { __typename?: "Thread" } & Pick<Thread, "id" | "last_message"> & {
+    { __typename?: "Thread" } & Pick<
+      Thread,
+      "id" | "created_at" | "last_message"
+    > & {
         invitees: Array<
           { __typename?: "User" } & Pick<
             User,
@@ -1893,6 +1896,7 @@ export const GetAllChannelThreadsDocument = gql`
   query GetAllChannelThreads($channelId: String!, $teamId: String!) {
     getAllChannelThreads(teamId: $teamId, channelId: $channelId) {
       id
+      created_at
       invitees {
         id
         username
