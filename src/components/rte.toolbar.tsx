@@ -36,6 +36,7 @@ import { SpecialInsertButton } from "./rte.special-insert-button";
 interface ToolbarProps {
   channelId: string;
   editor: ReactEditor;
+  inputRef: React.RefObject<HTMLInputElement>;
   invitees: string[];
   openFileDialog: () => void;
   setIndex: React.Dispatch<React.SetStateAction<number>>;
@@ -148,6 +149,7 @@ export function Toolbar({
           borderColor="transparent" // "#ccd0d5"
           color="#f5f6f7" // "#4b4f56"
           colorScheme="teal"
+          isDisabled={!ReactEditor.isFocused(editor)}
           fontSize="14px"
           fontWeight="semibold"
           icon={<IoIosSend size="1.4em" />}
