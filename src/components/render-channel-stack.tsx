@@ -1,16 +1,26 @@
+import { ChevronDownIcon } from "@chakra-ui/icons";
 import {
   Box,
+  Button,
   Center,
   Flex,
   Heading,
-  StackDivider,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuGroup,
+  MenuItem,
+  MenuList,
+  Portal,
   Text,
   VStack
 } from "@chakra-ui/react";
 import { clearAllBodyScrollLocks, disableBodyScroll } from "body-scroll-lock";
+import { format } from "date-fns";
 import React, { useEffect, useRef } from "react";
 import { useGetAllChannelThreadsQuery } from "../generated/graphql";
-import { deserialize_v2 } from "./rte.serialize";
+import { ChannelStackDivider } from "./channel-stack-divider";
+import { ThreadCard } from "./thread-card";
 
 interface RenderChannelStackProps {
   teamId: string;
@@ -51,7 +61,7 @@ export function RenderChannelStack({
   if (!teamId || !channelId) {
     body = (
       <Center>
-        <Heading>Someting is missing!</Heading>
+        <Heading>Something is missing!</Heading>
         <Text>Team ID: {teamId}</Text>
         <Text>Channel ID: {channelId}</Text>
       </Center>
@@ -86,21 +96,52 @@ export function RenderChannelStack({
   } else {
     body = data?.getAllChannelThreads.map((thread, index) => {
       return (
-        <Box
-          key={`${thread?.id}-messages-list`}
-          as="li"
-          // h="40px"
-          mx={5}
+        <Flex
           mt={index === 0 ? "auto" : 2}
-          listStyleType="none"
+          as="li"
+          key={`${thread?.id}-messages-list`}
+          width="100%"
+          flexDirection="column"
         >
-          {thread.messages?.map((msg) => {
-            if (msg) {
-              return <Flex key={msg.id}>{deserialize_v2(msg.message)}</Flex>;
-            }
-            return;
-          })}
-        </Box>
+          <ChannelStackDivider position="relative">
+            <Flex
+              position="absolute"
+              top="50%"
+              left="50%"
+              transform="translate(-50%, -50%)"
+              zIndex={1}
+            >
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  // colorScheme="pink"
+                  bg="#fff"
+                  borderWidth="1px"
+                  borderColor="#E2E8F0"
+                  rightIcon={<ChevronDownIcon />}
+                  borderRadius="100px 100px 100px 100px"
+                  size="sm"
+                >
+                  <Text size="sm">
+                    {format(Date.parse(thread.created_at), "EEEE, MMMM co")}
+                  </Text>
+                </MenuButton>
+                <Portal>
+                  <MenuList id="my-list">
+                    <MenuGroup title="Jump to...">
+                      <MenuItem>The very beginning</MenuItem>
+                    </MenuGroup>
+                    <MenuDivider />
+                    <MenuGroup>
+                      <MenuItem>Jump to a specific date</MenuItem>
+                    </MenuGroup>
+                  </MenuList>
+                </Portal>
+              </Menu>
+            </Flex>
+          </ChannelStackDivider>
+          <ThreadCard thread={thread} messages={thread.messages} />
+        </Flex>
       );
     });
   }
@@ -111,12 +152,12 @@ export function RenderChannelStack({
       ref={messageEl}
       gridColumn={3}
       gridRow={2}
-      divider={<StackDivider key={Math.random()} borderColor="gray.200" />}
-      spacing={4}
+      spacing={0}
       align="stretch"
       as="ul"
       h="100%"
       overflow="auto"
+      position="relative"
     >
       {body}
 
