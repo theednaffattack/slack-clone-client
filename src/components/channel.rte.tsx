@@ -429,7 +429,7 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
     <Flex
       flexDirection="column"
       border="1px solid #888"
-      mx={3}
+      mx={4}
       borderRadius="4px"
       overflow="hidden"
     >
