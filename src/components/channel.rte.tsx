@@ -1,7 +1,6 @@
 import { Flex } from "@chakra-ui/react";
 import { Picker } from "emoji-mart";
 import "emoji-mart/css/emoji-mart.css";
-import produce from "immer";
 import isHotkey from "is-hotkey";
 import React, {
   useCallback,
@@ -21,9 +20,6 @@ import {
   withReact
 } from "slate-react";
 import {
-  GetAllChannelThreadsDocument,
-  GetAllChannelThreadsQuery,
-  GetAllChannelThreadsQueryVariables,
   S3SignatureAction,
   useAddThreadToChannelMutation,
   useSignS3FilesMutation
@@ -82,10 +78,10 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
   channelName,
   invitees,
   setValue: setFormValue,
-  teamId,
-  value: formValue
+  teamId
+  // value: formValue
 }) => {
-  const [addThreadMessage, { client }] = useAddThreadToChannelMutation();
+  const [addThreadMessage] = useAddThreadToChannelMutation();
   const [signFile] = useSignS3FilesMutation();
   const mentionPanelRef = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState<Node[]>(RESET);
@@ -193,74 +189,6 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
           console.log("STRING VLAUES", strValues.join(""));
 
           addThreadMessage({
-            update: (cache, data) => {
-              let threadsInCache:
-                | GetAllChannelThreadsQuery
-                | null
-                | undefined = undefined;
-              try {
-                threadsInCache = cache.readQuery<
-                  GetAllChannelThreadsQuery,
-                  GetAllChannelThreadsQueryVariables
-                >({
-                  query: GetAllChannelThreadsDocument,
-                  variables: {
-                    channelId,
-                    teamId
-                  }
-                });
-              } catch (error) {
-                console.warn("VIEW CACHE ERROR", error);
-              }
-
-              if (
-                threadsInCache &&
-                data.data !== null &&
-                data.data !== undefined &&
-                data.data.addThreadToChannel.invitees &&
-                data.data.addThreadToChannel.invitees.length > 0
-              ) {
-                try {
-                  client.writeQuery<
-                    GetAllChannelThreadsQuery,
-                    GetAllChannelThreadsQueryVariables
-                  >({
-                    // Use immer to push our new message
-                    // onto the end of what's currently
-                    // in cache, updating the UI.
-                    data: produce(threadsInCache, (staged) => {
-                      if (
-                        staged &&
-                        data &&
-                        data.data !== null &&
-                        data.data !== undefined &&
-                        data.data.addThreadToChannel &&
-                        data.data.addThreadToChannel.invitees &&
-                        data.data.addThreadToChannel.invitees.length > 0
-                      ) {
-                        staged.getAllChannelThreads.push({
-                          invitees: [], // [...data.data.addThreadToChannel.invitees],
-                          __typename: "Thread",
-                          id: data.data?.addThreadToChannel.threadId,
-                          last_message:
-                            data.data.addThreadToChannel.message.message,
-                          messages: [data.data.addThreadToChannel.message]
-                        });
-                      } else {
-                        return threadsInCache;
-                      }
-                    }),
-                    query: GetAllChannelThreadsDocument,
-                    variables: { teamId, channelId }
-                  });
-                } catch (error) {
-                  console.log(
-                    "WRITE QUERY ERROR (ADD THREAD TO CHANNEL)",
-                    error
-                  );
-                }
-              }
-            },
             variables: {
               data: {
                 channelId,
@@ -364,9 +292,9 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
   }, [chars.length, editor, index, search, target]);
 
   // BEGIN DROPZONE SECTION
-  const [files, setFiles] = React.useState<
-    { type: "data-image" | "image"; url: string }[] | null
-  >(null);
+  // const [files, setFiles] = React.useState<
+  //   { type: "data-image" | "image"; url: string }[] | null
+  // >(null);
 
   // React.useEffect(() => {
   //   if (files) {
@@ -390,7 +318,7 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
 
   // END DROPZONE SECTION
 
-  const [focused, setFocused] = React.useState(false);
+  const [, setFocused] = React.useState(false);
   const savedSelection = React.useRef(editor.selection);
   const onFocus = React.useCallback(() => {
     setFocused(true);
@@ -406,7 +334,6 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
     savedSelection.current = editor.selection;
   }, [editor]);
 
-  const divRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const openFileDialog = () => {
     if (inputRef && inputRef.current) {
@@ -415,15 +342,15 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
       inputRef.current?.click();
     }
   };
-  const focusEditor = React.useCallback(
-    (e: React.MouseEvent) => {
-      if (e.target === divRef.current) {
-        ReactEditor.focus(editor);
-        e.preventDefault();
-      }
-    },
-    [editor]
-  );
+  // const focusEditor = React.useCallback(
+  //   (e: React.MouseEvent) => {
+  //     if (e.target === divRef.current) {
+  //       ReactEditor.focus(editor);
+  //       e.preventDefault();
+  //     }
+  //   },
+  //   [editor]
+  // );
 
   return (
     <Flex
@@ -455,7 +382,7 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
             const afterMatch = afterText.match(/^(\s|$)/);
 
             const atSymbolEntered = value.some((item) => {
-              return item.children.some((subItem: any) => {
+              return (item.children as any[]).some((subItem: any) => {
                 return subItem.text === "@";
               });
             });

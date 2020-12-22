@@ -114,10 +114,10 @@ export function insertMultipleImages({
   imageNodes
 }: InsertMultipleImagesProps): void {
   const text = { text: "" };
-  const newLine = {
-    type: "paragraph",
-    children: [text]
-  };
+  // const newLine = {
+  //   type: "paragraph",
+  //   children: [text]
+  // };
 
   const listNode = [
     {

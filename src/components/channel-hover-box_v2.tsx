@@ -29,10 +29,11 @@ export const ChannelHoverBox: React.FC<ChannelHoverBoxProps> = ({
         if (name === "channels") {
           hoverDispatch({ type: "channelToggleTriggerHover", event: "enter" });
         } else {
-          hoverDispatch({
-            type: "otherItemHover",
-            payload: { name: "Threads", event: "enter", index: 0 }
-          });
+          return;
+          // hoverDispatch({
+          //   type: "otherItemHover",
+          //   payload: { options: { name: "threads",, index: 0 } }
+          // });
         }
       }}
       onMouseLeave={(evt) => {
@@ -45,10 +46,11 @@ export const ChannelHoverBox: React.FC<ChannelHoverBoxProps> = ({
         if (name === "channels") {
           hoverDispatch({ type: "channelToggleTriggerHover", event: "leave" });
         } else {
-          hoverDispatch({
-            type: "otherItemHover",
-            payload: { name: "Threads", event: "leave", index: 0 }
-          });
+          return;
+          // hoverDispatch({
+          //   type: "otherItemHover",
+          //   payload: { name: "Threads", event: "leave", index: 0 }
+          // });
         }
 
         evt.preventDefault();

@@ -56,30 +56,30 @@ export function ShortcutsPanel() {
   );
 }
 
-interface HoverLinkProps {
-  children: React.ReactNode;
-}
+// interface HoverLinkProps {
+//   children: React.ReactNode;
+// }
 
-function HoverLink({ children }: HoverLinkProps) {
-  const [hoverState, setHoverState] = useState<
-    "is_hovering" | "is_not_hovering"
-  >("is_not_hovering");
-  function handleMouseEnter() {
-    setHoverState("is_hovering");
-  }
-  function handleMouseLeave() {
-    setHoverState("is_not_hovering");
-  }
-  return (
-    <a
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        backgroundColor:
-          hoverState === "is_hovering" ? "rgba(0,0,0,0.25)" : "transparent"
-      }}
-    >
-      {children}
-    </a>
-  );
-}
+// function HoverLink({ children }: HoverLinkProps) {
+//   const [hoverState, setHoverState] = useState<
+//     "is_hovering" | "is_not_hovering"
+//   >("is_not_hovering");
+//   function handleMouseEnter() {
+//     setHoverState("is_hovering");
+//   }
+//   function handleMouseLeave() {
+//     setHoverState("is_not_hovering");
+//   }
+//   return (
+//     <a
+//       onMouseEnter={handleMouseEnter}
+//       onMouseLeave={handleMouseLeave}
+//       style={{
+//         backgroundColor:
+//           hoverState === "is_hovering" ? "rgba(0,0,0,0.25)" : "transparent"
+//       }}
+//     >
+//       {children}
+//     </a>
+//   );
+// }

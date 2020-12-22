@@ -7,15 +7,15 @@ import React, { ReactElement, useState } from "react";
 import { Wrapper } from "../../components/box-wrapper";
 import { InputField } from "../../components/forms.input-field";
 import {
-  ChangePasswordMutation,
+  ChangePasswordFromTokenMutation,
   FieldError,
-  useChangePasswordMutation
+  useChangePasswordFromTokenMutation
 } from "../../generated/graphql";
 import { formatValidationErrors } from "../../lib/utilities.graphQLErrors.format-apollo-validation-errors";
 import { toErrorMap } from "../../lib/utilities.toErrorMap";
 
 const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
-  const [changePassword] = useChangePasswordMutation();
+  const [changePassword] = useChangePasswordFromTokenMutation();
   const [tokenErrorHelper, setTokenErrorHelper] = useState<ReactElement>();
   const router = useRouter();
   return (
@@ -33,15 +33,16 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
         });
         let validationErrors: FieldError[];
         if (response.errors) {
-          validationErrors = formatValidationErrors<ChangePasswordMutation>(
-            response.errors
-          );
+          validationErrors = formatValidationErrors<
+            ChangePasswordFromTokenMutation
+          >(response.errors);
           const errorMap = toErrorMap(validationErrors);
           setErrors(errorMap);
         }
 
-        const changePassErrors = response.data?.changePassword?.errors;
-        const successfulUser = response.data?.changePassword?.user;
+        const changePassErrors = response.data?.changePasswordFromToken?.errors;
+        const successfulUser =
+          response.data?.changePasswordFromToken?.user?.username;
 
         if (changePassErrors) {
           const errorMap = toErrorMap(changePassErrors);

@@ -1,5 +1,4 @@
 import { Flex, IconButton } from "@chakra-ui/react";
-import produce from "immer";
 import React from "react";
 import { IconType } from "react-icons";
 import { IoIosSend } from "react-icons/io";
@@ -18,12 +17,7 @@ import {
 import { VscMention } from "react-icons/vsc";
 import { Node, Transforms } from "slate";
 import { ReactEditor } from "slate-react";
-import {
-  GetAllChannelThreadsDocument,
-  GetAllChannelThreadsQuery,
-  GetAllChannelThreadsQueryVariables,
-  useAddThreadToChannelMutation
-} from "../generated/graphql";
+import { useAddThreadToChannelMutation } from "../generated/graphql";
 import { AttachFileButton } from "./rte.attach-file-button";
 import { BlockButton } from "./rte.block-button";
 import { EmojiPicker } from "./rte.emoji-picker";
@@ -74,7 +68,7 @@ export function Toolbar({
   teamId,
   value
 }: ToolbarProps) {
-  const [addThreadMessage, { client }] = useAddThreadToChannelMutation();
+  const [addThreadMessage] = useAddThreadToChannelMutation();
   return (
     <Flex alignItems="center" bg="#f5f6f7">
       <Flex>
@@ -177,71 +171,6 @@ export function Toolbar({
             const strValues = value.map((node) => serialize(node)).join("");
 
             addThreadMessage({
-              update: (cache, data) => {
-                let threadsInCache;
-                try {
-                  threadsInCache = cache.readQuery<
-                    GetAllChannelThreadsQuery,
-                    GetAllChannelThreadsQueryVariables
-                  >({
-                    query: GetAllChannelThreadsDocument,
-                    variables: {
-                      channelId,
-                      teamId
-                    }
-                  });
-                } catch (error) {
-                  console.warn("VIEW CACHE ERROR", error);
-                }
-
-                if (
-                  threadsInCache &&
-                  data.data !== null &&
-                  data.data !== undefined &&
-                  data.data.addThreadToChannel.invitees &&
-                  data.data.addThreadToChannel.invitees.length > 0
-                ) {
-                  try {
-                    client.writeQuery<
-                      GetAllChannelThreadsQuery,
-                      GetAllChannelThreadsQueryVariables
-                    >({
-                      // Use immer to push our new message
-                      // onto the end of what's currently
-                      // in cache, updating the UI.
-                      data: produce(threadsInCache, (staged) => {
-                        if (
-                          staged &&
-                          data &&
-                          data.data !== null &&
-                          data.data !== undefined &&
-                          data.data.addThreadToChannel &&
-                          data.data.addThreadToChannel.invitees &&
-                          data.data.addThreadToChannel.invitees.length > 0
-                        ) {
-                          staged.getAllChannelThreads.push({
-                            invitees: [], // [...data.data.addThreadToChannel.invitees],
-                            __typename: "Thread",
-                            id: data.data?.addThreadToChannel.threadId,
-                            last_message:
-                              data.data.addThreadToChannel.message.message,
-                            messages: [data.data.addThreadToChannel.message]
-                          });
-                        } else {
-                          return threadsInCache;
-                        }
-                      }),
-                      query: GetAllChannelThreadsDocument,
-                      variables: { teamId, channelId }
-                    });
-                  } catch (error) {
-                    console.log(
-                      "WRITE QUERY ERROR (ADD THREAD TO CHANNEL)",
-                      error
-                    );
-                  }
-                }
-              },
               variables: {
                 data: {
                   channelId,

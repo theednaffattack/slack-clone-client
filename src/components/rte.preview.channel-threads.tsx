@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { createEditor, Node } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
 
-import { Element } from "./rte.element.channel-threads";
+import { Element } from "./rte.element";
 import { Leaf } from "./rte.leaf";
 
 interface PreviewProps {

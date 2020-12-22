@@ -7,7 +7,7 @@ import {
   LoadChannelsByTeamIdQuery,
   LoadChannelsByTeamIdQueryVariables,
   useCreateChannelMutation
-} from "../../generated/graphql";
+} from "../generated/graphql";
 
 type CreateChannelFormProps = {
   children?: React.ReactNode;

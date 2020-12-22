@@ -27,23 +27,3 @@ export function formatFilename(filename: string): string {
   const newFileName = `${date}-${randomString}-${cleanedFileameWithoutExt}.${fileExt}`;
   return newFileName;
 }
-
-function formatFilename_Original(filename: string): string {
-  const date = format(new Date(), "yyyyMMdd");
-  const randomString = Math.random().toString(36).substring(2, 7);
-  const cleanFileName = filename.toLowerCase().replace(/[^a-z0-9]/g, "-");
-  const newFilename = `images/${date}-${randomString}-${cleanFileName}`;
-  return newFilename.substring(0, 60);
-}
-
-export async function submit(file: File) {
-  const response = await s3SignFile({
-    variables: {
-      filename: formatFilename(file.name),
-      filetype: file.type
-    }
-  });
-
-  const { signedRequest, uri } = response.data.signS3File;
-  await uploadToS3(file, signedRequest);
-}

@@ -75,7 +75,7 @@ const Login: NextPage<LoginProps> = ({ router }) => {
           }
 
           // SUCCESS
-          if (response.data?.login?.username) {
+          if (response.data?.login.user?.username) {
             // if we've set a redirect after login,
             // follow it. Otherwise go to home page.
             if (typeof router.query.next === "string") {

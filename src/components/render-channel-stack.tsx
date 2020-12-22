@@ -36,13 +36,39 @@ export function RenderChannelStack({
 
   let body;
 
-  const { data, error, loading } = useGetAllChannelThreadsQuery({
+  const {
+    data,
+    error,
+    loading
+    // subscribeToMore
+  } = useGetAllChannelThreadsQuery({
     skip: !channelId,
     variables: {
       channelId,
       teamId
     }
   });
+
+  // subscribeToMore({
+  //   document: AddThreadToChannelDocument,
+  //   updateQuery: (prev, { subscriptionData }) => {
+
+  //     if (!subscriptionData.data) return prev;
+  //     const newLink = subscriptionData.data.;
+  //     const exists = prev.feed.links.find(
+  //       ({ id }) => id === newLink.id
+  //     );
+  //     if (exists) return prev;
+
+  //     return Object.assign({}, prev, {
+  //       feed: {
+  //         links: [newLink, ...prev.feed.links],
+  //         count: prev.feed.links.length + 1,
+  //         __typename: prev.feed.__typename
+  //       }
+  //     });
+  //   }
+  // });
 
   useEffect(() => {
     messageEl.current?.scrollTo({

@@ -18,7 +18,7 @@ import {
   viewControllerReducer,
   ViewerType
 } from "../../lib/page-funcs.view-team-state";
-import { CreateChannelForm } from "./create-channel-form";
+import { CreateChannelForm } from "../../components/create-channel-form";
 type UrlParamType = string | string[] | undefined;
 
 interface ParseDestructure {
@@ -79,7 +79,6 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
       });
     }
   }, [viewControllerDispatch, dataTeams, router.pathname, router.query]);
-  const favoritedAlready = false;
   return (
     <Grid
       height="100%"

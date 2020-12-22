@@ -25,7 +25,7 @@ export interface NodeExample {
   type?: NodeType;
 }
 
-const deserializeFunc = (el: any, key: string) => {
+const deserializeFunc = (el: any, key: any) => {
   if (el.nodeType === 3) {
     return el.textContent;
   } else if (el.nodeType !== 1) {

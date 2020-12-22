@@ -229,12 +229,12 @@ export type Mutation = {
   createTeam: TeamResponse;
   teamLogin?: Maybe<User>;
   changePasswordFromContextUserid?: Maybe<User>;
-  changePasswordFromToken?: Maybe<User>;
+  changePasswordFromToken: ChangePasswordResponse;
   confirmUser: Scalars["Boolean"];
   forgotPassword: Scalars["Boolean"];
-  login?: Maybe<User>;
+  login: LoginResponse;
   logout: Scalars["Boolean"];
-  register: User;
+  register: RegisterResponse;
   addProfilePicture: UploadProfilePictueReturnType;
   editUserInfo: User;
   adminEditUserInfo: UserClassTypeWithReferenceIds;
@@ -427,6 +427,24 @@ export type PasswordInput = {
 export type ChangePasswordInput = {
   password: Scalars["String"];
   token?: Maybe<Scalars["String"]>;
+};
+
+export type ChangePasswordResponse = {
+  __typename?: "ChangePasswordResponse";
+  errors?: Maybe<Array<FieldError>>;
+  user?: Maybe<User>;
+};
+
+export type LoginResponse = {
+  __typename?: "LoginResponse";
+  errors?: Maybe<Array<FieldError>>;
+  user?: Maybe<User>;
+};
+
+export type RegisterResponse = {
+  __typename?: "RegisterResponse";
+  errors?: Maybe<Array<FieldError>>;
+  user?: Maybe<User>;
 };
 
 export type UploadProfilePictureInput = {
@@ -698,6 +716,23 @@ export type AddThreadToChannelMutation = { __typename?: "Mutation" } & {
     };
 };
 
+export type ChangePasswordFromTokenMutationVariables = Exact<{
+  data: ChangePasswordInput;
+}>;
+
+export type ChangePasswordFromTokenMutation = { __typename?: "Mutation" } & {
+  changePasswordFromToken: { __typename?: "ChangePasswordResponse" } & {
+    errors?: Maybe<
+      Array<
+        { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
+      >
+    >;
+    user?: Maybe<
+      { __typename?: "User" } & Pick<User, "id" | "name" | "username">
+    >;
+  };
+};
+
 export type ChangePasswordFromContextUseridMutationVariables = Exact<{
   data: PasswordInput;
 }>;
@@ -789,7 +824,16 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 export type RegisterMutation = { __typename?: "Mutation" } & {
-  register: { __typename?: "User" } & Pick<User, "id" | "name" | "username">;
+  register: { __typename?: "RegisterResponse" } & {
+    errors?: Maybe<
+      Array<
+        { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
+      >
+    >;
+    user?: Maybe<
+      { __typename?: "User" } & Pick<User, "id" | "name" | "username">
+    >;
+  };
 };
 
 export type SignS3FilesMutationVariables = Exact<{
@@ -1002,14 +1046,21 @@ export type LoadDirectMessagesThreadByIdQuery = { __typename?: "Query" } & {
 };
 
 export type LoginMutationVariables = Exact<{
-  username: Scalars["String"];
   password: Scalars["String"];
+  username: Scalars["String"];
 }>;
 
 export type LoginMutation = { __typename?: "Mutation" } & {
-  login?: Maybe<
-    { __typename?: "User" } & Pick<User, "id" | "name" | "username">
-  >;
+  login: { __typename?: "LoginResponse" } & {
+    errors?: Maybe<
+      Array<
+        { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
+      >
+    >;
+    user?: Maybe<
+      { __typename?: "User" } & Pick<User, "id" | "name" | "username">
+    >;
+  };
 };
 
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
@@ -1313,6 +1364,64 @@ export type AddThreadToChannelMutationResult = Apollo.MutationResult<
 export type AddThreadToChannelMutationOptions = Apollo.BaseMutationOptions<
   AddThreadToChannelMutation,
   AddThreadToChannelMutationVariables
+>;
+export const ChangePasswordFromTokenDocument = gql`
+  mutation ChangePasswordFromToken($data: ChangePasswordInput!) {
+    changePasswordFromToken(data: $data) {
+      errors {
+        field
+        message
+      }
+      user {
+        id
+        name
+        username
+      }
+    }
+  }
+`;
+export type ChangePasswordFromTokenMutationFn = Apollo.MutationFunction<
+  ChangePasswordFromTokenMutation,
+  ChangePasswordFromTokenMutationVariables
+>;
+
+/**
+ * __useChangePasswordFromTokenMutation__
+ *
+ * To run a mutation, you first call `useChangePasswordFromTokenMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangePasswordFromTokenMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changePasswordFromTokenMutation, { data, loading, error }] = useChangePasswordFromTokenMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useChangePasswordFromTokenMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ChangePasswordFromTokenMutation,
+    ChangePasswordFromTokenMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ChangePasswordFromTokenMutation,
+    ChangePasswordFromTokenMutationVariables
+  >(ChangePasswordFromTokenDocument, baseOptions);
+}
+export type ChangePasswordFromTokenMutationHookResult = ReturnType<
+  typeof useChangePasswordFromTokenMutation
+>;
+export type ChangePasswordFromTokenMutationResult = Apollo.MutationResult<
+  ChangePasswordFromTokenMutation
+>;
+export type ChangePasswordFromTokenMutationOptions = Apollo.BaseMutationOptions<
+  ChangePasswordFromTokenMutation,
+  ChangePasswordFromTokenMutationVariables
 >;
 export const ChangePasswordFromContextUseridDocument = gql`
   mutation ChangePasswordFromContextUserid($data: PasswordInput!) {
@@ -1686,9 +1795,15 @@ export type LogoutMutationOptions = Apollo.BaseMutationOptions<
 export const RegisterDocument = gql`
   mutation Register($data: RegisterInput!) {
     register(data: $data) {
-      id
-      name
-      username
+      errors {
+        field
+        message
+      }
+      user {
+        id
+        name
+        username
+      }
     }
   }
 `;
@@ -2347,11 +2462,17 @@ export type LoadDirectMessagesThreadByIdQueryResult = Apollo.QueryResult<
   LoadDirectMessagesThreadByIdQueryVariables
 >;
 export const LoginDocument = gql`
-  mutation Login($username: String!, $password: String!) {
-    login(username: $username, password: $password) {
-      id
-      name
-      username
+  mutation Login($password: String!, $username: String!) {
+    login(password: $password, username: $username) {
+      errors {
+        field
+        message
+      }
+      user {
+        id
+        name
+        username
+      }
     }
   }
 `;
@@ -2373,8 +2494,8 @@ export type LoginMutationFn = Apollo.MutationFunction<
  * @example
  * const [loginMutation, { data, loading, error }] = useLoginMutation({
  *   variables: {
- *      username: // value for 'username'
  *      password: // value for 'password'
+ *      username: // value for 'username'
  *   },
  * });
  */

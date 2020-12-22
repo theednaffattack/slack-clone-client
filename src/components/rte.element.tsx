@@ -90,9 +90,9 @@ export const Element = (props: RenderElementProps) => {
 
               return;
             }}
-            fallback={(emoji, props) => {
-              return emoji ? `:${emoji.short_names[0]}:` : props.emoji;
-            }}
+            // fallback={(emoji, props) => {
+            //   return emoji ? `:${emoji.short_names[0]}:` : props.emoji;
+            // }}
           />
         </span>
       );
