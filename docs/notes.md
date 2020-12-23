@@ -1,5 +1,3 @@
 # Notes
 
-## Urql Global Error Handling
-
-[ErrorExchange](https://github.com/formidablelabs/urql/issues/225)
+docker build -t theednaffattack/sc-client:prod . && docker push theednaffattack/sc-client
