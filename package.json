@@ -2,9 +2,9 @@
   "name": "slack-clone-client",
   "version": "1.0.0",
   "scripts": {
-    "dev": "next -p 3000",
+    "dev": "next -p 4040",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 4040",
     "lint": "eslint . --ext .ts,.tsx",
     "lint-and-fix": "eslint . --ext .ts,.tsx --fix",
     "gen": "graphql-codegen -r dotenv/config --config codegen.yml && prettier --write './src/generated/graphql.tsx'",
