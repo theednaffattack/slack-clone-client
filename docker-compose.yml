@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  ednaff-dot-dev:
+  sc-client:
     image: ${CONTAINER_IMAGE}
     container_name: ${CONTAINER_NAME}
     expose:
@@ -13,7 +13,7 @@ services:
       VIRTUAL_HOST: ${VIRTUAL_HOST}
       LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-      LETSENCRYPT_KEYSIZE: ${LETSENCRYPT_KEYSIZE: 2048}
+      LETSENCRYPT_KEYSIZE: ${LETSENCRYPT_KEYSIZE}
 
 networks:
   default:
