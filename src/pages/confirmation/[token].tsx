@@ -54,7 +54,7 @@ Confirmation.getInitialProps = async (ctx: MyContext) => {
     response = await ctx.apolloClient.mutate({
       mutation: ConfirmUserDocument,
       variables: {
-        token: typeof ctx.query.token === "string" ? ctx.query.token : ""
+        token: ctx.query.token ? (ctx.query.token as string) : ""
       }
     });
   } catch (error) {
