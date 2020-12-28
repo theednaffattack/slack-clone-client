@@ -12,7 +12,7 @@ type ConfirmationProps = {
 };
 
 const Confirmation: NextPage<ConfirmationProps> = ({ router }) => {
-  let realToken: string;
+  let realToken = "";
   if (typeof router.query.token === "string") {
     realToken = router.query.token;
   }
@@ -48,6 +48,7 @@ const Confirmation: NextPage<ConfirmationProps> = ({ router }) => {
           justifyContent="center"
         >
           <Heading>Confirm User</Heading>
+          {realToken}
           <Skeleton isLoaded={!loading}>
             <Text>Thank you for confirming your account!</Text>
             <NextLink href="/login" passHref>
