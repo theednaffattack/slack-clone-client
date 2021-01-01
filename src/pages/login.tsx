@@ -81,9 +81,11 @@ const Login: NextPage<LoginProps> = ({ router }) => {
             if (typeof router.query.next === "string") {
               console.log("WHAT IS NEXT FOR ROUTER?", router.query.next);
 
-              router.push(router.query.next);
+              // router.push(router.query.next);
+              console.log("WOULD HAVE PUSHED");
             } else {
-              router.push("/view-team");
+              // router.push("/view-team");
+              console.log("WOULD HAVE PUSHED");
             }
           }
         } catch (loginFnError) {
