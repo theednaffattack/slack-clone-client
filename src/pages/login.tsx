@@ -79,13 +79,9 @@ const Login: NextPage<LoginProps> = ({ router }) => {
             // if we've set a redirect after login,
             // follow it. Otherwise go to home page.
             if (typeof router.query.next === "string") {
-              console.log("WHAT IS NEXT FOR ROUTER?", router.query.next);
-
-              // router.push(router.query.next);
-              console.log("WOULD HAVE PUSHED");
+              router.push(router.query.next);
             } else {
-              // router.push("/view-team");
-              console.log("WOULD HAVE PUSHED");
+              router.push("/view-team");
             }
           }
         } catch (loginFnError) {
