@@ -94,11 +94,19 @@ type AccordionItemType = {
 };
 
 type TopOptionNames = "Threads" | "Mentioned" | "Saved" | "More";
+type MoreOptionText = "Invite Team Members" | "Remove Team Members";
+type MoreOptionNames = "invite_member" | "delete_member";
 
 export interface TopOptions {
   text: TopOptionNames;
   name: "threads" | "mentioned" | "saved" | "more";
   icon: IconType | any;
+}
+
+export interface MoreOptions {
+  text: MoreOptionText;
+  name: MoreOptionNames;
+  icon: IconType;
 }
 
 type OtherItemType = {
