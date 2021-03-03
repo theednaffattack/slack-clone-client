@@ -13,6 +13,10 @@ const options: TopOptions[] = [
   { text: "More", name: "more", icon: BsThreeDots }
 ];
 
+// const moreOptions = [
+//   { text: "Invite Team Members", name: "invite", icon: GrChatReplacement }
+// ];
+
 export function ShortcutsPanel() {
   const [hoverState, setHoverState] = useState<
     "is_hovering" | "is_not_hovering"
