@@ -2,6 +2,7 @@ mutation AddThreadToChannel($data: AddMessageToChannelInput!) {
   addThreadToChannel(data: $data) {
     success
     channelId
+    created_at
     threadId
     invitees {
       id
@@ -11,6 +12,7 @@ mutation AddThreadToChannel($data: AddMessageToChannelInput!) {
     }
     message {
       id
+      created_at
       message
     }
   }
