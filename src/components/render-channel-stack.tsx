@@ -18,7 +18,12 @@ import {
 import { clearAllBodyScrollLocks, disableBodyScroll } from "body-scroll-lock";
 import { format } from "date-fns";
 import React, { useEffect, useRef } from "react";
-import { useGetAllChannelThreadsQuery } from "../generated/graphql";
+import {
+  NewMessageSubDocument,
+  NewMessageSubSubscription,
+  NewMessageSubSubscriptionVariables,
+  useGetAllChannelThreadsQuery
+} from "../generated/graphql";
 import { ChannelStackDivider } from "./channel-stack-divider";
 import { ThreadCard } from "./thread-card";
 
@@ -39,36 +44,17 @@ export function RenderChannelStack({
   const {
     data,
     error,
-    loading
-    // subscribeToMore
+    loading,
+    subscribeToMore
   } = useGetAllChannelThreadsQuery({
+    // pollInterval: 500,
     skip: !channelId,
+
     variables: {
       channelId,
       teamId
     }
   });
-
-  // subscribeToMore({
-  //   document: AddThreadToChannelDocument,
-  //   updateQuery: (prev, { subscriptionData }) => {
-
-  //     if (!subscriptionData.data) return prev;
-  //     const newLink = subscriptionData.data.;
-  //     const exists = prev.feed.links.find(
-  //       ({ id }) => id === newLink.id
-  //     );
-  //     if (exists) return prev;
-
-  //     return Object.assign({}, prev, {
-  //       feed: {
-  //         links: [newLink, ...prev.feed.links],
-  //         count: prev.feed.links.length + 1,
-  //         __typename: prev.feed.__typename
-  //       }
-  //     });
-  //   }
-  // });
 
   useEffect(() => {
     messageEl.current?.scrollTo({
@@ -83,6 +69,49 @@ export function RenderChannelStack({
       clearAllBodyScrollLocks();
     };
   }, [data]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToMore<
+      NewMessageSubSubscription,
+      NewMessageSubSubscriptionVariables
+    >({
+      document: NewMessageSubDocument,
+      variables: {
+        data: {
+          channelId,
+          teamId,
+          invitees: [],
+          message: "init-sub"
+        }
+      },
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) return prev;
+
+        const newMessage = subscriptionData.data.newMessageSub;
+
+        const exists = prev.getAllChannelThreads.find(
+          ({ id }) => id === newMessage.threadId
+        );
+
+        if (exists) return prev;
+
+        return Object.assign({}, prev, {
+          getAllChannelThreads: [
+            ...prev.getAllChannelThreads,
+            {
+              __typename: newMessage.__typename,
+              created_at: newMessage.created_at,
+              invitees: [],
+              last_message: newMessage.message,
+              messages: [newMessage.message]
+            }
+          ],
+          __typename: prev.__typename
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   if (!teamId || !channelId) {
     body = (
