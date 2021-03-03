@@ -79,7 +79,7 @@ function addTeamUpdateCache(
   {
     data
   }: FetchResult<CreateTeamMutation, Record<string, any>, Record<string, any>>,
-  client: ApolloClient<object>
+  client: ApolloClient<Record<string, unknown>>
 ): void {
   const teamsCache = cache.readQuery<
     GetAllTeamsForUserQuery,
