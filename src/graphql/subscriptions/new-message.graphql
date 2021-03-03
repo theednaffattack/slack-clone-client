@@ -1,0 +1,15 @@
+subscription NewMessageSub($data: AddMessageToChannelInput!) {
+  newMessageSub(data: $data) {
+    success
+    created_at
+    channelId
+    invitees {
+      id
+    }
+    threadId
+    message {
+      id
+      message
+    }
+  }
+}
