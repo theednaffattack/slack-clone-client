@@ -3,7 +3,7 @@ import { User } from "../generated/graphql";
 export type ViewControllerStateType = {
   teamIdShowing: null | string;
   viewerDisplaying: {
-    viewing: null | string;
+    viewing: ViewerType | null;
     dmThreadId: null | string;
     channelId: null | string;
     header: null | HeaderProps;
@@ -22,9 +22,13 @@ interface HeaderProps {
 }
 
 export type ViewerType =
+  | "channel"
   | "channel_browser"
+  | "direct_messages"
   | "messages_browser"
-  | "team_browser";
+  | "teams_browser"
+  | "team_detail"
+  | "teams_invite_member";
 
 export type ParsedUrlParam = string | null;
 
@@ -39,7 +43,8 @@ export type ActionType =
         viewing: ViewerType;
         header: HeaderProps;
       };
-    };
+    }
+  | { type: "displayInviteTeamMember" };
 
 export const viewControllerInitialState: ViewControllerStateType = {
   teamIdShowing: null,
@@ -60,6 +65,17 @@ export function viewControllerReducer(
       return {
         viewerDisplaying: state.viewerDisplaying,
         teamIdShowing: action.payload
+      };
+
+    case "displayInviteTeamMember":
+      return {
+        teamIdShowing: state.teamIdShowing,
+        viewerDisplaying: {
+          channelId: null,
+          dmThreadId: null,
+          header: null,
+          viewing: "teams_invite_member"
+        }
       };
 
     case "changeDisplayToMatchRoute":
