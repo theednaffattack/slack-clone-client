@@ -112,6 +112,23 @@ export function ViewHeader({ viewControllerState }: ViewHeaderProps) {
           </HStack>
         </>
       ) : null}
+      {viewControllerState.viewerDisplaying.viewing === "team_detail" ? (
+        <HStack>
+          <AvatarGroup size="md" max={3} pl={2}>
+            {viewControllerState.viewerDisplaying.header?.invitees?.map(
+              ({ id, username }) => {
+                return (
+                  <Avatar
+                    key={id}
+                    name={username ? username : undefined}
+                    // src="https://bit.ly/broken-link"
+                  />
+                );
+              }
+            )}
+          </AvatarGroup>
+        </HStack>
+      ) : null}
     </Flex>
   );
 }
