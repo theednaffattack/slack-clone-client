@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   ApolloClient,
   HttpLink,
@@ -6,19 +5,23 @@ import {
   NormalizedCacheObject,
   split
 } from "@apollo/client";
+import { onError } from "@apollo/client/link/error";
+import { RetryLink } from "@apollo/client/link/retry";
+import { WebSocketLink } from "@apollo/client/link/ws";
 import {
   getMainDefinition,
   relayStylePagination
 } from "@apollo/client/utilities";
 import { setContext } from "@apollo/link-context";
-import { WebSocketLink } from "@apollo/client/link/ws";
-import { SubscriptionClient } from "subscriptions-transport-ws";
-import { onError } from "@apollo/client/link/error";
-import { RetryLink } from "@apollo/client/link/retry";
+import { TokenRefreshLink } from "apollo-link-token-refresh";
+import jwtDecode, { JwtPayload } from "jwt-decode";
 import Router from "next/router";
-
-import { parseCookies } from "../lib/utilities.parse-cookies";
+import { useMemo } from "react";
+import { SubscriptionClient } from "subscriptions-transport-ws";
+import { IAuthState } from "../components/auth-provider";
 import { isServer } from "../lib/utilities.is-server";
+// import { parseCookies } from "../lib/utilities.parse-cookies";
+import { getAccessToken, setAccessToken } from "./access-token";
 
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 
@@ -26,97 +29,159 @@ export const APOLLO_STATE_PROP_NAME = "__APOLLO_STATE__";
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const httpLink = new HttpLink({
-  uri: isProduction
-    ? process.env.NEXT_PUBLIC_PRODUCTION_GQL_URI
-    : process.env.NEXT_PUBLIC_DEVELOPMENT_GQL_URI,
-  credentials: "include"
-});
+function createApolloClient(
+  serverAccessToken?: string,
+  setAuthToken?: (obj: IAuthState) => void
+) {
+  const httpLink = new HttpLink({
+    uri: isProduction
+      ? process.env.NEXT_PUBLIC_PRODUCTION_GQL_URI
+      : process.env.NEXT_PUBLIC_DEVELOPMENT_GQL_URI,
+    credentials: "include"
+  });
 
-// Create a WebSocket link (browser only):
-const wsLink = !isServer()
-  ? new WebSocketLink(
-      new SubscriptionClient(
-        isProduction
-          ? process.env.NEXT_PUBLIC_PRODUCTION_WEBSOCKET_URL!
-          : process.env.NEXT_PUBLIC_DEVELOPMENT_WEBSOCKET_URL!,
-        {
-          lazy: true,
-          reconnect: true
-        }
+  // Create a WebSocket link (browser only):
+  const wsLink = !isServer()
+    ? new WebSocketLink(
+        new SubscriptionClient(
+          isProduction
+            ? process.env.NEXT_PUBLIC_PRODUCTION_WEBSOCKET_URL!
+            : process.env.NEXT_PUBLIC_DEVELOPMENT_WEBSOCKET_URL!,
+          {
+            lazy: true,
+            reconnect: true
+          }
+        )
       )
-    )
-  : null;
+    : null;
 
-const splitLink = !isServer()
-  ? split(
-      // split based on operation type
-      ({ query }) => {
-        const definition = getMainDefinition(query);
+  const splitLink = !isServer()
+    ? split(
+        // split based on operation type
+        ({ query }) => {
+          const definition = getMainDefinition(query);
 
-        return (
-          definition.kind === "OperationDefinition" &&
-          definition.operation === "subscription"
-        );
-      },
-      wsLink!,
-      httpLink
-    )
-  : httpLink;
+          return (
+            definition.kind === "OperationDefinition" &&
+            definition.operation === "subscription"
+          );
+        },
+        wsLink!,
+        httpLink
+      )
+    : httpLink;
 
-const authLink = setContext((_, { headers, req }) => {
-  const token = parseCookies(req)[process.env.NEXT_PUBLIC_COOKIE_PREFIX!];
+  // const authLink = setContext((_, { headers }) => {
+  //   // const token = parseCookies(req)[process.env.NEXT_PUBLIC_COOKIE_PREFIX!];
+  //   const accessToken = getAccessToken();
 
-  return {
-    headers: {
-      ...headers,
-      cookie: token ? `${process.env.NEXT_PUBLIC_COOKIE_PREFIX!}=${token}` : ""
+  //   return {
+  //     headers: {
+  //       ...headers,
+
+  //       authorization: accessToken ? `Bearer ${accessToken}` : ""
+  //       // cookie: token ? `${process.env.NEXT_PUBLIC_COOKIE_PREFIX!}=${token}` : ""
+  //     }
+  //   };
+  // });
+
+  const errorLink = onError(({ graphQLErrors, networkError }) => {
+    // We don't want the home page to re-route so don't include
+    // "createOrUpdateLikes" mutations to be filtered out and
+    // redirected.
+    const filteredAuthErrors =
+      graphQLErrors &&
+      graphQLErrors.filter(
+        (error) =>
+          error.message === "Not authenticated" &&
+          !error.path?.includes("createOrUpdateLikes")
+      );
+
+    if (filteredAuthErrors && filteredAuthErrors.length > 0) {
+      !isServer() && Router.push("/login?flash=You must be authenticated");
+      return;
     }
-  };
-});
 
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-  // We don't want the home page to re-route so don't include
-  // "createOrUpdateLikes" mutations to be filtered out and
-  // redirected.
-  const filteredAuthErrors =
-    graphQLErrors &&
-    graphQLErrors.filter(
-      (error) =>
-        error.message === "Not authenticated" &&
-        !error.path?.includes("createOrUpdateLikes")
-    );
+    const filteredRoutes =
+      graphQLErrors &&
+      graphQLErrors?.filter((errorThing) => {
+        const { path } = errorThing;
+        const something = path && typeof path[0] === "string" ? path[0] : "";
 
-  if (filteredAuthErrors && filteredAuthErrors.length > 0) {
-    !isServer() && Router.push("/login?flash=You must be authenticated");
-    return;
-  }
+        return something === "register";
+      });
 
-  const filteredRoutes =
-    graphQLErrors &&
-    graphQLErrors?.filter((errorThing) => {
-      const { path } = errorThing;
-      const something = path && typeof path[0] === "string" ? path[0] : "";
+    if (
+      (graphQLErrors && filteredRoutes && filteredRoutes.length < 1) ||
+      (graphQLErrors && !filteredRoutes)
+    ) {
+      graphQLErrors.map(({ message, locations, path }) =>
+        console.error(
+          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+        )
+      );
+    }
+    if (networkError) console.error(`[Network error]: ${networkError}`);
+  });
 
-      return something === "register";
-    });
+  const headersLink = setContext((_, prevContext) => {
+    // const accessToken = isServer() ? serverAccessToken : getAccessToken();
+    const accessToken = getAccessToken() ? getAccessToken() : serverAccessToken;
 
-  if (
-    (graphQLErrors && filteredRoutes && filteredRoutes.length < 1) ||
-    (graphQLErrors && !filteredRoutes)
-  ) {
-    graphQLErrors.map(({ message, locations, path }) =>
-      console.warn(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-      )
-    );
-  }
-  if (networkError) console.log(`[Network error]: ${networkError}`);
-});
+    return {
+      headers: {
+        ...prevContext.headers,
+        authorization: accessToken ? `Bearer ${accessToken}` : ""
+      }
+    };
+  });
 
-function createApolloClient() {
+  const tokenRefreshLink = new TokenRefreshLink<{
+    token: string;
+    refreshToken: string;
+  }>({
+    accessTokenField: "accessToken",
+    isTokenValidOrUndefined: () => {
+      const token = getAccessToken();
+
+      if (!token) {
+        return true;
+      }
+
+      try {
+        const { exp } = jwtDecode<JwtPayload>(token);
+        if (exp && Date.now() >= exp * 1000) {
+          return false;
+        } else {
+          return true;
+        }
+      } catch {
+        return false;
+      }
+    },
+    fetchAccessToken: () => {
+      const requestRefreshTokenAddress =
+        process.env.NODE_ENV === "development"
+          ? process.env.NEXT_PUBLIC_DEVELOPMENT_REFRESH_TOKEN_ADDRESS!
+          : process.env.NEXT_PUBLIC_PRODUCTION_REFRESH_TOKEN_ADDRESS!;
+      return fetch(requestRefreshTokenAddress, {
+        method: "POST",
+        credentials: "include"
+      });
+    },
+    handleFetch: (accessToken) => {
+      if (setAuthToken) {
+        setAuthToken({ token: accessToken.token, userId: "" });
+      }
+      setAccessToken(accessToken.token);
+    },
+    handleError: (err) => {
+      console.warn("Your refresh token is invalid. Try to relogin");
+      console.error(err);
+    }
+  }) as any;
+
   return new ApolloClient({
-    ssrMode: typeof window === "undefined",
     cache: new InMemoryCache({
       typePolicies: {
         Query: {
@@ -126,12 +191,25 @@ function createApolloClient() {
         }
       }
     }),
-    link: errorLink.concat(authLink.concat(new RetryLink().concat(splitLink)))
+    // headers: {
+    //   cookie:
+    // },
+    link: errorLink.concat(
+      headersLink.concat(
+        tokenRefreshLink.concat(new RetryLink().concat(splitLink))
+      )
+    ),
+    ssrMode: typeof window === "undefined"
   });
 }
 
-export function initializeApollo(initialState = null) {
-  const _apolloClient = apolloClient ?? createApolloClient();
+export function initializeApollo(
+  initialState = null,
+  serverAccessToken?: string,
+  setAuthToken?: (obj: IAuthState) => void
+) {
+  const _apolloClient =
+    apolloClient ?? createApolloClient(serverAccessToken, setAuthToken);
 
   // If your page has Next.js data fetching methods that use Apollo Client, the initial state
   // gets hydrated here
@@ -166,6 +244,9 @@ export function addApolloState(
 
 export function useApollo(pageProps: any) {
   const state = pageProps[APOLLO_STATE_PROP_NAME];
-  const store = useMemo(() => initializeApollo(state), [state]);
+  const store = useMemo(() => initializeApollo(state, pageProps.accessToken), [
+    state
+  ]);
+
   return store;
 }
