@@ -4,12 +4,12 @@ import { isServer } from "../lib/utilities.is-server";
 
 interface IAuthContextProps {
   authState: IAuthState;
-  setAuthToken?: (token: string) => void;
+  setAuthToken?: (obj: IAuthState) => void;
   signIn?: (userId: string, token: string) => void;
   signOut?: () => void;
 }
 
-interface IAuthState {
+export interface IAuthState {
   token?: string;
   userId?: string;
 }
@@ -20,7 +20,9 @@ type AuthAction =
   | { type: "sign_in"; payload: { token: string; userId: string } }
   | { type: "sign_out" };
 
-const AuthContext = createContext<IAuthContextProps>({});
+const AuthContext = createContext<IAuthContextProps>({
+  authState: { token: undefined, userId: undefined }
+});
 
 const useAuth = () => useContext(AuthContext);
 
@@ -62,10 +64,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  function setAuthToken(token: string): void {
+  function setAuthToken(tokenObj: IAuthState): void {
     authDispatch({
       type: "set_auth_token",
-      payload: token
+      payload: tokenObj?.token ?? ""
     });
   }
 
