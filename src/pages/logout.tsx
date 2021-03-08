@@ -1,4 +1,5 @@
 import { LogoutDocument } from "../generated/graphql";
+import { setAccessToken } from "../lib/access-token";
 import { initializeApollo } from "../lib/config.apollo-client";
 import { MyContext } from "../lib/types";
 import redirect from "../lib/utilities.redirect";
@@ -10,23 +11,22 @@ const Logout = () => {
 Logout.getInitialProps = async (ctx: MyContext) => {
   if (!ctx.apolloClient) ctx.apolloClient = initializeApollo();
 
-  console.log("VIEW APOLLO CLIENT", ctx.apolloClient);
-
   try {
     // await ctx.apolloClient.resetStore();
     await ctx.apolloClient.cache.reset();
   } catch (error) {
     console.warn("APOLLO RESET STORE", error);
   }
+
   try {
     await ctx.apolloClient.mutate({ mutation: LogoutDocument });
   } catch (error) {
-    console.warn("APOLLO MUTATE ERROR", error);
+    console.error("APOLLO LOGOUT ERROR", error);
   }
-
-  redirect(ctx, "/login");
-
-  // return {};
+  // Setting access token to an empty string
+  // will redirect(???)
+  setAccessToken("");
+  // redirect(ctx, "/login");
 
   return {
     props: {
