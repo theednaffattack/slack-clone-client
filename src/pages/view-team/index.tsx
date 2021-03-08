@@ -1,31 +1,48 @@
 import { Center, Flex, Grid, GridItem, Text } from "@chakra-ui/react";
+import cookie from "cookie";
+import { NextPage } from "next";
 import { Router } from "next/router";
 import React, { useEffect, useReducer } from "react";
 import { AddChannelMessageForm } from "../../components/add-channel-message-form";
 import { AddMessageForm } from "../../components/add-direct-message-form";
 import { ControllerAccordion } from "../../components/controller-accordion";
+import { CreateChannelForm } from "../../components/create-channel-form";
 import { RenderChannelBrowser } from "../../components/render-channel-browser";
 import { RenderChannelStack } from "../../components/render-channel-stack";
 import { RenderMessagesStack } from "../../components/render-messages-stack";
 import { ShortcutsPanel } from "../../components/shortcuts-panel";
 import { TeamExplorer } from "../../components/team-explorer";
+import { TeamMenuAllCharacters } from "../../components/team-menu-all-characters";
 import { TeamsStack } from "../../components/teams-stack";
 import { ViewHeader } from "../../components/view-header";
+import withApollo from "../../components/with-apollo";
 import { useGetAllTeamsForUserQuery } from "../../generated/graphql";
+import { setAccessToken } from "../../lib/access-token";
 import {
   viewControllerInit,
   viewControllerInitialState,
   viewControllerReducer,
   ViewerType
 } from "../../lib/page-funcs.view-team-state";
-import { CreateChannelForm } from "../../components/create-channel-form";
+import { MyContext } from "../../lib/types";
+
 type UrlParamType = string | string[] | undefined;
 
 interface ParseDestructure {
   id: any;
 }
 
-const ViewTeamIndex = ({ router }: { router: Router }) => {
+interface ViewTeamIndexProps {
+  accessToken: string;
+  router: Router;
+  syncLogout: (e: any) => void;
+}
+
+const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
+  accessToken,
+  router
+  // syncLogout
+}) => {
   const [viewControllerState, viewControllerDispatch] = useReducer(
     viewControllerReducer,
     viewControllerInitialState,
@@ -35,14 +52,14 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
 
   const { action, channel, id, name, invitees, thread, viewing } = router.query;
 
-  function handleUrlParam(param: UrlParamType): string | null {
+  function handleUrlParam(param: UrlParamType): string {
     if (typeof param === "string") {
       return param;
     }
     if (Array.isArray(param)) {
       return param[0];
     } else {
-      return null;
+      return "";
     }
   }
 
@@ -98,8 +115,23 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
         bg="#362234"
         color="#958993"
       >
-        <Flex alignItems="center" justifyContent="center">
+        <Flex
+          alignItems="center"
+          justifyContent="center"
+          flexDirection="column"
+        >
           <Text>Teams</Text>
+          <Text isTruncated>CHECK: {accessToken}</Text>
+          <a
+            onClick={() => {
+              // syncLogout(evt);
+              setAccessToken("");
+              localStorage.setItem("logout", new Date().toISOString());
+              router.push("/logout");
+            }}
+          >
+            logout
+          </a>
         </Flex>
         <TeamsStack data={dataTeams} router={router} />
       </GridItem>
@@ -114,6 +146,12 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
           bg="#4e3a4c"
           overflow="auto"
         >
+          <TeamMenuAllCharacters
+            dataTeams={dataTeams}
+            router={router}
+            viewControllerDispatch={viewControllerDispatch}
+            viewControllerState={viewControllerState}
+          />
           <ShortcutsPanel />
           <ControllerAccordion
             router={router}
@@ -146,7 +184,7 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
           <TeamExplorer />
         </Flex>
       ) : null}
-
+      {viewControllerState.teamIdShowing}
       {viewControllerState.teamIdShowing &&
       viewControllerState.viewerDisplaying.viewing === "channel_browser" ? (
         <RenderChannelBrowser>
@@ -214,4 +252,52 @@ const ViewTeamIndex = ({ router }: { router: Router }) => {
   );
 };
 
-export default ViewTeamIndex;
+export async function getServerSideProps(ctx: MyContext) {
+  let response;
+  const cookiePrefix = process.env.NEXT_PUBLIC_COOKIE_PREFIX ?? "";
+  const url = process.env.NEXT_PUBLIC_DEVELOPMENT_REFRESH_TOKEN_ADDRESS ?? "";
+  const reqCookie = ctx.req?.headers.cookie ?? "";
+  const cookies = cookie.parse(reqCookie);
+
+  // Try to find our cookie. If it exists,
+  // fetch our access token from the server.
+  if (cookies[cookiePrefix]) {
+    try {
+      //
+      response = await fetch(url, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          cookie: `${cookiePrefix}=` + cookies[cookiePrefix]
+        }
+      });
+
+      if (!response) {
+        return {
+          props: {
+            redirect: {
+              destination: "/",
+              permanent: false
+            }
+          }
+        };
+      }
+
+      const respData = await response.json();
+
+      return { props: { accessToken: respData.accessToken } };
+      // setAccessToken(accessToken);
+    } catch (err) {
+      console.error("FETCH ERROR - REFRESH", err);
+    }
+  } else {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false
+      }
+    };
+  }
+}
+
+export default withApollo(ViewTeamIndex);
