@@ -16,7 +16,9 @@ import { Router } from "next/router";
 import React, { useEffect, useState } from "react";
 import { Wrapper } from "../components/flex-wrapper";
 import { InputField } from "../components/forms.input-field";
+import withApollo from "../components/with-apollo";
 import { useLoginMutation } from "../generated/graphql";
+import { setAccessToken } from "../lib/access-token";
 import { toErrorMap } from "../lib/utilities.toErrorMap";
 
 type LoginProps = {
@@ -27,6 +29,7 @@ const Login: NextPage<LoginProps> = ({ router }) => {
   const [flashMessage, setFlashMessage] = useState<"hidden" | "visible">(
     "hidden"
   );
+
   const { flash } = router.query;
   const [userConfirmedHelper, setUserConfirmedHelper] = useState(<></>);
   const [login] = useLoginMutation();
@@ -75,7 +78,10 @@ const Login: NextPage<LoginProps> = ({ router }) => {
           }
 
           // SUCCESS
-          if (response.data?.login.user?.username) {
+          if (response.data?.login.accessToken) {
+            console.log("LOOKS SUCCESSFUL", response.data?.login.accessToken);
+
+            setAccessToken(response.data.login.accessToken);
             // if we've set a redirect after login,
             // follow it. Otherwise go to home page.
             if (typeof router.query.next === "string") {
@@ -163,4 +169,4 @@ const Login: NextPage<LoginProps> = ({ router }) => {
   );
 };
 
-export default Login;
+export default withApollo(Login);
