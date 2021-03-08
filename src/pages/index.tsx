@@ -1,10 +1,17 @@
 import { Flex } from "@chakra-ui/react";
+import Link from "next/link";
 import React from "react";
 
 function Index() {
   return (
     <Flex flexDirection="column" alignItems="center">
       Lame
+      <Link href="/view-team">
+        <a>view team</a>
+      </Link>
+      <Link href="/login">
+        <a>login</a>
+      </Link>
       {/*       
       <Flex alignItems="center" width={[1 / 2, 1 / 2, 1 / 2, "900px"]}>
         <Heading>Branding</Heading>
