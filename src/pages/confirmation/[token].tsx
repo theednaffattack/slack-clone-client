@@ -1,34 +1,52 @@
 // import { useConfirmUserMutation } from "../../generated/graphql";
+import { FetchResult, NormalizedCacheObject } from "@apollo/client";
 import { Button, Flex, Heading, Link, Skeleton, Text } from "@chakra-ui/react";
 import { NextPage } from "next";
 import NextLink from "next/link";
-import { Router } from "next/router";
-import React, { useEffect } from "react";
+import React from "react";
 import { Wrapper } from "../../components/box-wrapper";
-import { useConfirmUserMutation } from "../../generated/graphql";
+import { ConfirmUserDocument } from "../../generated/graphql";
+import { initializeApollo } from "../../lib/config.apollo-client";
+import { MyContext } from "../../lib/types";
 
-type ConfirmationProps = {
-  router: Router;
-};
+interface ConfirmationProps {
+  props: {
+    initialApolloState: NormalizedCacheObject;
+  };
+  revalidate: number;
+  userConfirmed: any;
+  response:
+    | FetchResult<any, Record<string, any>, Record<string, any>>
+    | undefined;
+  token: string;
+}
 
-const Confirmation: NextPage<ConfirmationProps> = ({ router }) => {
-  let realToken = "";
-  if (typeof router.query.token === "string") {
-    realToken = router.query.token;
-  }
-  if (Array.isArray(router.query.token)) {
-    realToken = router.query.token[0];
-  }
-  const [confirmUser, { error, loading }] = useConfirmUserMutation();
-  useEffect(() => {
-    confirmUser({
-      variables: {
-        token: realToken
-      }
-    });
-  }, []);
+const Confirmation: NextPage<ConfirmationProps> = ({ response, token }) => {
+  // const router = {
+  //   query: {
+  //     token: "blah"
+  //   }
+  // };
+  // let realToken = "";
+  // if (typeof router.query.token === "string") {
+  //   realToken = router.query.token;
+  // }
+  // if (Array.isArray(router.query.token)) {
+  //   realToken = router.query.token[0];
+  // }
+  // const [confirmUser, { error, loading }] = useConfirmUserMutation();
+  // useEffect(() => {
+  //   console.log("VIEW QUERY OBJECT", router.query);
+  //   console.log("VIEW REAL TOKEN", realToken);
 
-  if (error)
+  //   confirmUser({
+  //     variables: {
+  //       token: realToken
+  //     }
+  //   });
+  // }, []);
+
+  if (response && response.errors)
     return (
       <Wrapper>
         <Flex
@@ -39,7 +57,7 @@ const Confirmation: NextPage<ConfirmationProps> = ({ router }) => {
         />
       </Wrapper>
     );
-  if (!error) {
+  if (!response?.errors) {
     return (
       <Wrapper>
         <Flex
@@ -48,8 +66,9 @@ const Confirmation: NextPage<ConfirmationProps> = ({ router }) => {
           justifyContent="center"
         >
           <Heading>Confirm User</Heading>
-          {realToken}
-          <Skeleton isLoaded={!loading}>
+          {JSON.stringify(response, null, 2)}
+          Token: {token}
+          <Skeleton isLoaded={!response?.data}>
             <Text>Thank you for confirming your account!</Text>
             <NextLink href="/login" passHref>
               <Link>Login</Link>
@@ -80,29 +99,46 @@ const Confirmation: NextPage<ConfirmationProps> = ({ router }) => {
   }
 };
 
-// Confirmation.getInitialProps = async (ctx: MyContext) => {
-//   if (!ctx.apolloClient) ctx.apolloClient = initializeApollo();
+export async function getServerSideProps(ctx: MyContext) {
+  if (!ctx.apolloClient) ctx.apolloClient = initializeApollo();
 
-//   let response;
-//   // Take token as a URL param and confirm the user.
-//   try {
-//     response = await ctx.apolloClient.mutate({
-//       mutation: ConfirmUserDocument,
-//       variables: {
-//         token: ctx.query.token ? (ctx.query.token as string) : ""
-//       }
-//     });
-//   } catch (error) {
-//     console.warn("CONFIRMATION GET INITIAL PROPS", error);
-//   }
-//   return {
-//     props: {
-//       initialApolloState: ctx.apolloClient.cache.extract()
-//     },
-//     revalidate: 1,
-
-//     userConfirmed: response?.data?.confirmUser
-//   };
-// };
+  let response;
+  // Take token as a URL param and confirm the user.
+  try {
+    response = await ctx.apolloClient.mutate({
+      mutation: ConfirmUserDocument,
+      variables: {
+        token: ctx.query.token ? (ctx.query.token as string) : ""
+      }
+    });
+  } catch (error) {
+    console.warn("CONFIRMATION GET INITIAL PROPS", error);
+  }
+  function parseToken(ctx: MyContext): string {
+    if (!ctx) {
+      throw new Error("Context is undefined!");
+    }
+    if (!ctx.query.token) {
+      throw new Error("Token is undefined!");
+    }
+    if (typeof ctx.query.token === "string") {
+      return ctx.query.token;
+    }
+    if (Array.isArray(ctx.query.token)) {
+      return ctx.query.token[0];
+    }
+    // we hope is unreachable
+    return "token is undreadable";
+  }
+  return {
+    props: {
+      initialApolloState: ctx.apolloClient.cache.extract()
+    },
+    revalidate: 1,
+    response,
+    userConfirmed: response?.data?.confirmUser,
+    token: parseToken(ctx)
+  };
+}
 
 export default Confirmation;
