@@ -21,6 +21,7 @@ export type Query = {
   getAllTeamMembers: Array<UserToTeam>;
   getAllTeamsForUser: Array<UserToTeam>;
   teamMembers?: Maybe<Array<Maybe<User>>>;
+  bye: Scalars["String"];
   me?: Maybe<User>;
   helloWorld: Scalars["String"];
   getAllMyMessages?: Maybe<User>;
@@ -132,7 +133,7 @@ export type Channel = {
   message_count: Scalars["Int"];
   /** Determines whether this channel is viewable to the public. (default = false) */
   public?: Maybe<Scalars["Boolean"]>;
-  team: Array<Team>;
+  team: Team;
   invitees?: Maybe<Array<Maybe<User>>>;
   threads?: Maybe<Array<Maybe<Thread>>>;
   created_by: User;
@@ -222,8 +223,6 @@ export type GetMessagesFromUserInput = {
 
 export type Mutation = {
   __typename?: "Mutation";
-  createProduct: Product;
-  createUser: User;
   addTeamMemberByEmail: UserToTeamIdReferencesOnlyClass;
   addTeamMemberById: UserToTeamIdReferencesOnlyClass;
   createTeam: TeamResponse;
@@ -235,6 +234,8 @@ export type Mutation = {
   login: LoginResponse;
   logout: Scalars["Boolean"];
   register: RegisterResponse;
+  createUser: User;
+  createProduct: Product;
   addProfilePicture: UploadProfilePictueReturnType;
   editUserInfo: User;
   adminEditUserInfo: UserClassTypeWithReferenceIds;
@@ -250,14 +251,7 @@ export type Mutation = {
   deleteChannel: Scalars["Boolean"];
   addDirectMessageToThread: AddDirectMessagePayload;
   createDirectMessage: AddDirectMessagePayload;
-};
-
-export type MutationCreateProductArgs = {
-  data: ProductInput;
-};
-
-export type MutationCreateUserArgs = {
-  data: RegisterInput;
+  revokeRefreshTokensForUser: Scalars["Boolean"];
 };
 
 export type MutationAddTeamMemberByEmailArgs = {
@@ -374,22 +368,8 @@ export type MutationCreateDirectMessageArgs = {
   input: CreateDirectMessageInput;
 };
 
-export type ProductInput = {
-  name: Scalars["String"];
-};
-
-export type Product = {
-  __typename?: "Product";
-  id: Scalars["ID"];
-  name: Scalars["String"];
-};
-
-export type RegisterInput = {
-  password: Scalars["String"];
-  firstName: Scalars["String"];
-  lastName: Scalars["String"];
-  username: Scalars["String"];
-  email: Scalars["String"];
+export type MutationRevokeRefreshTokensForUserArgs = {
+  userId: Scalars["Int"];
 };
 
 export type UserToTeamIdReferencesOnlyClass = {
@@ -424,38 +404,53 @@ export type PasswordInput = {
   password: Scalars["String"];
 };
 
+export type ChangePasswordResponse = {
+  __typename?: "ChangePasswordResponse";
+  errors?: Maybe<FieldError>;
+  user?: Maybe<User>;
+};
+
 export type ChangePasswordInput = {
   password: Scalars["String"];
   token?: Maybe<Scalars["String"]>;
-};
-
-export type ChangePasswordResponse = {
-  __typename?: "ChangePasswordResponse";
-  errors?: Maybe<Array<FieldError>>;
-  user?: Maybe<User>;
 };
 
 export type LoginResponse = {
   __typename?: "LoginResponse";
   errors?: Maybe<Array<FieldError>>;
   user?: Maybe<User>;
+  accessToken?: Maybe<Scalars["String"]>;
 };
 
 export type RegisterResponse = {
   __typename?: "RegisterResponse";
-  errors?: Maybe<Array<FieldError>>;
+  errors?: Maybe<FieldError>;
   user?: Maybe<User>;
 };
 
-export type UploadProfilePictureInput = {
-  user: Scalars["ID"];
-  image?: Maybe<Scalars["String"]>;
+export type RegisterInput = {
+  password: Scalars["String"];
+  firstName: Scalars["String"];
+  lastName: Scalars["String"];
+  username: Scalars["String"];
+  email: Scalars["String"];
+};
+
+export type Product = {
+  __typename?: "Product";
+  id: Scalars["ID"];
+  name: Scalars["String"];
 };
 
 export type UploadProfilePictueReturnType = {
   __typename?: "UploadProfilePictueReturnType";
   message: Scalars["String"];
   profileImgUrl: Scalars["String"];
+};
+
+export type UploadProfilePictureInput = {
+  user: Scalars["ID"];
+  image?: Maybe<Scalars["String"]>;
 };
 
 export type EditUserInput = {
@@ -490,6 +485,17 @@ export type UserClassTypeWithReferenceIds = {
   userToTeams?: Maybe<Array<UserToTeamIdReferencesOnlyClass>>;
 };
 
+export type SignedS3Payload = {
+  __typename?: "SignedS3Payload";
+  signatures: Array<SignedS3SubPayload>;
+};
+
+export type SignedS3SubPayload = {
+  __typename?: "SignedS3SubPayload";
+  uri: Scalars["String"];
+  signedRequest: Scalars["String"];
+};
+
 export type ImageSubInput = {
   type: Scalars["String"];
   lastModified: Scalars["Float"];
@@ -506,17 +512,6 @@ export enum S3SignatureAction {
   GetObject = "getObject"
 }
 
-export type SignedS3Payload = {
-  __typename?: "SignedS3Payload";
-  signatures: Array<SignedS3SubPayload>;
-};
-
-export type SignedS3SubPayload = {
-  __typename?: "SignedS3SubPayload";
-  uri: Scalars["String"];
-  signedRequest: Scalars["String"];
-};
-
 export type FileInput_V2 = {
   type: Scalars["String"];
   lastModified: Scalars["Float"];
@@ -529,6 +524,15 @@ export type FileInput_V2 = {
 export type FileInput = {
   id: Scalars["ID"];
   uri: Scalars["String"];
+};
+
+export type AddMessagePayload = {
+  __typename?: "AddMessagePayload";
+  success: Scalars["Boolean"];
+  channelId: Scalars["ID"];
+  message: Message;
+  user: User;
+  invitees?: Maybe<Array<Maybe<User>>>;
 };
 
 export type AddMessageToChannelInput = {
@@ -546,19 +550,11 @@ export type FileInputHelper = {
   file_type: FileTypeEnum;
 };
 
-export type AddMessagePayload = {
-  __typename?: "AddMessagePayload";
-  success: Scalars["Boolean"];
-  channelId: Scalars["ID"];
-  message: Message;
-  user: User;
-  invitees?: Maybe<Array<Maybe<User>>>;
-};
-
 export type AddThreadPayload = {
   __typename?: "AddThreadPayload";
   success: Scalars["Boolean"];
   channelId: Scalars["ID"];
+  created_at?: Maybe<Scalars["DateTime"]>;
   threadId: Scalars["ID"];
   message: Message;
   sentBy: User;
@@ -570,13 +566,6 @@ export type AddChannelInput = {
   name: Scalars["String"];
 };
 
-export type AddDirectMessageToThreadInput = {
-  threadId: Scalars["ID"];
-  teamId: Scalars["ID"];
-  message_text: Scalars["String"];
-  invitees: Array<Scalars["String"]>;
-};
-
 export type AddDirectMessagePayload = {
   __typename?: "AddDirectMessagePayload";
   success: Scalars["Boolean"];
@@ -584,6 +573,13 @@ export type AddDirectMessagePayload = {
   message: Message;
   sentBy: User;
   invitees: Array<User>;
+};
+
+export type AddDirectMessageToThreadInput = {
+  threadId: Scalars["ID"];
+  teamId: Scalars["ID"];
+  message_text: Scalars["String"];
+  invitees: Array<Scalars["String"]>;
 };
 
 export type CreateDirectMessageInput = {
@@ -594,39 +590,12 @@ export type CreateDirectMessageInput = {
 
 export type Subscription = {
   __typename?: "Subscription";
-  newMessageSub: Message;
+  newMessageSub: AddThreadPayload;
   newDirectMessageSub: AddDirectMessagePayload;
 };
 
 export type SubscriptionNewMessageSubArgs = {
   data: AddMessageToChannelInput;
-};
-
-export type Role = {
-  __typename?: "Role";
-  id?: Maybe<Scalars["ID"]>;
-  teamRoleAuthorizations: Array<TeamRoleEnum>;
-};
-
-export type MessageOutput = {
-  __typename?: "MessageOutput";
-  message: Scalars["String"];
-};
-
-export type UserTeam = {
-  __typename?: "UserTeam";
-  userId: Scalars["ID"];
-  teamId: Scalars["ID"];
-  name: Scalars["String"];
-};
-
-export type GetFileObjectInput = {
-  id: Scalars["ID"];
-  uri: Scalars["String"];
-};
-
-export type GetAllMyMessagesInput = {
-  user: Scalars["String"];
 };
 
 export type AddChannelMemberMutationVariables = Exact<{
@@ -700,7 +669,7 @@ export type AddThreadToChannelMutationVariables = Exact<{
 export type AddThreadToChannelMutation = { __typename?: "Mutation" } & {
   addThreadToChannel: { __typename?: "AddThreadPayload" } & Pick<
     AddThreadPayload,
-    "success" | "channelId" | "threadId"
+    "success" | "channelId" | "created_at" | "threadId"
   > & {
       invitees?: Maybe<
         Array<
@@ -712,7 +681,10 @@ export type AddThreadToChannelMutation = { __typename?: "Mutation" } & {
           >
         >
       >;
-      message: { __typename?: "Message" } & Pick<Message, "id" | "message">;
+      message: { __typename?: "Message" } & Pick<
+        Message,
+        "id" | "created_at" | "message"
+      >;
     };
 };
 
@@ -723,9 +695,7 @@ export type ChangePasswordFromTokenMutationVariables = Exact<{
 export type ChangePasswordFromTokenMutation = { __typename?: "Mutation" } & {
   changePasswordFromToken: { __typename?: "ChangePasswordResponse" } & {
     errors?: Maybe<
-      Array<
-        { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
-      >
+      { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
     >;
     user?: Maybe<
       { __typename?: "User" } & Pick<User, "id" | "name" | "username">
@@ -826,9 +796,7 @@ export type RegisterMutationVariables = Exact<{
 export type RegisterMutation = { __typename?: "Mutation" } & {
   register: { __typename?: "RegisterResponse" } & {
     errors?: Maybe<
-      Array<
-        { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
-      >
+      { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
     >;
     user?: Maybe<
       { __typename?: "User" } & Pick<User, "id" | "name" | "username">
@@ -1051,22 +1019,39 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 export type LoginMutation = { __typename?: "Mutation" } & {
-  login: { __typename?: "LoginResponse" } & {
-    errors?: Maybe<
-      Array<
-        { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
-      >
-    >;
-    user?: Maybe<
-      { __typename?: "User" } & Pick<User, "id" | "name" | "username">
-    >;
-  };
+  login: { __typename?: "LoginResponse" } & Pick<
+    LoginResponse,
+    "accessToken"
+  > & {
+      errors?: Maybe<
+        Array<
+          { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
+        >
+      >;
+      user?: Maybe<{ __typename?: "User" } & Pick<User, "id" | "username">>;
+    };
 };
 
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = { __typename?: "Query" } & {
   me?: Maybe<{ __typename?: "User" } & Pick<User, "id" | "name" | "username">>;
+};
+
+export type NewMessageSubSubscriptionVariables = Exact<{
+  data: AddMessageToChannelInput;
+}>;
+
+export type NewMessageSubSubscription = { __typename?: "Subscription" } & {
+  newMessageSub: { __typename?: "AddThreadPayload" } & Pick<
+    AddThreadPayload,
+    "success" | "created_at" | "channelId" | "threadId"
+  > & {
+      invitees?: Maybe<
+        Array<Maybe<{ __typename?: "User" } & Pick<User, "id">>>
+      >;
+      message: { __typename?: "Message" } & Pick<Message, "id" | "message">;
+    };
 };
 
 export const AddChannelMemberDocument = gql`
@@ -1308,6 +1293,7 @@ export const AddThreadToChannelDocument = gql`
     addThreadToChannel(data: $data) {
       success
       channelId
+      created_at
       threadId
       invitees {
         id
@@ -1317,6 +1303,7 @@ export const AddThreadToChannelDocument = gql`
       }
       message {
         id
+        created_at
         message
       }
     }
@@ -2470,9 +2457,9 @@ export const LoginDocument = gql`
       }
       user {
         id
-        name
         username
       }
+      accessToken
     }
   }
 `;
@@ -2557,3 +2544,54 @@ export function useMeLazyQuery(
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const NewMessageSubDocument = gql`
+  subscription NewMessageSub($data: AddMessageToChannelInput!) {
+    newMessageSub(data: $data) {
+      success
+      created_at
+      channelId
+      invitees {
+        id
+      }
+      threadId
+      message {
+        id
+        message
+      }
+    }
+  }
+`;
+
+/**
+ * __useNewMessageSubSubscription__
+ *
+ * To run a query within a React component, call `useNewMessageSubSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useNewMessageSubSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNewMessageSubSubscription({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useNewMessageSubSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    NewMessageSubSubscription,
+    NewMessageSubSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    NewMessageSubSubscription,
+    NewMessageSubSubscriptionVariables
+  >(NewMessageSubDocument, baseOptions);
+}
+export type NewMessageSubSubscriptionHookResult = ReturnType<
+  typeof useNewMessageSubSubscription
+>;
+export type NewMessageSubSubscriptionResult = Apollo.SubscriptionResult<
+  NewMessageSubSubscription
+>;
