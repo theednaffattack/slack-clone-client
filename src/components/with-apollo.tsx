@@ -8,11 +8,7 @@ import { useAuth } from "./auth-provider";
 const withApollo = (PageComponent: any) => {
   const WithApollo = ({ apolloClient, apolloState, ...pageProps }: any) => {
     const { authState, setAuthToken } = useAuth();
-    console.log("VIEW WITH APOLLO PROPS", {
-      authState,
-      pageProps,
-      setAuthToken
-    });
+
     const client =
       apolloClient ||
       initializeApollo(
@@ -23,10 +19,6 @@ const withApollo = (PageComponent: any) => {
       );
 
     if (!isServer() && !getAccessToken() && setAuthToken) {
-      console.log("WITH APOLLO SETTING ACCESS TOKEN", {
-        accToken: pageProps.accessToken
-      });
-      // setAuthToken({ token: pageProps.accessToken, userId: undefined });
       setAccessToken(pageProps.accessToken);
     }
 
