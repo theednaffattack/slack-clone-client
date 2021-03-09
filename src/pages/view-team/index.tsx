@@ -39,9 +39,8 @@ interface ViewTeamIndexProps {
 }
 
 const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
-  accessToken,
-  router
-  // syncLogout
+  router,
+  syncLogout
 }) => {
   const [viewControllerState, viewControllerDispatch] = useReducer(
     viewControllerReducer,
@@ -121,10 +120,9 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
           flexDirection="column"
         >
           <Text>Teams</Text>
-          <Text isTruncated>CHECK: {accessToken}</Text>
           <a
-            onClick={() => {
-              // syncLogout(evt);
+            onClick={(evt) => {
+              syncLogout(evt);
               setAccessToken("");
               localStorage.setItem("logout", new Date().toISOString());
               router.push("/logout");
@@ -133,7 +131,11 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
             logout
           </a>
         </Flex>
-        <TeamsStack data={dataTeams} router={router} />
+        <TeamsStack
+          teamIdShowing={viewControllerState.teamIdShowing}
+          data={dataTeams}
+          router={router}
+        />
       </GridItem>
       {viewControllerState.teamIdShowing !== null &&
       viewControllerState.viewerDisplaying.viewing !== "teams_browser" ? (
@@ -184,7 +186,6 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
           <TeamExplorer />
         </Flex>
       ) : null}
-      {viewControllerState.teamIdShowing}
       {viewControllerState.teamIdShowing &&
       viewControllerState.viewerDisplaying.viewing === "channel_browser" ? (
         <RenderChannelBrowser>
