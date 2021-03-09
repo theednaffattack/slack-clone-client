@@ -7,10 +7,11 @@ import { TeamMenuSingleCharacter } from "./teams-single-character";
 
 interface TeamStackProps {
   data: GetAllTeamsForUserQuery | undefined;
+  teamIdShowing: string | null;
   router: Router;
 }
 
-export function TeamsStack({ data, router }: TeamStackProps) {
+export function TeamsStack({ data, router, teamIdShowing }: TeamStackProps) {
   return (
     <VStack id="teams-list" spacing={4} align="stretch" as="ul">
       {data &&
@@ -22,6 +23,7 @@ export function TeamsStack({ data, router }: TeamStackProps) {
             id={id}
             name={name}
             router={router}
+            selected={teamIdShowing === id}
           />
         ))
       ) : (
