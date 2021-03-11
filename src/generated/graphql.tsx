@@ -122,6 +122,7 @@ export type User = {
   messages?: Maybe<Array<Message>>;
   sent_messages?: Maybe<Array<Message>>;
   userToTeams?: Maybe<Array<UserToTeam>>;
+  team_scopes: Array<Scalars["String"]>;
 };
 
 export type Channel = {
@@ -237,7 +238,7 @@ export type Mutation = {
   createUser: User;
   createProduct: Product;
   addProfilePicture: UploadProfilePictueReturnType;
-  editUserInfo: User;
+  editCurrentUserInfo: EditUserInfoResponse;
   adminEditUserInfo: UserClassTypeWithReferenceIds;
   signS3: SignedS3Payload;
   signS3Files: SignedS3Payload;
@@ -255,15 +256,11 @@ export type Mutation = {
 };
 
 export type MutationAddTeamMemberByEmailArgs = {
-  roles: Array<TeamRoleEnum>;
-  teamId: Scalars["String"];
-  email: Scalars["String"];
+  data: AddTeamMemberByEmailInput;
 };
 
 export type MutationAddTeamMemberByIdArgs = {
-  roles: Array<TeamRoleEnum>;
-  teamId: Scalars["String"];
-  userId: Scalars["String"];
+  data: AddTeamMemberByIdInput;
 };
 
 export type MutationCreateTeamArgs = {
@@ -305,7 +302,7 @@ export type MutationAddProfilePictureArgs = {
   data: UploadProfilePictureInput;
 };
 
-export type MutationEditUserInfoArgs = {
+export type MutationEditCurrentUserInfoArgs = {
   data: EditUserInput;
 };
 
@@ -380,6 +377,18 @@ export type UserToTeamIdReferencesOnlyClass = {
   teamRoleAuthorizations: Array<TeamRoleEnum>;
 };
 
+export type AddTeamMemberByEmailInput = {
+  email: Scalars["String"];
+  teamRoles: Array<TeamRoleEnum>;
+  teamId: Scalars["ID"];
+};
+
+export type AddTeamMemberByIdInput = {
+  userId: Scalars["String"];
+  teamRoles: Array<TeamRoleEnum>;
+  teamId: Scalars["ID"];
+};
+
 export type TeamResponse = {
   __typename?: "TeamResponse";
   errors?: Maybe<Array<FieldError>>;
@@ -451,6 +460,18 @@ export type UploadProfilePictueReturnType = {
 export type UploadProfilePictureInput = {
   user: Scalars["ID"];
   image?: Maybe<Scalars["String"]>;
+};
+
+export type EditUserInfoResponse = {
+  __typename?: "EditUserInfoResponse";
+  errors?: Maybe<FieldError>;
+  userWithRoles?: Maybe<UserExtendedWithTeamRoles>;
+};
+
+export type UserExtendedWithTeamRoles = {
+  __typename?: "UserExtendedWithTeamRoles";
+  user: User;
+  teamRoles: Array<TeamRoleEnum>;
 };
 
 export type EditUserInput = {
@@ -650,15 +671,13 @@ export type AddMessageToChannelMutation = { __typename?: "Mutation" } & {
 };
 
 export type AddTeamMemberByIdMutationVariables = Exact<{
-  userId: Scalars["String"];
-  teamId: Scalars["String"];
-  roles: Array<TeamRoleEnum>;
+  data: AddTeamMemberByIdInput;
 }>;
 
 export type AddTeamMemberByIdMutation = { __typename?: "Mutation" } & {
   addTeamMemberById: { __typename?: "UserToTeamIdReferencesOnlyClass" } & Pick<
     UserToTeamIdReferencesOnlyClass,
-    "userId" | "teamId" | "userToTeamId" | "teamRoleAuthorizations"
+    "userToTeamId" | "userId" | "teamId" | "teamRoleAuthorizations"
   >;
 };
 
@@ -769,6 +788,29 @@ export type CreateTeamMutation = { __typename?: "Mutation" } & {
         UttData,
         "name" | "teamId" | "userId" | "userToTeamId"
       >
+    >;
+  };
+};
+
+export type EditCurrentUserInfoMutationVariables = Exact<{
+  data: EditUserInput;
+}>;
+
+export type EditCurrentUserInfoMutation = { __typename?: "Mutation" } & {
+  editCurrentUserInfo: { __typename?: "EditUserInfoResponse" } & {
+    errors?: Maybe<
+      { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
+    >;
+    userWithRoles?: Maybe<
+      { __typename?: "UserExtendedWithTeamRoles" } & Pick<
+        UserExtendedWithTeamRoles,
+        "teamRoles"
+      > & {
+          user: { __typename?: "User" } & Pick<
+            User,
+            "id" | "firstName" | "username"
+          >;
+        }
     >;
   };
 };
@@ -1230,15 +1272,11 @@ export type AddMessageToChannelMutationOptions = Apollo.BaseMutationOptions<
   AddMessageToChannelMutationVariables
 >;
 export const AddTeamMemberByIdDocument = gql`
-  mutation AddTeamMemberById(
-    $userId: String!
-    $teamId: String!
-    $roles: [TeamRoleEnum!]!
-  ) {
-    addTeamMemberById(userId: $userId, teamId: $teamId, roles: $roles) {
+  mutation AddTeamMemberById($data: AddTeamMemberByIdInput!) {
+    addTeamMemberById(data: $data) {
+      userToTeamId
       userId
       teamId
-      userToTeamId
       teamRoleAuthorizations
     }
   }
@@ -1261,9 +1299,7 @@ export type AddTeamMemberByIdMutationFn = Apollo.MutationFunction<
  * @example
  * const [addTeamMemberByIdMutation, { data, loading, error }] = useAddTeamMemberByIdMutation({
  *   variables: {
- *      userId: // value for 'userId'
- *      teamId: // value for 'teamId'
- *      roles: // value for 'roles'
+ *      data: // value for 'data'
  *   },
  * });
  */
@@ -1687,6 +1723,67 @@ export type CreateTeamMutationResult = Apollo.MutationResult<
 export type CreateTeamMutationOptions = Apollo.BaseMutationOptions<
   CreateTeamMutation,
   CreateTeamMutationVariables
+>;
+export const EditCurrentUserInfoDocument = gql`
+  mutation EditCurrentUserInfo($data: EditUserInput!) {
+    editCurrentUserInfo(data: $data) {
+      errors {
+        field
+        message
+      }
+      userWithRoles {
+        user {
+          id
+          firstName
+          username
+        }
+        teamRoles
+      }
+    }
+  }
+`;
+export type EditCurrentUserInfoMutationFn = Apollo.MutationFunction<
+  EditCurrentUserInfoMutation,
+  EditCurrentUserInfoMutationVariables
+>;
+
+/**
+ * __useEditCurrentUserInfoMutation__
+ *
+ * To run a mutation, you first call `useEditCurrentUserInfoMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditCurrentUserInfoMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editCurrentUserInfoMutation, { data, loading, error }] = useEditCurrentUserInfoMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useEditCurrentUserInfoMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    EditCurrentUserInfoMutation,
+    EditCurrentUserInfoMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    EditCurrentUserInfoMutation,
+    EditCurrentUserInfoMutationVariables
+  >(EditCurrentUserInfoDocument, baseOptions);
+}
+export type EditCurrentUserInfoMutationHookResult = ReturnType<
+  typeof useEditCurrentUserInfoMutation
+>;
+export type EditCurrentUserInfoMutationResult = Apollo.MutationResult<
+  EditCurrentUserInfoMutation
+>;
+export type EditCurrentUserInfoMutationOptions = Apollo.BaseMutationOptions<
+  EditCurrentUserInfoMutation,
+  EditCurrentUserInfoMutationVariables
 >;
 export const ForgotPasswordDocument = gql`
   mutation ForgotPassword($email: String!) {

@@ -1,0 +1,16 @@
+mutation EditCurrentUserInfo($data: EditUserInput!) {
+  editCurrentUserInfo(data: $data) {
+    errors {
+      field
+      message
+    }
+    userWithRoles {
+      user {
+        id
+        firstName
+        username
+      }
+      teamRoles
+    }
+  }
+}
