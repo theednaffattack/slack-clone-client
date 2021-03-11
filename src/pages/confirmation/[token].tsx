@@ -132,12 +132,14 @@ export async function getServerSideProps(ctx: MyContext) {
   }
   return {
     props: {
-      initialApolloState: ctx.apolloClient.cache.extract()
-    },
-    revalidate: 1,
-    response,
-    userConfirmed: response?.data?.confirmUser,
-    token: parseToken(ctx)
+      initialApolloState: ctx.apolloClient.cache.extract(),
+
+      response,
+      userConfirmed: response?.data?.confirmUser,
+      token: parseToken(ctx),
+
+      revalidate: 1
+    }
   };
 }
 
