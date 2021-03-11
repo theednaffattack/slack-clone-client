@@ -1,12 +1,8 @@
-mutation AddTeamMemberById(
-  $userId: String!
-  $teamId: String!
-  $roles: [TeamRoleEnum!]!
-) {
-  addTeamMemberById(userId: $userId, teamId: $teamId, roles: $roles) {
+mutation AddTeamMemberById($data: AddTeamMemberByIdInput!) {
+  addTeamMemberById(data: $data) {
+    userToTeamId
     userId
     teamId
-    userToTeamId
     teamRoleAuthorizations
   }
 }
