@@ -1,10 +1,7 @@
 import { VStack, StackDivider, Flex } from "@chakra-ui/react";
+{
 
-type RenderChannelBrowserProps = {};
-
-export const RenderChannelBrowser: React.FC<RenderChannelBrowserProps> = ({
-  children
-}) => {
+export const RenderChannelBrowser: React.FC = ({ children }) => {
   return (
     <VStack
       id="viewer"
