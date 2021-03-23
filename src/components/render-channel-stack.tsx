@@ -57,20 +57,19 @@ export function RenderChannelStack({
   });
 
   useEffect(() => {
+    // scroll to the bottom of the stack
     messageEl.current?.scrollTo({
       behavior: "auto",
       top: messageBottomEl.current?.offsetTop
     });
 
+    // disable body scroll if there
+    // are messages
     if (messageEl && messageEl.current) {
       disableBodyScroll(messageEl.current);
     }
-    return () => {
-      clearAllBodyScrollLocks();
-    };
-  }, [data]);
 
-  useEffect(() => {
+    // prepare subscribeToMore for new messages
     const unsubscribe = subscribeToMore<
       NewMessageSubSubscription,
       NewMessageSubSubscriptionVariables
@@ -110,8 +109,11 @@ export function RenderChannelStack({
         });
       }
     });
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      clearAllBodyScrollLocks();
+      unsubscribe();
+    };
+  }, [data]);
 
   if (!teamId || !channelId) {
     body = (
@@ -177,9 +179,7 @@ export function RenderChannelStack({
                   borderRadius="100px 100px 100px 100px"
                   size="sm"
                 >
-                  <Text size="sm">
-                    {format(Date.parse(thread.created_at), "EEEE, MMMM co")}
-                  </Text>
+                  {format(Date.parse(thread.created_at), "EEEE, MMMM co")}
                 </MenuButton>
                 <Portal>
                   <MenuList id="my-list">
