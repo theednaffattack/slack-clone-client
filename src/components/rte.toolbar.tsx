@@ -175,7 +175,7 @@ export function Toolbar({
                 data: {
                   channelId,
                   teamId,
-                  created_at: "",
+                  created_at: new Date(),
                   invitees: [...invitees],
                   message: strValues
                 }
