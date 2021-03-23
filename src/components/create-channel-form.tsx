@@ -77,11 +77,9 @@ export function CreateChannelForm({ teamId }: CreateChannelFormProps) {
                 <pre>{JSON.stringify(errorsFormik, null, 2)}</pre>
               </Flex>
             ) : null}
-
             {data ? (
               <Flex>
                 <Text>success!</Text>
-                {/* <pre>{JSON.stringify(data, null, 2)}</pre> */}
               </Flex>
             ) : null}
             <Input
