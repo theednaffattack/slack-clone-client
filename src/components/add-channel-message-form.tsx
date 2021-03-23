@@ -12,23 +12,23 @@ interface AddChannelMessageFormProps {
   channelName: string;
 }
 
-const RESET: Node[] = [
-  {
-    children: [
-      {
-        text: ""
-      }
-    ],
-    type: "paragraph"
-  }
-];
-
 export const AddChannelMessageForm: React.FC<AddChannelMessageFormProps> = ({
   teamId,
   channelId,
   channelName,
   invitees
 }) => {
+  const RESET: Node[] = [
+    {
+      children: [
+        {
+          text: ""
+        }
+      ],
+      type: "paragraph"
+    }
+  ];
+
   const [formValue, setFormValue] = useState<Node[]>(RESET);
 
   return (
@@ -41,7 +41,6 @@ export const AddChannelMessageForm: React.FC<AddChannelMessageFormProps> = ({
         teamId={teamId}
         value={formValue}
       />
-
       <Flex id="message-bar" height="2ch" px={3} ml="auto">
         <Text fontSize="xs" color="rgb(97,96,97)">
           Press <b>Enter</b> to submit. Press <b>Shift + Enter</b> for a
