@@ -116,7 +116,7 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
 
   const onKeyDown = useCallback(
     async (event, invitees) => {
-      // event.preventDefault();
+      event.persist();
       // const { selection } = editor;
       // if (selection) {
       //   const [start] = Range.edges(selection);
@@ -186,14 +186,20 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
             })
           );
 
-          console.log("STRING VLAUES", strValues.join(""));
+          console.log("STRING VALUES", {
+            channelId,
+            teamId,
+            created_at: new Date().toISOString(),
+            invitees: [...invitees],
+            message: strValues.join("")
+          });
 
           addThreadMessage({
             variables: {
               data: {
                 channelId,
                 teamId,
-                created_at: "",
+                created_at: new Date(),
                 invitees: [...invitees],
                 message: strValues.join("")
               }
@@ -264,8 +270,6 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
             break;
         }
       }
-
-      console.log("KEY DOWN");
     },
     [index, search, target, value]
   );
