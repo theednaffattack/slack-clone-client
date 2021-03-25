@@ -98,6 +98,7 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
   return (
     <Grid
       height="100%"
+      // "100px 1fr",
       gridTemplateColumns={
         dataTeams &&
         dataTeams.getAllTeamsForUser?.length > 0 &&
@@ -114,53 +115,40 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
         bg="#362234"
         color="#958993"
       >
-        <Flex
-          alignItems="center"
-          justifyContent="center"
-          flexDirection="column"
-        >
-          <Text>Teams</Text>
-          <a
-            onClick={(evt) => {
-              syncLogout(evt);
-              setAccessToken("");
-              localStorage.setItem("logout", new Date().toISOString());
-              router.push("/logout");
-            }}
-          >
-            logout
-          </a>
-        </Flex>
         <TeamsStack
           teamIdShowing={viewControllerState.teamIdShowing}
           data={dataTeams}
           router={router}
         />
       </GridItem>
-      {viewControllerState.teamIdShowing !== null &&
-      viewControllerState.viewerDisplaying.viewing !== "teams_browser" ? (
-        <Flex
-          id="controller"
-          flexDirection="column"
-          gridColumn={2}
-          gridRow="1/4"
-          color="#fff"
-          bg="#4e3a4c"
-          overflow="auto"
-        >
-          <TeamMenuAllCharacters
-            dataTeams={dataTeams}
-            router={router}
-            viewControllerDispatch={viewControllerDispatch}
-            viewControllerState={viewControllerState}
-          />
-          <ShortcutsPanel />
-          <ControllerAccordion
-            router={router}
-            teamId={viewControllerState.teamIdShowing}
-          />
-        </Flex>
-      ) : null}
+
+      <GridItem gridColumn={2} gridRow="1/4" overflow="auto">
+        {viewControllerState.teamIdShowing !== null &&
+        viewControllerState.viewerDisplaying.viewing !== "teams_browser" ? (
+          <Flex
+            id="controller"
+            flexDirection="column"
+            height="100%"
+            // gridColumn={2}
+            // gridRow="1/4"
+            color="#fff"
+            bg="#4e3a4c"
+            // overflow="auto"
+          >
+            <TeamMenuAllCharacters
+              dataTeams={dataTeams}
+              router={router}
+              viewControllerDispatch={viewControllerDispatch}
+              viewControllerState={viewControllerState}
+            />
+            <ShortcutsPanel />
+            <ControllerAccordion
+              router={router}
+              teamId={viewControllerState.teamIdShowing}
+            />
+          </Flex>
+        ) : null}
+      </GridItem>
       {viewControllerState.teamIdShowing !== null &&
       viewControllerState.viewerDisplaying.viewing !== "teams_browser" ? (
         <GridItem
@@ -232,21 +220,19 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
 
         {viewControllerState.viewerDisplaying.channelId &&
         viewControllerState.teamIdShowing ? (
-          <>
-            <AddChannelMessageForm
-              invitees={
-                invitees && typeof invitees === "string"
-                  ? JSON.parse(invitees).map(({ id }: ParseDestructure) => id)
-                  : []
-              }
-              name="message_text"
-              teamId={viewControllerState.teamIdShowing}
-              channelId={viewControllerState.viewerDisplaying.channelId}
-              channelName={
-                viewControllerState.viewerDisplaying.header?.name ?? ""
-              }
-            />
-          </>
+          <AddChannelMessageForm
+            invitees={
+              invitees && typeof invitees === "string"
+                ? JSON.parse(invitees).map(({ id }: ParseDestructure) => id)
+                : []
+            }
+            name="message_text"
+            teamId={viewControllerState.teamIdShowing}
+            channelId={viewControllerState.viewerDisplaying.channelId}
+            channelName={
+              viewControllerState.viewerDisplaying.header?.name ?? ""
+            }
+          />
         ) : null}
       </Flex>
     </Grid>
