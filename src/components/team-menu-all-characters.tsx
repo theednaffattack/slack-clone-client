@@ -20,7 +20,7 @@ import {
 
 export function TeamMenuAllCharacters({
   dataTeams,
-  // router,
+  router,
   viewControllerDispatch,
   viewControllerState
 }: {
@@ -29,11 +29,16 @@ export function TeamMenuAllCharacters({
   viewControllerState: ViewControllerStateType;
   viewControllerDispatch: React.Dispatch<ActionType>;
 }) {
+  const name = dataTeams?.getAllTeamsForUser.filter(
+    ({ teamId }) => teamId === viewControllerState.teamIdShowing
+  )[0].team.name;
+
   return (
     <Flex>
       <Menu>
         <MenuButton
           as={Button}
+          w={"100%"}
           // colorScheme="pink"
           bg="transparent"
           borderWidth="1px"
@@ -46,18 +51,12 @@ export function TeamMenuAllCharacters({
           _expanded={{ bg: "transparent" }}
           _focus={{ boxShadow: "outline" }}
         >
-          <Text size="sm">Workspace name</Text>
+          <Text size="sm">{name}</Text>
         </MenuButton>
         <Portal>
           <MenuList id="my-list">
-            <Flex>
-              <Text>
-                {
-                  dataTeams?.getAllTeamsForUser.filter(
-                    ({ teamId }) => teamId === viewControllerState.teamIdShowing
-                  )[0].team.name
-                }
-              </Text>
+            <Flex px={3}>
+              <Text>{name} Community</Text>
             </Flex>
             <MenuGroup title="">
               <MenuItem
@@ -80,7 +79,13 @@ export function TeamMenuAllCharacters({
             </MenuGroup>
             <MenuDivider />
             <MenuGroup>
-              <MenuItem>Jump to a specific date</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  router.push("/logout");
+                }}
+              >
+                Logout
+              </MenuItem>
             </MenuGroup>
           </MenuList>
         </Portal>
