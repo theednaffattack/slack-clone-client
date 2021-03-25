@@ -79,8 +79,6 @@ const Login: NextPage<LoginProps> = ({ router }) => {
 
           // SUCCESS
           if (response.data?.login.accessToken) {
-            console.log("LOOKS SUCCESSFUL", response.data?.login.accessToken);
-
             setAccessToken(response.data.login.accessToken);
             // if we've set a redirect after login,
             // follow it. Otherwise go to home page.
