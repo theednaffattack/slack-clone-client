@@ -1,5 +1,4 @@
 import { VStack, StackDivider, Flex } from "@chakra-ui/react";
-{
 
 export const RenderChannelBrowser: React.FC = ({ children }) => {
   return (
