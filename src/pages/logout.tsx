@@ -24,9 +24,10 @@ Logout.getInitialProps = async (ctx: MyContext) => {
     console.error("APOLLO LOGOUT ERROR", error);
   }
   // Setting access token to an empty string
-  // will redirect(???)
+  // to reset global state. Can't do this with
+  // both context and apollo currently.
   setAccessToken("");
-  // redirect(ctx, "/login");
+  redirect(ctx, "/login");
 
   return {
     props: {
