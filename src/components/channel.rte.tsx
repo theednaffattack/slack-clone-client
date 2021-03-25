@@ -186,14 +186,6 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
             })
           );
 
-          console.log("STRING VALUES", {
-            channelId,
-            teamId,
-            created_at: new Date().toISOString(),
-            invitees: [...invitees],
-            message: strValues.join("")
-          });
-
           addThreadMessage({
             variables: {
               data: {
