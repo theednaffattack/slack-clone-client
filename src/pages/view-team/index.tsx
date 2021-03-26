@@ -17,7 +17,6 @@ import { TeamsStack } from "../../components/teams-stack";
 import { ViewHeader } from "../../components/view-header";
 import withApollo from "../../components/with-apollo";
 import { useGetAllTeamsForUserQuery } from "../../generated/graphql";
-import { setAccessToken } from "../../lib/access-token";
 import {
   viewControllerInit,
   viewControllerInitialState,
@@ -35,12 +34,12 @@ interface ParseDestructure {
 interface ViewTeamIndexProps {
   accessToken: string;
   router: Router;
-  syncLogout: (e: any) => void;
+  // syncLogout: (e: any) => void;
 }
 
 const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
-  router,
-  syncLogout
+  router
+  // syncLogout
 }) => {
   const [viewControllerState, viewControllerDispatch] = useReducer(
     viewControllerReducer,
@@ -49,7 +48,15 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
   );
   const { data: dataTeams } = useGetAllTeamsForUserQuery();
 
-  const { action, channel, id, name, invitees, thread, viewing } = router.query;
+  const {
+    action,
+    channel,
+    teamId,
+    name,
+    invitees,
+    thread,
+    viewing
+  } = router.query;
 
   function handleUrlParam(param: UrlParamType): string {
     if (typeof param === "string") {
@@ -63,8 +70,8 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
   }
 
   useEffect(() => {
-    const realId = handleUrlParam(id)
-      ? handleUrlParam(id)
+    const realId = handleUrlParam(teamId)
+      ? handleUrlParam(teamId)
       : dataTeams?.getAllTeamsForUser?.[0]?.teamId;
 
     viewControllerDispatch({
@@ -98,22 +105,39 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
   return (
     <Grid
       height="100%"
-      // "100px 1fr",
-      gridTemplateColumns={
-        dataTeams &&
-        dataTeams.getAllTeamsForUser?.length > 0 &&
-        viewControllerState.viewerDisplaying.viewing !== "teams_browser"
-          ? "100px 250px 1fr"
-          : "100px 1fr"
-      }
-      gridTemplateRows="auto 1fr auto"
+      w="100%"
+      // gridTemplateColumns={
+      //   // dataTeams &&
+      //   // dataTeams.getAllTeamsForUser?.length > 0 &&
+      //   // viewControllerState.viewerDisplaying.viewing !== "teams_browser"
+      //   //   ? "100px 250px 1fr"
+      //   //   : "100px 1fr"
+      //   ["100px 250px 1fr"]
+      // }
+      // gridTemplateRows="auto 1fr auto"
+      sx={{
+        "@media only screen and (min-width: 600px)": {
+          gridTemplateColumns: "100px 250px 1fr",
+
+          gridTemplateRows: "auto 1fr auto"
+        },
+        gridTemplateColumns: "1fr"
+      }}
     >
+      {/* BEG - TEAM COLUMN */}
+
       <GridItem
-        id="teams"
-        gridColumn={1}
-        gridRow="1/4"
         bg="#362234"
         color="#958993"
+        id="teams"
+        overflow="auto"
+        sx={{
+          "@media only screen and (max-width: 600px)": {
+            display: "none"
+          },
+          gridColumn: 1,
+          gridRow: "1/4"
+        }}
       >
         <TeamsStack
           teamIdShowing={viewControllerState.teamIdShowing}
@@ -121,8 +145,21 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
           router={router}
         />
       </GridItem>
+      {/* END - TEAM COLUMN */}
 
-      <GridItem gridColumn={2} gridRow="1/4" overflow="auto">
+      {/* BEG - CONTROLLER COLUMN */}
+      <GridItem
+        bg="#4e3a4c"
+        color="#fff"
+        gridColumn={2}
+        gridRow="1/4"
+        overflow="auto"
+        sx={{
+          "@media only screen and (max-width: 600px)": {
+            display: "none"
+          }
+        }}
+      >
         {viewControllerState.teamIdShowing !== null &&
         viewControllerState.viewerDisplaying.viewing !== "teams_browser" ? (
           <Flex
@@ -131,8 +168,6 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
             height="100%"
             // gridColumn={2}
             // gridRow="1/4"
-            color="#fff"
-            bg="#4e3a4c"
             // overflow="auto"
           >
             <TeamMenuAllCharacters
@@ -149,19 +184,61 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
           </Flex>
         ) : null}
       </GridItem>
+
+      {/* END - CONTROLLER COLUMN */}
+
+      {/* BEG - HEADER  */}
       {viewControllerState.teamIdShowing !== null &&
       viewControllerState.viewerDisplaying.viewing !== "teams_browser" ? (
         <GridItem
           id="header"
-          gridColumn={
-            dataTeams && dataTeams.getAllTeamsForUser?.length > 0 ? 3 : 2
-          }
+          // gridColumn={
+          //   dataTeams && dataTeams.getAllTeamsForUser?.length > 0 ? 3 : 2
+          // }
           gridRow={1}
           borderBottom="1px solid #eee"
+          sx={{
+            "@media only screen and (min-width: 600px)": {
+              gridColumn:
+                dataTeams && dataTeams.getAllTeamsForUser?.length > 0 ? 3 : 2
+            },
+            gridColumn: "1/4"
+          }}
+          height="100%"
         >
-          <ViewHeader viewControllerState={viewControllerState} />
+          <Flex display="flex" flexDirection="column">
+            <Flex
+              bg="#362234"
+              color="#fff"
+              id="team-menu-controller"
+              flexDirection="column"
+              height="100%"
+              sx={{
+                "@media only screen and (min-width: 600px)": {
+                  display: "none"
+                }
+              }}
+              // gridColumn={2}
+              // gridRow="1/4"
+              // overflow="auto"
+            >
+              <TeamMenuAllCharacters
+                dataTeams={dataTeams}
+                router={router}
+                viewControllerDispatch={viewControllerDispatch}
+                viewControllerState={viewControllerState}
+              />
+            </Flex>
+
+            {viewControllerState.viewerDisplaying.viewing !==
+            "channel_browser" ? (
+              <ViewHeader viewControllerState={viewControllerState} />
+            ) : null}
+          </Flex>
         </GridItem>
       ) : null}
+      {/* END - HEADER  */}
+      {/* BEG - TEAMS EXPLORER  */}
       {viewControllerState.teamIdShowing === null ||
       viewControllerState.viewerDisplaying.viewing === "teams_browser" ? (
         <Flex
@@ -174,19 +251,44 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
           <TeamExplorer />
         </Flex>
       ) : null}
+      {/* BEG - TEAMS EXPLORER  */}
+
+      {/* BEG - CHANNEL EXPLORER  */}
       {viewControllerState.teamIdShowing &&
       viewControllerState.viewerDisplaying.viewing === "channel_browser" ? (
-        <RenderChannelBrowser>
+        <RenderChannelBrowser teamId={viewControllerState.teamIdShowing}>
           {action === "add_channel" ? (
-            <Flex>
+            <Flex
+              alignItems="center"
+              justifyContent="center"
+              // sx={{
+              //   "@media only screen and (max-width: 600px)": {
+              //     gridColumn: "1/4"
+              //   },
+              //   // gridColumn: 1,
+              //   gridRow: "1/4"
+              // }}
+
+              sx={{
+                "@media only screen and (min-width: 600px)": {
+                  gridColumn: 3
+                },
+                gridColumn: "1/4"
+              }}
+            >
               <CreateChannelForm teamId={viewControllerState.teamIdShowing} />
             </Flex>
           ) : null}
         </RenderChannelBrowser>
       ) : null}
+      {/* END - CHANNEL EXPLORER  */}
+
+      {/* BEG - DIRECT MESSAGES EXPLORER  */}
       {viewControllerState.viewerDisplaying.viewing === "messages_browser" ? (
         <Center>ADD TEAMMATE EXPLORER</Center>
       ) : null}
+      {/* END - DIRECT MESSAGES EXPLORER  */}
+
       {viewControllerState.teamIdShowing &&
       viewControllerState.viewerDisplaying.dmThreadId &&
       viewControllerState.viewerDisplaying.viewing === "direct_messages" ? (
@@ -202,7 +304,18 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
           channelId={viewControllerState.viewerDisplaying.channelId}
         />
       ) : null}
-      <Flex id="input" gridColumn={3} gridRow={3}>
+      {/* BEG - INPUT */}
+      <Flex
+        id="input"
+        // gridColumn={3}
+        gridRow={3}
+        sx={{
+          "@media only screen and (min-width: 600px)": {
+            gridColumn: 3
+          },
+          gridColumn: "1/4"
+        }}
+      >
         {viewControllerState.viewerDisplaying.dmThreadId &&
         viewControllerState.viewerDisplaying.dmThreadId !== null &&
         viewControllerState.teamIdShowing ? (
@@ -235,6 +348,8 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
           />
         ) : null}
       </Flex>
+
+      {/* END - INPUT */}
     </Grid>
   );
 };
