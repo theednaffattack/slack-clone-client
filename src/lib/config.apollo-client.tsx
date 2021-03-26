@@ -86,10 +86,14 @@ function createApolloClient(
   // });
 
   const errorLink = onError(({ graphQLErrors, networkError }) => {
+    // Below we re-route for un-Authenticated users.
+    // For now timeouts are handled slightly differently than
+    // other Authentication issues.
+
     // We don't want the home page to re-route so don't include
     // "createOrUpdateLikes" mutations to be filtered out and
     // redirected.
-    const filteredAuthErrors =
+    const filteredAuthenticationErrors =
       graphQLErrors &&
       graphQLErrors.filter(
         (error) =>
@@ -97,8 +101,31 @@ function createApolloClient(
           !error.path?.includes("createOrUpdateLikes")
       );
 
-    if (filteredAuthErrors && filteredAuthErrors.length > 0) {
+    if (
+      filteredAuthenticationErrors &&
+      filteredAuthenticationErrors.length > 0
+    ) {
       !isServer() && Router.push("/login?flash=You must be authenticated");
+      return;
+    }
+
+    const filteredAuthenticationTimeoutErrors =
+      graphQLErrors &&
+      graphQLErrors.filter((error) => {
+        return (
+          error.message === "Your session has expired, please log in." &&
+          !error.path?.includes("createOrUpdateLikes")
+        );
+      });
+
+    if (
+      filteredAuthenticationTimeoutErrors &&
+      filteredAuthenticationTimeoutErrors.length > 0
+    ) {
+      console.log(Router.query);
+
+      !isServer() &&
+        Router.push(`/login?flash=Your session has expired, please log in.`);
       return;
     }
 
