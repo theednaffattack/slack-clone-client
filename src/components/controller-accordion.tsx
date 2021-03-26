@@ -64,11 +64,12 @@ export const ControllerAccordion: React.FC<ControllerAccordionProps> = ({
   return (
     <Accordion allowToggle allowMultiple defaultIndex={[0, 1]}>
       <ChannelAccordion
+        channels={dataFromChannels?.loadChannelsByTeamId ?? []}
+        dispatch={controllerDispatch}
         errorFromChannels={errorFromChannels}
         router={router}
         state={controllerState}
-        channels={dataFromChannels?.loadChannelsByTeamId ?? []}
-        dispatch={controllerDispatch}
+        teamId={teamId}
       />
       <DirectMessagesAccordion
         errorThreads={errorThreads}
