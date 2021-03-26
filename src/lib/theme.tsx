@@ -6,7 +6,7 @@ const fonts = { ...chakraTheme.fonts, mono: `'Menlo', monospace` };
 
 // const breakpoints = ["30em", "48em", "62em", "80em"];
 
-const breakpoints = ["30em", "48em", "62em", "80em", "96em"];
+// const breakpoints = ["30em", "48em", "62em", "80em", "96em"];
 
 const colors = {
   ...chakraTheme.colors,
@@ -49,7 +49,7 @@ const spaces = {
 
 const theme = {
   ...chakraTheme,
-  breakpoints,
+  // breakpoints,
   colors,
   fonts,
   fontSizes,
