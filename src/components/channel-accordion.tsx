@@ -30,6 +30,7 @@ interface ChannelAccordionProps {
   errorFromChannels: ApolloError | undefined;
   router: Router;
   state: ControllerState;
+  teamId: string | null;
 }
 
 export function ChannelAccordion({
@@ -37,7 +38,8 @@ export function ChannelAccordion({
   dispatch,
   errorFromChannels,
   router,
-  state
+  state,
+  teamId
 }: ChannelAccordionProps) {
   const { channel: channelBase } = router.query;
 
@@ -52,11 +54,15 @@ export function ChannelAccordion({
   //   channel = "no_id";
   // }
   function handleExploreChannelClick() {
-    router.push("/view-team/?viewing=channel_browser&action=find_channel");
+    router.push(
+      `/view-team/?teamId=${teamId}&viewing=channel_browser&action=find_channel`
+    );
   }
 
   function handleAddChannelClick() {
-    router.push("/view-team/?viewing=channel_browser&action=add_channel");
+    router.push(
+      `/view-team/?teamId=${teamId}&viewing=channel_browser&action=add_channel`
+    );
   }
 
   return (
@@ -117,6 +123,24 @@ export function ChannelAccordion({
               ) : null}
               {!errorFromChannels && channels ? (
                 channels.map(({ id, invitees, name }, index) => {
+                  let fixedInvitees;
+                  if (invitees) {
+                    fixedInvitees = invitees?.map((invitedPerson) => {
+                      if (invitedPerson) {
+                        return {
+                          id: invitedPerson.id,
+                          profileImageUri: invitedPerson.profileImageUri,
+                          username: invitedPerson.username
+                        };
+                      } else {
+                        return {
+                          id: "why is this reachable?",
+                          profileImageUri: "why is this reachable?",
+                          username: "why is this reachable?"
+                        };
+                      }
+                    });
+                  }
                   const {
                     accordionItem: { event, highlightIndex, highlightName }
                   } = state;
@@ -134,10 +158,11 @@ export function ChannelAccordion({
                       href={{
                         pathname: `/view-team`,
                         query: {
-                          viewing: "channel",
                           channel: id,
+                          invitees: JSON.stringify(fixedInvitees),
                           name: name,
-                          invitees: JSON.stringify(invitees)
+                          teamId,
+                          viewing: "channel"
                         }
                       }}
                       passHref
