@@ -71,7 +71,13 @@ export function Toolbar({
   const [addThreadMessage] = useAddThreadToChannelMutation();
   return (
     <Flex alignItems="center" bg="#f5f6f7">
-      <Flex>
+      <Flex
+        sx={{
+          "@media only screen and (max-width: 600px)": {
+            display: "none"
+          }
+        }}
+      >
         <MarkButton
           editor={editor}
           format="bold"
