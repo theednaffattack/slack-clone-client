@@ -70,29 +70,55 @@ export function CreateChannelForm({ teamId }: CreateChannelFormProps) {
         values
       }) => {
         return (
-          <Form onSubmit={handleSubmit}>
-            {errorGql ? <Flex>{errorGql.message}</Flex> : null}
-            {errorsFormik.name ? (
-              <Flex>
-                <pre>{JSON.stringify(errorsFormik, null, 2)}</pre>
+          <Form
+            onSubmit={handleSubmit}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
+          >
+            <Flex
+              p={[2]}
+              pt={["10px", "20px", "20px", "20px", "55px"]}
+              w={["80%"]}
+              flexDirection="column"
+              alignItems="center"
+            >
+              {errorGql ? <Flex>{errorGql.message}</Flex> : null}
+              {errorsFormik.name ? (
+                <Flex>
+                  <pre>{JSON.stringify(errorsFormik, null, 2)}</pre>
+                </Flex>
+              ) : null}
+              {data ? (
+                <Flex>
+                  <Text>success!</Text>
+                </Flex>
+              ) : null}
+              <Flex
+                flexDirection="column"
+                alignItems="center"
+                width={["300px", "300px", "300px", "450px"]}
+              >
+                <Input
+                  value={values.name}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  type="text"
+                  id="name"
+                  name="name"
+                />
+                <Button
+                  w={["190px", "190px", "190px", "190px", "190px"]}
+                  type="submit"
+                  colorScheme="teal"
+                >
+                  create channel
+                </Button>
               </Flex>
-            ) : null}
-            {data ? (
-              <Flex>
-                <Text>success!</Text>
-              </Flex>
-            ) : null}
-            <Input
-              value={values.name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              type="text"
-              id="name"
-              name="name"
-            />
-            <Button type="submit" colorScheme="teal">
-              create channel
-            </Button>
+            </Flex>
           </Form>
         );
       }}
