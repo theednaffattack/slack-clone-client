@@ -527,7 +527,6 @@ export const ChannelRichTextInput: React.FC<ChannelRichTextInputProps> = ({
           <Portal>
             <Flex
               bg="#fff"
-              border="2px dashed teal"
               position="absolute"
               minHeight="300px"
               minWidth="300px"
