@@ -213,6 +213,12 @@ export function RenderChannelStack({
       h="100%"
       overflow="auto"
       position="relative"
+      sx={{
+        "@media only screen and (min-width: 600px)": {
+          gridColumn: 3
+        },
+        gridColumn: "1/4"
+      }}
     >
       {body}
 
