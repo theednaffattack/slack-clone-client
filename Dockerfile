@@ -49,6 +49,8 @@ COPY --from=builder /usr/src/app/.next ./.next
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 # RUN yarn add next
 
+EXPOSE 4040
+
 CMD ["yarn", "start"]
 # CMD ["node_modules/.bin/next", "start -p 4040"]
 
