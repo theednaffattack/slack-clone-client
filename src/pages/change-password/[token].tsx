@@ -45,9 +45,7 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
           response.data?.changePasswordFromToken?.user?.username;
 
         if (changePassErrors) {
-          const errorMap = toErrorMap(changePassErrors);
-
-          if ("token" in errorMap) {
+          if ("token" in Object.keys(changePassErrors)) {
             setTokenErrorHelper(
               <Flex>
                 <Text color="crimson" mr={2}>
@@ -58,9 +56,8 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
                 </NextLink>
               </Flex>
             );
-            delete errorMap.token;
           }
-          setErrors(errorMap);
+          setErrors({ [changePassErrors.field]: changePassErrors.message });
         } else if (successfulUser) {
           router.push("/");
         }
