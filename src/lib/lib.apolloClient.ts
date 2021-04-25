@@ -17,7 +17,7 @@ import { TokenRefreshLink } from "apollo-link-token-refresh";
 
 import fetch from "isomorphic-unfetch";
 import jwtDecode, { JwtPayload } from "jwt-decode";
-import { Router } from "next/router";
+import Router from "next/router";
 import { SubscriptionClient } from "subscriptions-transport-ws";
 import { getAccessToken, setAccessToken } from "./access-token";
 import { MyContext } from "./types";
