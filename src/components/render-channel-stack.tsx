@@ -36,7 +36,7 @@ export function RenderChannelStack({
   channelId,
   teamId
 }: RenderChannelStackProps) {
-  const messageEl = useRef<HTMLDivElement>(null);
+  const messageEl = useRef<any>(null);
   const messageBottomEl = useRef<HTMLDivElement>(null);
 
   let body;
