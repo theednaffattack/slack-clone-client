@@ -5,84 +5,9 @@ import React, { useState } from "react";
 
 import { Wrapper } from "../components/flex-wrapper";
 import { InputField } from "../components/forms.input-field";
+import withApollo from "../components/with-apollo";
 import { useRegisterMutation } from "../generated/graphql";
 import { toErrorMap } from "../lib/utilities.toErrorMap";
-
-function Register() {
-  const [register, { error }] = useRegisterMutation();
-  const [registrationStatus, setRegistrationStatus] = useState<
-    "isNotRegistered" | "hasRegistered"
-  >("isNotRegistered");
-  return (
-    <Formik
-      initialValues={{
-        email: "",
-        username: "",
-        firstName: "",
-        lastName: "",
-        password: "",
-        keepMeSignedIn: true,
-        termsAndConditions: true
-      }}
-      onSubmit={async (values, { setErrors }) => {
-        try {
-          const response = await register({
-            variables: {
-              data: {
-                password: values.password,
-                firstName: values.firstName,
-                lastName: values.lastName,
-                email: values.email,
-                username: values.username
-                // termsAndConditions: true, //values.termsAndConditions,
-                // keepMeSignedIn: true // values.keepMeSignedIn
-              }
-            }
-          });
-
-          // if we have FieldError(s) we'll handle them here
-          if (response.data?.register.errors) {
-            setErrors(toErrorMap(response.data.register.errors));
-          }
-          // SUCCESS
-          if (response.data?.register.user) {
-            setRegistrationStatus("hasRegistered");
-            // router.push("/");
-          }
-        } catch (registerError) {
-          // Server validation errors are caught and handled here
-          // here.
-          if (error?.graphQLErrors[0].extensions!.valErrors) {
-            setErrors(
-              toErrorMap(error?.graphQLErrors[0].extensions!.valErrors)
-            );
-          } else {
-            // Non validation errors that are also not FieldErrors,
-            // but have been server transformed into the same format.
-            setErrors(toErrorMap(registerError));
-          }
-        }
-      }}
-    >
-      {({ handleSubmit, isSubmitting }) => {
-        return (
-          <Wrapper flexDirection="column">
-            {registrationStatus === "isNotRegistered" ? (
-              <RegisterForm
-                handleSubmit={handleSubmit}
-                isSubmitting={isSubmitting}
-              />
-            ) : (
-              <RegistrationSuccessMessage />
-            )}
-          </Wrapper>
-        );
-      }}
-    </Formik>
-  );
-}
-
-export default Register;
 
 function RegisterForm({
   handleSubmit,
@@ -181,3 +106,82 @@ function RegistrationSuccessMessage() {
     </Flex>
   );
 }
+
+function Register() {
+  const [register, { error }] = useRegisterMutation();
+  const [registrationStatus, setRegistrationStatus] = useState<
+    "isNotRegistered" | "hasRegistered"
+  >("isNotRegistered");
+  return (
+    <Formik
+      initialValues={{
+        email: "",
+        username: "",
+        firstName: "",
+        lastName: "",
+        password: "",
+        keepMeSignedIn: true,
+        termsAndConditions: true
+      }}
+      onSubmit={async (values, { setErrors }) => {
+        try {
+          const response = await register({
+            variables: {
+              data: {
+                password: values.password,
+                firstName: values.firstName,
+                lastName: values.lastName,
+                email: values.email,
+                username: values.username
+                // termsAndConditions: true, //values.termsAndConditions,
+                // keepMeSignedIn: true // values.keepMeSignedIn
+              }
+            }
+          });
+
+          // if we have FieldError(s) we'll handle them here
+          if (response.data?.register.errors) {
+            setErrors({
+              [response.data.register.errors.field]:
+                response.data.register.errors.message
+            });
+          }
+          // SUCCESS
+          if (response.data?.register.user) {
+            setRegistrationStatus("hasRegistered");
+            // router.push("/");
+          }
+        } catch (registerError) {
+          // Server validation errors are caught and handled here
+          // here.
+          if (error?.graphQLErrors[0].extensions!.valErrors) {
+            setErrors(
+              toErrorMap(error?.graphQLErrors[0].extensions!.valErrors)
+            );
+          } else {
+            // Non validation errors that are also not FieldErrors,
+            // but have been server transformed into the same format.
+            setErrors(toErrorMap(registerError));
+          }
+        }
+      }}
+    >
+      {({ handleSubmit, isSubmitting }) => {
+        return (
+          <Wrapper flexDirection="column">
+            {registrationStatus === "isNotRegistered" ? (
+              <RegisterForm
+                handleSubmit={handleSubmit}
+                isSubmitting={isSubmitting}
+              />
+            ) : (
+              <RegistrationSuccessMessage />
+            )}
+          </Wrapper>
+        );
+      }}
+    </Formik>
+  );
+}
+
+export default withApollo(Register);
