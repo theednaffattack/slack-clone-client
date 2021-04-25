@@ -4,7 +4,7 @@ FROM node:12.16.2 AS deps
 
 WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
-ENV YARN_CACHE_FOLDER=/dev/shm/yarn_cache
+# ENV YARN_CACHE_FOLDER=/dev/shm/yarn_cache
 RUN yarn install --frozen-lockfile --production
 
 # Rebuild the source code only when needed
