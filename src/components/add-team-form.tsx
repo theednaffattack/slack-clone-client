@@ -11,9 +11,9 @@ import {
   useCreateTeamMutation
 } from "../generated/graphql";
 
-interface AddTeamFormProps {}
+// interface AddTeamFormProps {}
 
-export const AddTeamForm: React.FC<AddTeamFormProps> = () => {
+export const AddTeamForm: React.FC = () => {
   const [createTeam, { client }] = useCreateTeamMutation();
   return (
     <Formik
@@ -79,7 +79,7 @@ function addTeamUpdateCache(
   {
     data
   }: FetchResult<CreateTeamMutation, Record<string, any>, Record<string, any>>,
-  client: ApolloClient<Record<string, unknown>>
+  client: ApolloClient<any>
 ): void {
   const teamsCache = cache.readQuery<
     GetAllTeamsForUserQuery,
