@@ -16,7 +16,7 @@ export const RenderMessagesStack = ({
   teamId: string;
   threadId: string;
 }) => {
-  const messageEl = useRef<HTMLDivElement>(null);
+  const messageEl = useRef<any>(null);
   const messageBottomEl = useRef<HTMLDivElement>(null);
 
   let body;
