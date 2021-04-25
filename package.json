@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "next -p 4040",
-    "build": "next build",
+    "build": "rimraf .next && next build",
     "start": "next start -p 4040",
     "lint": "eslint . --ext .ts,.tsx",
     "lint-and-fix": "eslint . --ext .ts,.tsx --fix",
@@ -43,7 +43,7 @@
     "emotion": "^11.0.0",
     "escape-html": "^1.0.3",
     "formik": "^2.2.0",
-    "framer-motion": "^2.9.4",
+    "framer-motion": "3.10.6",
     "graphql": "^15.3.0",
     "html-react-parser": "^0.14.2",
     "image-extensions": "^1.1.0",
