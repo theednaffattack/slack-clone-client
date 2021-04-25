@@ -1,4 +1,4 @@
-import { Center, Flex, Grid, GridItem, Text } from "@chakra-ui/react";
+import { Center, Flex, Grid, GridItem } from "@chakra-ui/react";
 import cookie from "cookie";
 import { NextPage } from "next";
 import { Router } from "next/router";
