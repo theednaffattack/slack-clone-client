@@ -17,3 +17,5 @@ dokku tags sc
 ```bash
 dokku tags:deploy sc latest
 ```
+
+docker pull theednaffattack/sc-client:production && docker tag theednaffattack/sc-client:production dokku/sc:latest && dokku tags sc && dokku tags:deploy sc latest
