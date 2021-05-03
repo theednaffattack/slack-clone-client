@@ -353,11 +353,40 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
     </Grid>
   );
 };
+interface RedirectProps {
+  props: {
+    redirect: {
+      destination: string;
+      permanent: boolean;
+    };
+  };
+}
 
-export async function getServerSideProps(ctx: MyContext) {
+interface AccessTokenProps {
+  props: { accessToken: string };
+}
+
+export async function getServerSideProps(
+  ctx: MyContext
+): Promise<RedirectProps | AccessTokenProps> {
   let response;
+  let url;
+
+  if (
+    process.env.NEXT_PUBLIC_DEVELOPMENT_REFRESH_TOKEN_ADDRESS &&
+    process.env.NEXT_PUBLIC_PRODUCTION_REFRESH_TOKEN_ADDRESS
+  ) {
+    url =
+      process.env.NODE_ENV === "production"
+        ? process.env.NEXT_PUBLIC_PRODUCTION_REFRESH_TOKEN_ADDRESS
+        : process.env.NEXT_PUBLIC_DEVELOPMENT_REFRESH_TOKEN_ADDRESS;
+  } else {
+    throw new Error(
+      "The refresh token address is missing! Please check the 'REFRESH_TOKEN_ADDRESS' environent variable and try again."
+    );
+  }
+
   const cookiePrefix = process.env.NEXT_PUBLIC_COOKIE_PREFIX ?? "";
-  const url = process.env.NEXT_PUBLIC_DEVELOPMENT_REFRESH_TOKEN_ADDRESS ?? "";
   const reqCookie = ctx.req?.headers.cookie ?? "";
   const cookies = cookie.parse(reqCookie);
 
@@ -394,12 +423,23 @@ export async function getServerSideProps(ctx: MyContext) {
     }
   } else {
     return {
+      props: {
+        redirect: {
+          destination: "/",
+          permanent: false
+        }
+      }
+    };
+  }
+  // I hope this is unreachable!!!
+  return {
+    props: {
       redirect: {
         destination: "/",
         permanent: false
       }
-    };
-  }
+    }
+  };
 }
 
 export default withApollo(ViewTeamIndex);
