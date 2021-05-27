@@ -69,10 +69,10 @@
     "wonka": "^4.0.14"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "1.17.10",
-    "@graphql-codegen/typescript": "1.17.10",
-    "@graphql-codegen/typescript-operations": "1.17.8",
-    "@graphql-codegen/typescript-react-apollo": "^2.0.7",
+    "@graphql-codegen/cli": "1.21.5",
+    "@graphql-codegen/typescript": "1.22.1",
+    "@graphql-codegen/typescript-operations": "1.18.0",
+    "@graphql-codegen/typescript-react-apollo": "^2.2.5",
     "@graphql-codegen/typescript-urql": "^2.0.2",
     "@types/body-scroll-lock": "^2.6.1",
     "@types/cookie": "^0.4.0",
