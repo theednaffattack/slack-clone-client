@@ -11,9 +11,6 @@
     "release": "standard-version",
     "commit": "git-cz"
   },
-  "engines": {
-    "node": "12.16.2"
-  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
