@@ -1,58 +1,41 @@
-
 # Install dependencies only when needed
 FROM node:12.16.2 AS deps
-
-WORKDIR /usr/src/app
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
 COPY package.json yarn.lock ./
-# ENV YARN_CACHE_FOLDER=/dev/shm/yarn_cache
-# Do not enable '--production' flag below, we need typescript
 RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
-# This is where because may be the case that you would try
-# to build the app based on some `X_TAG` in my case (Git commit hash)
-# but the code hasn't changed.
-#
-# Builder stage.
-# In this state we compile our TypeScript to get the JavaScript code.
-#
 FROM node:12.16.2 AS builder
-
-ENV NODE_ENV=production
-
-# Setting working directory. All the path will be relative to WORKDIR
-WORKDIR /usr/src/app
-
+WORKDIR /app
 COPY . .
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-
+COPY --from=deps /app/node_modules ./node_modules
 RUN yarn build
 
-# RUN npm ci --quiet && npm run build
-
-
-#
-# Production stage.
-# This state compile get back the JavaScript code from builder stage
-# It will also install the production package only
-#
-FROM node:12.16.2-slim AS runner
-
+# Production image, copy all the files and run next
+FROM node:12.16.2 AS runner
 WORKDIR /app
-ENV NODE_ENV=production
 
-# Copy only files needed to run our Next app.
-# Note things are ONLY copied from 'builder' stage
-# COPY --from=builder /usr/src/app/next.config.js ./
-COPY --from=builder /usr/src/app/public ./public
-COPY --from=builder /usr/src/app/package.json ./
-COPY --from=builder /usr/src/app/.next ./.next
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-# RUN yarn add next
+ENV NODE_ENV production
+
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+
+# You only need to copy next.config.js if you are NOT using the default configuration
+COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
+USER nextjs
 
 EXPOSE 4040
 
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry.
+# ENV NEXT_TELEMETRY_DISABLED 1
+
 CMD ["yarn", "start"]
-# CMD ["node_modules/.bin/next", "start -p 4040"]
-
-
