@@ -4,6 +4,11 @@ export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
 };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> &
+  { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> &
+  { [SubKey in K]: Maybe<T[SubKey]> };
+const defaultOptions = {};
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -13,116 +18,82 @@ export type Scalars = {
   Float: number;
   /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: any;
+  /** A field whose value conforms to the standard internet email address format as specified in RFC822: https://www.w3.org/Protocols/rfc822/. */
+  EmailAddress: any;
 };
 
-export type Query = {
-  __typename?: "Query";
-  batchTeams: Array<Team>;
-  getAllTeamMembers: Array<UserToTeam>;
-  getAllTeamsForUser: Array<UserToTeam>;
-  teamMembers?: Maybe<Array<Maybe<User>>>;
-  bye: Scalars["String"];
-  me?: Maybe<User>;
-  helloWorld: Scalars["String"];
-  getAllMyMessages?: Maybe<User>;
-  getListToCreateThread: Array<Maybe<User>>;
-  getMyMessagesFromUser?: Maybe<Array<Message>>;
-  getChannelName: Scalars["String"];
-  getAllChannelMembers: Array<User>;
-  getAllChannelMessages: Array<Message>;
-  getAllChannelThreads: Array<Thread>;
-  loadChannelsByTeamId: Array<Channel>;
-  channelMembers?: Maybe<Array<Maybe<User>>>;
-  loadDirectMessagesThreadById: Thread;
-  loadDirectMessageThreadsByTeamAndUser: Array<Thread>;
-};
-
-export type QueryGetAllTeamMembersArgs = {
-  teamId: Scalars["String"];
-};
-
-export type QueryTeamMembersArgs = {
-  teamIds: Array<Scalars["ID"]>;
-};
-
-export type QueryGetListToCreateThreadArgs = {
-  teamId: Scalars["String"];
-};
-
-export type QueryGetMyMessagesFromUserArgs = {
-  input: GetMessagesFromUserInput;
-};
-
-export type QueryGetChannelNameArgs = {
-  channelId: Scalars["String"];
-};
-
-export type QueryGetAllChannelMembersArgs = {
-  channelId: Scalars["String"];
-};
-
-export type QueryGetAllChannelMessagesArgs = {
-  teamId?: Maybe<Scalars["String"]>;
-  channelId?: Maybe<Scalars["String"]>;
-};
-
-export type QueryGetAllChannelThreadsArgs = {
-  teamId?: Maybe<Scalars["String"]>;
-  channelId?: Maybe<Scalars["String"]>;
-};
-
-export type QueryLoadChannelsByTeamIdArgs = {
-  teamId: Scalars["String"];
-};
-
-export type QueryChannelMembersArgs = {
-  channelIds: Array<Scalars["ID"]>;
-};
-
-export type QueryLoadDirectMessagesThreadByIdArgs = {
-  teamId: Scalars["String"];
-  threadId: Scalars["String"];
-};
-
-export type QueryLoadDirectMessageThreadsByTeamAndUserArgs = {
-  teamId: Scalars["String"];
-};
-
-export type Team = {
-  __typename?: "Team";
-  id: Scalars["ID"];
+export type AddChannelInput = {
+  teamId: Scalars["ID"];
   name: Scalars["String"];
-  owner: User;
-  channels: Array<Maybe<Channel>>;
-  threads: Array<Maybe<Thread>>;
-  members: Array<Maybe<User>>;
-  userToTeams: Array<Maybe<UserToTeam>>;
 };
 
-export type User = {
-  __typename?: "User";
-  id?: Maybe<Scalars["ID"]>;
-  firstName?: Maybe<Scalars["String"]>;
-  lastName?: Maybe<Scalars["String"]>;
-  username?: Maybe<Scalars["String"]>;
-  email?: Maybe<Scalars["String"]>;
-  channels_created?: Maybe<Channel>;
-  images?: Maybe<Array<Maybe<Image>>>;
-  files?: Maybe<Array<Maybe<FileEntity>>>;
-  mappedMessages?: Maybe<Array<Maybe<Message>>>;
-  followers?: Maybe<Array<Maybe<User>>>;
-  following?: Maybe<Array<Maybe<User>>>;
-  teams?: Maybe<Array<Maybe<Team>>>;
-  threads?: Maybe<Array<Thread>>;
-  thread_invitations?: Maybe<Array<Maybe<Thread>>>;
-  channel_memberships?: Maybe<Array<Maybe<Channel>>>;
-  profileImageUri?: Maybe<Scalars["String"]>;
-  name?: Maybe<Scalars["String"]>;
-  team_ownership: Scalars["String"];
-  messages?: Maybe<Array<Message>>;
-  sent_messages?: Maybe<Array<Message>>;
-  userToTeams?: Maybe<Array<UserToTeam>>;
-  team_scopes: Array<Scalars["String"]>;
+export type AddDirectMessagePayload = {
+  __typename?: "AddDirectMessagePayload";
+  success: Scalars["Boolean"];
+  threadId: Scalars["ID"];
+  message: Message;
+  sentBy: User;
+  invitees: Array<User>;
+};
+
+export type AddDirectMessageToThreadInput = {
+  threadId: Scalars["ID"];
+  teamId: Scalars["ID"];
+  message_text: Scalars["String"];
+  invitees: Array<Scalars["String"]>;
+};
+
+export type AddMessagePayload = {
+  __typename?: "AddMessagePayload";
+  success: Scalars["Boolean"];
+  channelId: Scalars["ID"];
+  message: Message;
+  user: User;
+  invitees?: Maybe<Array<Maybe<User>>>;
+};
+
+export type AddMessageToChannelInput = {
+  channelId: Scalars["ID"];
+  teamId: Scalars["ID"];
+  created_at?: Maybe<Scalars["DateTime"]>;
+  invitees: Array<Scalars["ID"]>;
+  message: Scalars["String"];
+  images?: Maybe<Array<Maybe<Scalars["String"]>>>;
+  files?: Maybe<Array<Maybe<FileInputHelper>>>;
+};
+
+export type AddTeamMemberByEmailInput = {
+  email: Scalars["String"];
+  teamRoles: Array<TeamRoleEnum>;
+  teamId: Scalars["ID"];
+};
+
+export type AddTeamMemberByIdInput = {
+  userId: Scalars["String"];
+  teamRoles: Array<TeamRoleEnum>;
+  teamId: Scalars["ID"];
+};
+
+export type AddThreadPayload = {
+  __typename?: "AddThreadPayload";
+  success: Scalars["Boolean"];
+  channelId: Scalars["ID"];
+  created_at?: Maybe<Scalars["DateTime"]>;
+  threadId: Scalars["ID"];
+  message: Message;
+  sentBy: User;
+  invitees?: Maybe<Array<Maybe<User>>>;
+};
+
+export type ChangePasswordInput = {
+  password: Scalars["String"];
+  token?: Maybe<Scalars["String"]>;
+};
+
+export type ChangePasswordResponse = {
+  __typename?: "ChangePasswordResponse";
+  errors?: Maybe<FieldError>;
+  user?: Maybe<User>;
 };
 
 export type Channel = {
@@ -142,26 +113,30 @@ export type Channel = {
   updated_at?: Maybe<Scalars["DateTime"]>;
 };
 
-export type Message = {
-  __typename?: "Message";
-  id: Scalars["ID"];
-  created_at?: Maybe<Scalars["DateTime"]>;
-  updated_at?: Maybe<Scalars["DateTime"]>;
-  message: Scalars["String"];
-  images?: Maybe<Array<Maybe<Image>>>;
-  files?: Maybe<Array<Maybe<FileEntity>>>;
-  sentBy: User;
-  user: User;
-  channel?: Maybe<Channel>;
-  thread?: Maybe<Thread>;
+export type CreateDirectMessageInput = {
+  teamId: Scalars["ID"];
+  message_text: Scalars["String"];
+  invitees: Array<Scalars["String"]>;
 };
 
-export type Image = {
-  __typename?: "Image";
-  id: Scalars["ID"];
-  uri: Scalars["String"];
-  message?: Maybe<Message>;
-  user: User;
+export type EditUserInfoResponse = {
+  __typename?: "EditUserInfoResponse";
+  errors?: Maybe<FieldError>;
+  userWithRoles?: Maybe<UserExtendedWithTeamRoles>;
+};
+
+export type EditUserInput = {
+  firstName: Scalars["String"];
+  lastName: Scalars["String"];
+  email: Scalars["String"];
+  teamRoles: Array<TeamRoleEnum>;
+  teamId: Scalars["ID"];
+};
+
+export type FieldError = {
+  __typename?: "FieldError";
+  field: Scalars["String"];
+  message: Scalars["String"];
 };
 
 export type FileEntity = {
@@ -171,6 +146,25 @@ export type FileEntity = {
   file_type: FileTypeEnum;
   message?: Maybe<Message>;
   upload_user: User;
+};
+
+export type FileInput = {
+  id: Scalars["ID"];
+  uri: Scalars["String"];
+};
+
+export type FileInputHelper = {
+  uri: Scalars["String"];
+  file_type: FileTypeEnum;
+};
+
+export type FileInput_V2 = {
+  type: Scalars["String"];
+  lastModified: Scalars["Float"];
+  lastModifiedDate: Scalars["String"];
+  size: Scalars["Int"];
+  name: Scalars["String"];
+  webkitRelativePath: Scalars["String"];
 };
 
 /** css | csv | image-all | pdf | svg | docx | other */
@@ -185,64 +179,100 @@ export enum FileTypeEnum {
   Other = "OTHER"
 }
 
-export type Thread = {
-  __typename?: "Thread";
-  id?: Maybe<Scalars["ID"]>;
-  messages?: Maybe<Array<Maybe<Message>>>;
-  last_message?: Maybe<Scalars["String"]>;
-  message_count: Scalars["Int"];
-  user: User;
-  team?: Maybe<Team>;
-  invitees: Array<User>;
-  channel?: Maybe<Channel>;
-  created_at?: Maybe<Scalars["DateTime"]>;
-  updated_at?: Maybe<Scalars["DateTime"]>;
-};
-
-export type UserToTeam = {
-  __typename?: "UserToTeam";
-  userToTeamId: Scalars["ID"];
-  userId: Scalars["ID"];
-  teamId: Scalars["ID"];
-  teamRoleAuthorizations: Array<TeamRoleEnum>;
-  user: User;
-  team: Team;
-};
-
-/** admin | owner | member | public guest */
-export enum TeamRoleEnum {
-  Admin = "ADMIN",
-  Owner = "OWNER",
-  Member = "MEMBER",
-  PublicGuest = "PUBLIC_GUEST"
-}
-
 export type GetMessagesFromUserInput = {
   sentBy: Scalars["String"];
   user: Scalars["String"];
 };
 
+export type Image = {
+  __typename?: "Image";
+  id: Scalars["ID"];
+  uri: Scalars["String"];
+  message?: Maybe<Message>;
+  user: User;
+};
+
+export type ImageSubInput = {
+  type: Scalars["String"];
+  lastModified: Scalars["Float"];
+  lastModifiedDate: Scalars["DateTime"];
+  size: Scalars["Int"];
+  name: Scalars["String"];
+  webkitRelativePath: Scalars["String"];
+  path: Scalars["String"];
+};
+
+export type Invitation = {
+  __typename?: "Invitation";
+  id: Scalars["ID"];
+  email: Scalars["EmailAddress"];
+  teamId: Scalars["ID"];
+  team: Team;
+  status: InvitationStatusEnum;
+  created_at?: Maybe<Scalars["DateTime"]>;
+  updated_at?: Maybe<Scalars["DateTime"]>;
+};
+
+/** admin | owner | member | public guest */
+export enum InvitationStatusEnum {
+  Accepted = "ACCEPTED",
+  Pending = "PENDING",
+  AcceptError = "ACCEPT_ERROR",
+  Reissued = "REISSUED",
+  Rescinded = "RESCINDED",
+  Sent = "SENT",
+  Unsent = "UNSENT"
+}
+
+export type InviteTeamMemberInput = {
+  email: Scalars["String"];
+  teamRoles: Array<TeamRoleEnum>;
+  teamId: Scalars["ID"];
+};
+
+export type InviteTeamMemberResponse = {
+  __typename?: "InviteTeamMemberResponse";
+  errors?: Maybe<Array<FieldError>>;
+  invitation?: Maybe<Invitation>;
+};
+
+export type LoginResponse = {
+  __typename?: "LoginResponse";
+  errors?: Maybe<Array<FieldError>>;
+  user?: Maybe<User>;
+  accessToken?: Maybe<Scalars["String"]>;
+};
+
+export type MeResponse = {
+  __typename?: "MeResponse";
+  errors?: Maybe<Array<FieldError>>;
+  user?: Maybe<User>;
+};
+
+export type Message = {
+  __typename?: "Message";
+  id: Scalars["ID"];
+  created_at?: Maybe<Scalars["DateTime"]>;
+  updated_at?: Maybe<Scalars["DateTime"]>;
+  message: Scalars["String"];
+  images?: Maybe<Array<Maybe<Image>>>;
+  files?: Maybe<Array<Maybe<FileEntity>>>;
+  sentBy: User;
+  user: User;
+  channel?: Maybe<Channel>;
+  thread?: Maybe<Thread>;
+};
+
 export type Mutation = {
   __typename?: "Mutation";
+  signS3: SignedS3Payload;
+  signS3Files: SignedS3Payload;
+  signS3GetObject: SignedS3Payload;
+  inviteNewTeamMember: InviteTeamMemberResponse;
   addTeamMemberByEmail: UserToTeamIdReferencesOnlyClass;
   addTeamMemberById: UserToTeamIdReferencesOnlyClass;
   createTeam: TeamResponse;
   teamLogin?: Maybe<User>;
-  changePasswordFromContextUserid?: Maybe<User>;
-  changePasswordFromToken: ChangePasswordResponse;
-  confirmUser: Scalars["Boolean"];
-  forgotPassword: Scalars["Boolean"];
-  login: LoginResponse;
-  logout: Scalars["Boolean"];
-  register: RegisterResponse;
-  createUser: User;
-  createProduct: Product;
-  addProfilePicture: UploadProfilePictueReturnType;
-  editCurrentUserInfo: EditUserInfoResponse;
-  adminEditUserInfo: UserClassTypeWithReferenceIds;
-  signS3: SignedS3Payload;
-  signS3Files: SignedS3Payload;
-  signS3GetObject: SignedS3Payload;
   addMessageToChannel: AddMessagePayload;
   addThreadToChannel: AddThreadPayload;
   addChannelMember: Scalars["Boolean"];
@@ -252,7 +282,38 @@ export type Mutation = {
   deleteChannel: Scalars["Boolean"];
   addDirectMessageToThread: AddDirectMessagePayload;
   createDirectMessage: AddDirectMessagePayload;
+  adminEditUserInfo: UserClassTypeWithReferenceIds;
+  changePasswordFromContextUserid?: Maybe<User>;
+  changePasswordFromToken: ChangePasswordResponse;
+  confirmUser: Scalars["Boolean"];
+  createUser: User;
+  createProduct: Product;
+  editCurrentUserInfo: EditUserInfoResponse;
+  forgotPassword: Scalars["Boolean"];
+  login: LoginResponse;
+  logout: Scalars["Boolean"];
+  addProfilePicture: UploadProfilePictueReturnType;
+  register: RegisterResponse;
   revokeRefreshTokensForUser: Scalars["Boolean"];
+};
+
+export type MutationSignS3Args = {
+  files: Array<ImageSubInput>;
+  action: S3SignatureAction;
+};
+
+export type MutationSignS3FilesArgs = {
+  files: Array<FileInput_V2>;
+  action: S3SignatureAction;
+};
+
+export type MutationSignS3GetObjectArgs = {
+  files: Array<FileInput>;
+  action?: Maybe<S3SignatureAction>;
+};
+
+export type MutationInviteNewTeamMemberArgs = {
+  data: InviteTeamMemberInput;
 };
 
 export type MutationAddTeamMemberByEmailArgs = {
@@ -271,58 +332,6 @@ export type MutationTeamLoginArgs = {
   email: Scalars["Int"];
   password: Scalars["Int"];
   teamId: Scalars["String"];
-};
-
-export type MutationChangePasswordFromContextUseridArgs = {
-  data: PasswordInput;
-};
-
-export type MutationChangePasswordFromTokenArgs = {
-  data: ChangePasswordInput;
-};
-
-export type MutationConfirmUserArgs = {
-  token: Scalars["String"];
-};
-
-export type MutationForgotPasswordArgs = {
-  email: Scalars["String"];
-};
-
-export type MutationLoginArgs = {
-  password: Scalars["String"];
-  username: Scalars["String"];
-};
-
-export type MutationRegisterArgs = {
-  data: RegisterInput;
-};
-
-export type MutationAddProfilePictureArgs = {
-  data: UploadProfilePictureInput;
-};
-
-export type MutationEditCurrentUserInfoArgs = {
-  data: EditUserInput;
-};
-
-export type MutationAdminEditUserInfoArgs = {
-  data: EditUserInput;
-};
-
-export type MutationSignS3Args = {
-  files: Array<ImageSubInput>;
-  action: S3SignatureAction;
-};
-
-export type MutationSignS3FilesArgs = {
-  files: Array<FileInput_V2>;
-  action: S3SignatureAction;
-};
-
-export type MutationSignS3GetObjectArgs = {
-  files: Array<FileInput>;
-  action?: Maybe<S3SignatureAction>;
 };
 
 export type MutationAddMessageToChannelArgs = {
@@ -365,76 +374,140 @@ export type MutationCreateDirectMessageArgs = {
   input: CreateDirectMessageInput;
 };
 
+export type MutationAdminEditUserInfoArgs = {
+  data: EditUserInput;
+};
+
+export type MutationChangePasswordFromContextUseridArgs = {
+  data: PasswordInput;
+};
+
+export type MutationChangePasswordFromTokenArgs = {
+  data: ChangePasswordInput;
+};
+
+export type MutationConfirmUserArgs = {
+  token: Scalars["String"];
+};
+
+export type MutationCreateUserArgs = {
+  data: RegisterInput;
+};
+
+export type MutationCreateProductArgs = {
+  data: ProductInput;
+};
+
+export type MutationEditCurrentUserInfoArgs = {
+  data: EditUserInput;
+};
+
+export type MutationForgotPasswordArgs = {
+  email: Scalars["String"];
+};
+
+export type MutationLoginArgs = {
+  password: Scalars["String"];
+  username: Scalars["String"];
+};
+
+export type MutationAddProfilePictureArgs = {
+  data: UploadProfilePictureInput;
+};
+
+export type MutationRegisterArgs = {
+  data: RegisterInput;
+};
+
 export type MutationRevokeRefreshTokensForUserArgs = {
   userId: Scalars["Int"];
-};
-
-export type UserToTeamIdReferencesOnlyClass = {
-  __typename?: "UserToTeamIdReferencesOnlyClass";
-  userToTeamId: Scalars["ID"];
-  userId: Scalars["ID"];
-  teamId: Scalars["ID"];
-  teamRoleAuthorizations: Array<TeamRoleEnum>;
-};
-
-export type AddTeamMemberByEmailInput = {
-  email: Scalars["String"];
-  teamRoles: Array<TeamRoleEnum>;
-  teamId: Scalars["ID"];
-};
-
-export type AddTeamMemberByIdInput = {
-  userId: Scalars["String"];
-  teamRoles: Array<TeamRoleEnum>;
-  teamId: Scalars["ID"];
-};
-
-export type TeamResponse = {
-  __typename?: "TeamResponse";
-  errors?: Maybe<Array<FieldError>>;
-  uttData?: Maybe<UttData>;
-};
-
-export type FieldError = {
-  __typename?: "FieldError";
-  field: Scalars["String"];
-  message: Scalars["String"];
-};
-
-export type UttData = {
-  __typename?: "UttData";
-  name: Scalars["String"];
-  teamId: Scalars["String"];
-  userId: Scalars["String"];
-  userToTeamId: Scalars["String"];
 };
 
 export type PasswordInput = {
   password: Scalars["String"];
 };
 
-export type ChangePasswordResponse = {
-  __typename?: "ChangePasswordResponse";
-  errors?: Maybe<FieldError>;
-  user?: Maybe<User>;
+export type Product = {
+  __typename?: "Product";
+  id: Scalars["ID"];
+  name: Scalars["String"];
 };
 
-export type ChangePasswordInput = {
-  password: Scalars["String"];
-  token?: Maybe<Scalars["String"]>;
+export type ProductInput = {
+  name: Scalars["String"];
 };
 
-export type LoginResponse = {
-  __typename?: "LoginResponse";
-  errors?: Maybe<Array<FieldError>>;
-  user?: Maybe<User>;
-  accessToken?: Maybe<Scalars["String"]>;
+export type Query = {
+  __typename?: "Query";
+  batchTeams: Array<Team>;
+  getAllTeamMembers: Array<UserToTeam>;
+  getAllTeamsForUser: Array<UserToTeam>;
+  teamMembers?: Maybe<Array<Maybe<User>>>;
+  getChannelName: Scalars["String"];
+  getAllChannelMembers: Array<User>;
+  getAllChannelMessages: Array<Message>;
+  getAllChannelThreads: Array<Thread>;
+  loadChannelsByTeamId: Array<Channel>;
+  channelMembers?: Maybe<Array<Maybe<User>>>;
+  loadDirectMessagesThreadById: Thread;
+  loadDirectMessageThreadsByTeamAndUser: Array<Thread>;
+  getAllMyMessages?: Maybe<User>;
+  getListToCreateThread: Array<Maybe<User>>;
+  getMyMessagesFromUser?: Maybe<Array<Message>>;
+  bye: Scalars["String"];
+  me?: Maybe<MeResponse>;
+  helloWorld: Scalars["String"];
 };
 
-export type RegisterResponse = {
-  __typename?: "RegisterResponse";
-  errors?: Maybe<FieldError>;
-  user?: Maybe<User>;
+export type QueryGetAllTeamMembersArgs = {
+  teamId: Scalars["String"];
+};
+
+export type QueryTeamMembersArgs = {
+  teamIds: Array<Scalars["ID"]>;
+};
+
+export type QueryGetChannelNameArgs = {
+  channelId: Scalars["String"];
+};
+
+export type QueryGetAllChannelMembersArgs = {
+  channelId: Scalars["String"];
+};
+
+export type QueryGetAllChannelMessagesArgs = {
+  teamId?: Maybe<Scalars["String"]>;
+  channelId?: Maybe<Scalars["String"]>;
+};
+
+export type QueryGetAllChannelThreadsArgs = {
+  teamId?: Maybe<Scalars["String"]>;
+  channelId?: Maybe<Scalars["String"]>;
+};
+
+export type QueryLoadChannelsByTeamIdArgs = {
+  teamId: Scalars["String"];
+};
+
+export type QueryChannelMembersArgs = {
+  channelIds: Array<Scalars["ID"]>;
+};
+
+export type QueryLoadDirectMessagesThreadByIdArgs = {
+  teamId: Scalars["String"];
+  threadId: Scalars["String"];
+};
+
+export type QueryLoadDirectMessageThreadsByTeamAndUserArgs = {
+  teamId: Scalars["String"];
+};
+
+export type QueryGetListToCreateThreadArgs = {
+  teamId: Scalars["String"];
+};
+
+export type QueryGetMyMessagesFromUserArgs = {
+  input: GetMessagesFromUserInput;
 };
 
 export type RegisterInput = {
@@ -445,10 +518,77 @@ export type RegisterInput = {
   email: Scalars["String"];
 };
 
-export type Product = {
-  __typename?: "Product";
+export type RegisterResponse = {
+  __typename?: "RegisterResponse";
+  errors?: Maybe<FieldError>;
+  user?: Maybe<User>;
+};
+
+/** The actions associated with obtaining a signed URL from S3 (get | put | delete) */
+export enum S3SignatureAction {
+  PutObject = "putObject",
+  GetObject = "getObject"
+}
+
+export type SignedS3Payload = {
+  __typename?: "SignedS3Payload";
+  signatures: Array<SignedS3SubPayload>;
+};
+
+export type SignedS3SubPayload = {
+  __typename?: "SignedS3SubPayload";
+  uri: Scalars["String"];
+  signedRequest: Scalars["String"];
+};
+
+export type Subscription = {
+  __typename?: "Subscription";
+  newMessageSub: AddThreadPayload;
+  newDirectMessageSub: AddDirectMessagePayload;
+};
+
+export type SubscriptionNewMessageSubArgs = {
+  data: AddMessageToChannelInput;
+};
+
+export type Team = {
+  __typename?: "Team";
   id: Scalars["ID"];
   name: Scalars["String"];
+  owner: User;
+  channels: Array<Maybe<Channel>>;
+  threads: Array<Maybe<Thread>>;
+  members: Array<Maybe<User>>;
+  userToTeams: Array<Maybe<UserToTeam>>;
+  invitations: Array<Maybe<Invitation>>;
+};
+
+export type TeamResponse = {
+  __typename?: "TeamResponse";
+  errors?: Maybe<Array<FieldError>>;
+  uttData?: Maybe<UttData>;
+};
+
+/** admin | owner | member | public guest */
+export enum TeamRoleEnum {
+  Admin = "ADMIN",
+  Owner = "OWNER",
+  Member = "MEMBER",
+  PublicGuest = "PUBLIC_GUEST"
+}
+
+export type Thread = {
+  __typename?: "Thread";
+  id?: Maybe<Scalars["ID"]>;
+  messages?: Maybe<Array<Maybe<Message>>>;
+  last_message?: Maybe<Scalars["String"]>;
+  message_count: Scalars["Int"];
+  user: User;
+  team?: Maybe<Team>;
+  invitees: Array<User>;
+  channel?: Maybe<Channel>;
+  created_at?: Maybe<Scalars["DateTime"]>;
+  updated_at?: Maybe<Scalars["DateTime"]>;
 };
 
 export type UploadProfilePictueReturnType = {
@@ -462,24 +602,30 @@ export type UploadProfilePictureInput = {
   image?: Maybe<Scalars["String"]>;
 };
 
-export type EditUserInfoResponse = {
-  __typename?: "EditUserInfoResponse";
-  errors?: Maybe<FieldError>;
-  userWithRoles?: Maybe<UserExtendedWithTeamRoles>;
-};
-
-export type UserExtendedWithTeamRoles = {
-  __typename?: "UserExtendedWithTeamRoles";
-  user: User;
-  teamRoles: Array<TeamRoleEnum>;
-};
-
-export type EditUserInput = {
-  firstName: Scalars["String"];
-  lastName: Scalars["String"];
-  email: Scalars["String"];
-  teamRoles: Array<TeamRoleEnum>;
-  teamId: Scalars["ID"];
+export type User = {
+  __typename?: "User";
+  id?: Maybe<Scalars["ID"]>;
+  firstName?: Maybe<Scalars["String"]>;
+  lastName?: Maybe<Scalars["String"]>;
+  username?: Maybe<Scalars["String"]>;
+  email?: Maybe<Scalars["String"]>;
+  channels_created?: Maybe<Channel>;
+  images?: Maybe<Array<Maybe<Image>>>;
+  files?: Maybe<Array<Maybe<FileEntity>>>;
+  mappedMessages?: Maybe<Array<Maybe<Message>>>;
+  followers?: Maybe<Array<Maybe<User>>>;
+  following?: Maybe<Array<Maybe<User>>>;
+  teams?: Maybe<Array<Maybe<Team>>>;
+  threads?: Maybe<Array<Thread>>;
+  thread_invitations?: Maybe<Array<Maybe<Thread>>>;
+  channel_memberships?: Maybe<Array<Maybe<Channel>>>;
+  profileImageUri?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  team_ownership: Scalars["String"];
+  messages?: Maybe<Array<Message>>;
+  sent_messages?: Maybe<Array<Message>>;
+  userToTeams?: Maybe<Array<UserToTeam>>;
+  team_scopes: Array<Scalars["String"]>;
 };
 
 export type UserClassTypeWithReferenceIds = {
@@ -506,117 +652,36 @@ export type UserClassTypeWithReferenceIds = {
   userToTeams?: Maybe<Array<UserToTeamIdReferencesOnlyClass>>;
 };
 
-export type SignedS3Payload = {
-  __typename?: "SignedS3Payload";
-  signatures: Array<SignedS3SubPayload>;
-};
-
-export type SignedS3SubPayload = {
-  __typename?: "SignedS3SubPayload";
-  uri: Scalars["String"];
-  signedRequest: Scalars["String"];
-};
-
-export type ImageSubInput = {
-  type: Scalars["String"];
-  lastModified: Scalars["Float"];
-  lastModifiedDate: Scalars["DateTime"];
-  size: Scalars["Int"];
-  name: Scalars["String"];
-  webkitRelativePath: Scalars["String"];
-  path: Scalars["String"];
-};
-
-/** The actions associated with obtaining a signed URL from S3 (get | put | delete) */
-export enum S3SignatureAction {
-  PutObject = "putObject",
-  GetObject = "getObject"
-}
-
-export type FileInput_V2 = {
-  type: Scalars["String"];
-  lastModified: Scalars["Float"];
-  lastModifiedDate: Scalars["String"];
-  size: Scalars["Int"];
-  name: Scalars["String"];
-  webkitRelativePath: Scalars["String"];
-};
-
-export type FileInput = {
-  id: Scalars["ID"];
-  uri: Scalars["String"];
-};
-
-export type AddMessagePayload = {
-  __typename?: "AddMessagePayload";
-  success: Scalars["Boolean"];
-  channelId: Scalars["ID"];
-  message: Message;
+export type UserExtendedWithTeamRoles = {
+  __typename?: "UserExtendedWithTeamRoles";
   user: User;
-  invitees?: Maybe<Array<Maybe<User>>>;
+  teamRoles: Array<TeamRoleEnum>;
 };
 
-export type AddMessageToChannelInput = {
-  channelId: Scalars["ID"];
+export type UserToTeam = {
+  __typename?: "UserToTeam";
+  userToTeamId: Scalars["ID"];
+  userId: Scalars["ID"];
   teamId: Scalars["ID"];
-  created_at?: Maybe<Scalars["DateTime"]>;
-  invitees: Array<Scalars["ID"]>;
-  message: Scalars["String"];
-  images?: Maybe<Array<Maybe<Scalars["String"]>>>;
-  files?: Maybe<Array<Maybe<FileInputHelper>>>;
+  teamRoleAuthorizations: Array<TeamRoleEnum>;
+  user: User;
+  team: Team;
 };
 
-export type FileInputHelper = {
-  uri: Scalars["String"];
-  file_type: FileTypeEnum;
-};
-
-export type AddThreadPayload = {
-  __typename?: "AddThreadPayload";
-  success: Scalars["Boolean"];
-  channelId: Scalars["ID"];
-  created_at?: Maybe<Scalars["DateTime"]>;
-  threadId: Scalars["ID"];
-  message: Message;
-  sentBy: User;
-  invitees?: Maybe<Array<Maybe<User>>>;
-};
-
-export type AddChannelInput = {
+export type UserToTeamIdReferencesOnlyClass = {
+  __typename?: "UserToTeamIdReferencesOnlyClass";
+  userToTeamId: Scalars["ID"];
+  userId: Scalars["ID"];
   teamId: Scalars["ID"];
+  teamRoleAuthorizations: Array<TeamRoleEnum>;
+};
+
+export type UttData = {
+  __typename?: "UttData";
   name: Scalars["String"];
-};
-
-export type AddDirectMessagePayload = {
-  __typename?: "AddDirectMessagePayload";
-  success: Scalars["Boolean"];
-  threadId: Scalars["ID"];
-  message: Message;
-  sentBy: User;
-  invitees: Array<User>;
-};
-
-export type AddDirectMessageToThreadInput = {
-  threadId: Scalars["ID"];
-  teamId: Scalars["ID"];
-  message_text: Scalars["String"];
-  invitees: Array<Scalars["String"]>;
-};
-
-export type CreateDirectMessageInput = {
-  teamId: Scalars["ID"];
-  message_text: Scalars["String"];
-  invitees: Array<Scalars["String"]>;
-};
-
-export type Subscription = {
-  __typename?: "Subscription";
-  newMessageSub: AddThreadPayload;
-  newDirectMessageSub: AddDirectMessagePayload;
-};
-
-export type SubscriptionNewMessageSubArgs = {
-  data: AddMessageToChannelInput;
+  teamId: Scalars["String"];
+  userId: Scalars["String"];
+  userToTeamId: Scalars["String"];
 };
 
 export type AddChannelMemberMutationVariables = Exact<{
@@ -824,6 +889,26 @@ export type ForgotPasswordMutation = { __typename?: "Mutation" } & Pick<
   "forgotPassword"
 >;
 
+export type InviteNewTeamMemberMutationVariables = Exact<{
+  data: InviteTeamMemberInput;
+}>;
+
+export type InviteNewTeamMemberMutation = { __typename?: "Mutation" } & {
+  inviteNewTeamMember: { __typename?: "InviteTeamMemberResponse" } & {
+    errors?: Maybe<
+      Array<
+        { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
+      >
+    >;
+    invitation?: Maybe<
+      { __typename?: "Invitation" } & Pick<
+        Invitation,
+        "id" | "email" | "teamId" | "status"
+      >
+    >;
+  };
+};
+
 export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
 
 export type LogoutMutation = { __typename?: "Mutation" } & Pick<
@@ -847,7 +932,7 @@ export type RegisterMutation = { __typename?: "Mutation" } & {
 };
 
 export type SignS3FilesMutationVariables = Exact<{
-  files: Array<FileInput_V2>;
+  files: Array<FileInput_V2> | FileInput_V2;
   action: S3SignatureAction;
 }>;
 
@@ -863,7 +948,7 @@ export type SignS3FilesMutation = { __typename?: "Mutation" } & {
 };
 
 export type SignS3GetObjectMutationVariables = Exact<{
-  files: Array<FileInput>;
+  files: Array<FileInput> | FileInput;
   action?: Maybe<S3SignatureAction>;
 }>;
 
@@ -879,7 +964,7 @@ export type SignS3GetObjectMutation = { __typename?: "Mutation" } & {
 };
 
 export type SignS3MutationVariables = Exact<{
-  files: Array<ImageSubInput>;
+  files: Array<ImageSubInput> | ImageSubInput;
   action: S3SignatureAction;
 }>;
 
@@ -1077,7 +1162,18 @@ export type LoginMutation = { __typename?: "Mutation" } & {
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = { __typename?: "Query" } & {
-  me?: Maybe<{ __typename?: "User" } & Pick<User, "id" | "name" | "username">>;
+  me?: Maybe<
+    { __typename?: "MeResponse" } & {
+      errors?: Maybe<
+        Array<
+          { __typename?: "FieldError" } & Pick<FieldError, "field" | "message">
+        >
+      >;
+      user?: Maybe<
+        { __typename?: "User" } & Pick<User, "id" | "name" | "username">
+      >;
+    }
+  >;
 };
 
 export type NewMessageSubSubscriptionVariables = Exact<{
@@ -1130,17 +1226,16 @@ export function useAddChannelMemberMutation(
     AddChannelMemberMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     AddChannelMemberMutation,
     AddChannelMemberMutationVariables
-  >(AddChannelMemberDocument, baseOptions);
+  >(AddChannelMemberDocument, options);
 }
 export type AddChannelMemberMutationHookResult = ReturnType<
   typeof useAddChannelMemberMutation
 >;
-export type AddChannelMemberMutationResult = Apollo.MutationResult<
-  AddChannelMemberMutation
->;
+export type AddChannelMemberMutationResult = Apollo.MutationResult<AddChannelMemberMutation>;
 export type AddChannelMemberMutationOptions = Apollo.BaseMutationOptions<
   AddChannelMemberMutation,
   AddChannelMemberMutationVariables
@@ -1191,17 +1286,16 @@ export function useAddDirectMessageToThreadMutation(
     AddDirectMessageToThreadMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     AddDirectMessageToThreadMutation,
     AddDirectMessageToThreadMutationVariables
-  >(AddDirectMessageToThreadDocument, baseOptions);
+  >(AddDirectMessageToThreadDocument, options);
 }
 export type AddDirectMessageToThreadMutationHookResult = ReturnType<
   typeof useAddDirectMessageToThreadMutation
 >;
-export type AddDirectMessageToThreadMutationResult = Apollo.MutationResult<
-  AddDirectMessageToThreadMutation
->;
+export type AddDirectMessageToThreadMutationResult = Apollo.MutationResult<AddDirectMessageToThreadMutation>;
 export type AddDirectMessageToThreadMutationOptions = Apollo.BaseMutationOptions<
   AddDirectMessageToThreadMutation,
   AddDirectMessageToThreadMutationVariables
@@ -1256,17 +1350,16 @@ export function useAddMessageToChannelMutation(
     AddMessageToChannelMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     AddMessageToChannelMutation,
     AddMessageToChannelMutationVariables
-  >(AddMessageToChannelDocument, baseOptions);
+  >(AddMessageToChannelDocument, options);
 }
 export type AddMessageToChannelMutationHookResult = ReturnType<
   typeof useAddMessageToChannelMutation
 >;
-export type AddMessageToChannelMutationResult = Apollo.MutationResult<
-  AddMessageToChannelMutation
->;
+export type AddMessageToChannelMutationResult = Apollo.MutationResult<AddMessageToChannelMutation>;
 export type AddMessageToChannelMutationOptions = Apollo.BaseMutationOptions<
   AddMessageToChannelMutation,
   AddMessageToChannelMutationVariables
@@ -1309,17 +1402,16 @@ export function useAddTeamMemberByIdMutation(
     AddTeamMemberByIdMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     AddTeamMemberByIdMutation,
     AddTeamMemberByIdMutationVariables
-  >(AddTeamMemberByIdDocument, baseOptions);
+  >(AddTeamMemberByIdDocument, options);
 }
 export type AddTeamMemberByIdMutationHookResult = ReturnType<
   typeof useAddTeamMemberByIdMutation
 >;
-export type AddTeamMemberByIdMutationResult = Apollo.MutationResult<
-  AddTeamMemberByIdMutation
->;
+export type AddTeamMemberByIdMutationResult = Apollo.MutationResult<AddTeamMemberByIdMutation>;
 export type AddTeamMemberByIdMutationOptions = Apollo.BaseMutationOptions<
   AddTeamMemberByIdMutation,
   AddTeamMemberByIdMutationVariables
@@ -1373,17 +1465,16 @@ export function useAddThreadToChannelMutation(
     AddThreadToChannelMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     AddThreadToChannelMutation,
     AddThreadToChannelMutationVariables
-  >(AddThreadToChannelDocument, baseOptions);
+  >(AddThreadToChannelDocument, options);
 }
 export type AddThreadToChannelMutationHookResult = ReturnType<
   typeof useAddThreadToChannelMutation
 >;
-export type AddThreadToChannelMutationResult = Apollo.MutationResult<
-  AddThreadToChannelMutation
->;
+export type AddThreadToChannelMutationResult = Apollo.MutationResult<AddThreadToChannelMutation>;
 export type AddThreadToChannelMutationOptions = Apollo.BaseMutationOptions<
   AddThreadToChannelMutation,
   AddThreadToChannelMutationVariables
@@ -1431,17 +1522,16 @@ export function useChangePasswordFromTokenMutation(
     ChangePasswordFromTokenMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     ChangePasswordFromTokenMutation,
     ChangePasswordFromTokenMutationVariables
-  >(ChangePasswordFromTokenDocument, baseOptions);
+  >(ChangePasswordFromTokenDocument, options);
 }
 export type ChangePasswordFromTokenMutationHookResult = ReturnType<
   typeof useChangePasswordFromTokenMutation
 >;
-export type ChangePasswordFromTokenMutationResult = Apollo.MutationResult<
-  ChangePasswordFromTokenMutation
->;
+export type ChangePasswordFromTokenMutationResult = Apollo.MutationResult<ChangePasswordFromTokenMutation>;
 export type ChangePasswordFromTokenMutationOptions = Apollo.BaseMutationOptions<
   ChangePasswordFromTokenMutation,
   ChangePasswordFromTokenMutationVariables
@@ -1483,17 +1573,16 @@ export function useChangePasswordFromContextUseridMutation(
     ChangePasswordFromContextUseridMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     ChangePasswordFromContextUseridMutation,
     ChangePasswordFromContextUseridMutationVariables
-  >(ChangePasswordFromContextUseridDocument, baseOptions);
+  >(ChangePasswordFromContextUseridDocument, options);
 }
 export type ChangePasswordFromContextUseridMutationHookResult = ReturnType<
   typeof useChangePasswordFromContextUseridMutation
 >;
-export type ChangePasswordFromContextUseridMutationResult = Apollo.MutationResult<
-  ChangePasswordFromContextUseridMutation
->;
+export type ChangePasswordFromContextUseridMutationResult = Apollo.MutationResult<ChangePasswordFromContextUseridMutation>;
 export type ChangePasswordFromContextUseridMutationOptions = Apollo.BaseMutationOptions<
   ChangePasswordFromContextUseridMutation,
   ChangePasswordFromContextUseridMutationVariables
@@ -1531,17 +1620,16 @@ export function useConfirmUserMutation(
     ConfirmUserMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<ConfirmUserMutation, ConfirmUserMutationVariables>(
     ConfirmUserDocument,
-    baseOptions
+    options
   );
 }
 export type ConfirmUserMutationHookResult = ReturnType<
   typeof useConfirmUserMutation
 >;
-export type ConfirmUserMutationResult = Apollo.MutationResult<
-  ConfirmUserMutation
->;
+export type ConfirmUserMutationResult = Apollo.MutationResult<ConfirmUserMutation>;
 export type ConfirmUserMutationOptions = Apollo.BaseMutationOptions<
   ConfirmUserMutation,
   ConfirmUserMutationVariables
@@ -1586,17 +1674,16 @@ export function useCreateChannelMutation(
     CreateChannelMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     CreateChannelMutation,
     CreateChannelMutationVariables
-  >(CreateChannelDocument, baseOptions);
+  >(CreateChannelDocument, options);
 }
 export type CreateChannelMutationHookResult = ReturnType<
   typeof useCreateChannelMutation
 >;
-export type CreateChannelMutationResult = Apollo.MutationResult<
-  CreateChannelMutation
->;
+export type CreateChannelMutationResult = Apollo.MutationResult<CreateChannelMutation>;
 export type CreateChannelMutationOptions = Apollo.BaseMutationOptions<
   CreateChannelMutation,
   CreateChannelMutationVariables
@@ -1650,17 +1737,16 @@ export function useCreateDirectMessageMutation(
     CreateDirectMessageMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     CreateDirectMessageMutation,
     CreateDirectMessageMutationVariables
-  >(CreateDirectMessageDocument, baseOptions);
+  >(CreateDirectMessageDocument, options);
 }
 export type CreateDirectMessageMutationHookResult = ReturnType<
   typeof useCreateDirectMessageMutation
 >;
-export type CreateDirectMessageMutationResult = Apollo.MutationResult<
-  CreateDirectMessageMutation
->;
+export type CreateDirectMessageMutationResult = Apollo.MutationResult<CreateDirectMessageMutation>;
 export type CreateDirectMessageMutationOptions = Apollo.BaseMutationOptions<
   CreateDirectMessageMutation,
   CreateDirectMessageMutationVariables
@@ -1709,17 +1795,16 @@ export function useCreateTeamMutation(
     CreateTeamMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<CreateTeamMutation, CreateTeamMutationVariables>(
     CreateTeamDocument,
-    baseOptions
+    options
   );
 }
 export type CreateTeamMutationHookResult = ReturnType<
   typeof useCreateTeamMutation
 >;
-export type CreateTeamMutationResult = Apollo.MutationResult<
-  CreateTeamMutation
->;
+export type CreateTeamMutationResult = Apollo.MutationResult<CreateTeamMutation>;
 export type CreateTeamMutationOptions = Apollo.BaseMutationOptions<
   CreateTeamMutation,
   CreateTeamMutationVariables
@@ -1770,17 +1855,16 @@ export function useEditCurrentUserInfoMutation(
     EditCurrentUserInfoMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     EditCurrentUserInfoMutation,
     EditCurrentUserInfoMutationVariables
-  >(EditCurrentUserInfoDocument, baseOptions);
+  >(EditCurrentUserInfoDocument, options);
 }
 export type EditCurrentUserInfoMutationHookResult = ReturnType<
   typeof useEditCurrentUserInfoMutation
 >;
-export type EditCurrentUserInfoMutationResult = Apollo.MutationResult<
-  EditCurrentUserInfoMutation
->;
+export type EditCurrentUserInfoMutationResult = Apollo.MutationResult<EditCurrentUserInfoMutation>;
 export type EditCurrentUserInfoMutationOptions = Apollo.BaseMutationOptions<
   EditCurrentUserInfoMutation,
   EditCurrentUserInfoMutationVariables
@@ -1818,20 +1902,77 @@ export function useForgotPasswordMutation(
     ForgotPasswordMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     ForgotPasswordMutation,
     ForgotPasswordMutationVariables
-  >(ForgotPasswordDocument, baseOptions);
+  >(ForgotPasswordDocument, options);
 }
 export type ForgotPasswordMutationHookResult = ReturnType<
   typeof useForgotPasswordMutation
 >;
-export type ForgotPasswordMutationResult = Apollo.MutationResult<
-  ForgotPasswordMutation
->;
+export type ForgotPasswordMutationResult = Apollo.MutationResult<ForgotPasswordMutation>;
 export type ForgotPasswordMutationOptions = Apollo.BaseMutationOptions<
   ForgotPasswordMutation,
   ForgotPasswordMutationVariables
+>;
+export const InviteNewTeamMemberDocument = gql`
+  mutation InviteNewTeamMember($data: InviteTeamMemberInput!) {
+    inviteNewTeamMember(data: $data) {
+      errors {
+        field
+        message
+      }
+      invitation {
+        id
+        email
+        teamId
+        status
+      }
+    }
+  }
+`;
+export type InviteNewTeamMemberMutationFn = Apollo.MutationFunction<
+  InviteNewTeamMemberMutation,
+  InviteNewTeamMemberMutationVariables
+>;
+
+/**
+ * __useInviteNewTeamMemberMutation__
+ *
+ * To run a mutation, you first call `useInviteNewTeamMemberMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useInviteNewTeamMemberMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [inviteNewTeamMemberMutation, { data, loading, error }] = useInviteNewTeamMemberMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useInviteNewTeamMemberMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    InviteNewTeamMemberMutation,
+    InviteNewTeamMemberMutationVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    InviteNewTeamMemberMutation,
+    InviteNewTeamMemberMutationVariables
+  >(InviteNewTeamMemberDocument, options);
+}
+export type InviteNewTeamMemberMutationHookResult = ReturnType<
+  typeof useInviteNewTeamMemberMutation
+>;
+export type InviteNewTeamMemberMutationResult = Apollo.MutationResult<InviteNewTeamMemberMutation>;
+export type InviteNewTeamMemberMutationOptions = Apollo.BaseMutationOptions<
+  InviteNewTeamMemberMutation,
+  InviteNewTeamMemberMutationVariables
 >;
 export const LogoutDocument = gql`
   mutation Logout {
@@ -1865,9 +2006,10 @@ export function useLogoutMutation(
     LogoutMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(
     LogoutDocument,
-    baseOptions
+    options
   );
 }
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
@@ -1919,9 +2061,10 @@ export function useRegisterMutation(
     RegisterMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<RegisterMutation, RegisterMutationVariables>(
     RegisterDocument,
-    baseOptions
+    options
   );
 }
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
@@ -1969,17 +2112,16 @@ export function useSignS3FilesMutation(
     SignS3FilesMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<SignS3FilesMutation, SignS3FilesMutationVariables>(
     SignS3FilesDocument,
-    baseOptions
+    options
   );
 }
 export type SignS3FilesMutationHookResult = ReturnType<
   typeof useSignS3FilesMutation
 >;
-export type SignS3FilesMutationResult = Apollo.MutationResult<
-  SignS3FilesMutation
->;
+export type SignS3FilesMutationResult = Apollo.MutationResult<SignS3FilesMutation>;
 export type SignS3FilesMutationOptions = Apollo.BaseMutationOptions<
   SignS3FilesMutation,
   SignS3FilesMutationVariables
@@ -2026,17 +2168,16 @@ export function useSignS3GetObjectMutation(
     SignS3GetObjectMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<
     SignS3GetObjectMutation,
     SignS3GetObjectMutationVariables
-  >(SignS3GetObjectDocument, baseOptions);
+  >(SignS3GetObjectDocument, options);
 }
 export type SignS3GetObjectMutationHookResult = ReturnType<
   typeof useSignS3GetObjectMutation
 >;
-export type SignS3GetObjectMutationResult = Apollo.MutationResult<
-  SignS3GetObjectMutation
->;
+export type SignS3GetObjectMutationResult = Apollo.MutationResult<SignS3GetObjectMutation>;
 export type SignS3GetObjectMutationOptions = Apollo.BaseMutationOptions<
   SignS3GetObjectMutation,
   SignS3GetObjectMutationVariables
@@ -2080,9 +2221,10 @@ export function useSignS3Mutation(
     SignS3MutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<SignS3Mutation, SignS3MutationVariables>(
     SignS3Document,
-    baseOptions
+    options
   );
 }
 export type SignS3MutationHookResult = ReturnType<typeof useSignS3Mutation>;
@@ -2130,15 +2272,16 @@ export const GetAllChannelThreadsDocument = gql`
  * });
  */
 export function useGetAllChannelThreadsQuery(
-  baseOptions?: Apollo.QueryHookOptions<
+  baseOptions: Apollo.QueryHookOptions<
     GetAllChannelThreadsQuery,
     GetAllChannelThreadsQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<
     GetAllChannelThreadsQuery,
     GetAllChannelThreadsQueryVariables
-  >(GetAllChannelThreadsDocument, baseOptions);
+  >(GetAllChannelThreadsDocument, options);
 }
 export function useGetAllChannelThreadsLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<
@@ -2146,10 +2289,11 @@ export function useGetAllChannelThreadsLazyQuery(
     GetAllChannelThreadsQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<
     GetAllChannelThreadsQuery,
     GetAllChannelThreadsQueryVariables
-  >(GetAllChannelThreadsDocument, baseOptions);
+  >(GetAllChannelThreadsDocument, options);
 }
 export type GetAllChannelThreadsQueryHookResult = ReturnType<
   typeof useGetAllChannelThreadsQuery
@@ -2206,9 +2350,10 @@ export function useGetAllMyMessagesQuery(
     GetAllMyMessagesQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables>(
     GetAllMyMessagesDocument,
-    baseOptions
+    options
   );
 }
 export function useGetAllMyMessagesLazyQuery(
@@ -2217,10 +2362,11 @@ export function useGetAllMyMessagesLazyQuery(
     GetAllMyMessagesQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<
     GetAllMyMessagesQuery,
     GetAllMyMessagesQueryVariables
-  >(GetAllMyMessagesDocument, baseOptions);
+  >(GetAllMyMessagesDocument, options);
 }
 export type GetAllMyMessagesQueryHookResult = ReturnType<
   typeof useGetAllMyMessagesQuery
@@ -2263,15 +2409,16 @@ export const GetAllTeamMembersDocument = gql`
  * });
  */
 export function useGetAllTeamMembersQuery(
-  baseOptions?: Apollo.QueryHookOptions<
+  baseOptions: Apollo.QueryHookOptions<
     GetAllTeamMembersQuery,
     GetAllTeamMembersQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<
     GetAllTeamMembersQuery,
     GetAllTeamMembersQueryVariables
-  >(GetAllTeamMembersDocument, baseOptions);
+  >(GetAllTeamMembersDocument, options);
 }
 export function useGetAllTeamMembersLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<
@@ -2279,10 +2426,11 @@ export function useGetAllTeamMembersLazyQuery(
     GetAllTeamMembersQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<
     GetAllTeamMembersQuery,
     GetAllTeamMembersQueryVariables
-  >(GetAllTeamMembersDocument, baseOptions);
+  >(GetAllTeamMembersDocument, options);
 }
 export type GetAllTeamMembersQueryHookResult = ReturnType<
   typeof useGetAllTeamMembersQuery
@@ -2329,10 +2477,11 @@ export function useGetAllTeamsForUserQuery(
     GetAllTeamsForUserQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<
     GetAllTeamsForUserQuery,
     GetAllTeamsForUserQueryVariables
-  >(GetAllTeamsForUserDocument, baseOptions);
+  >(GetAllTeamsForUserDocument, options);
 }
 export function useGetAllTeamsForUserLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<
@@ -2340,10 +2489,11 @@ export function useGetAllTeamsForUserLazyQuery(
     GetAllTeamsForUserQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<
     GetAllTeamsForUserQuery,
     GetAllTeamsForUserQueryVariables
-  >(GetAllTeamsForUserDocument, baseOptions);
+  >(GetAllTeamsForUserDocument, options);
 }
 export type GetAllTeamsForUserQueryHookResult = ReturnType<
   typeof useGetAllTeamsForUserQuery
@@ -2386,15 +2536,16 @@ export const LoadChannelsByTeamIdDocument = gql`
  * });
  */
 export function useLoadChannelsByTeamIdQuery(
-  baseOptions?: Apollo.QueryHookOptions<
+  baseOptions: Apollo.QueryHookOptions<
     LoadChannelsByTeamIdQuery,
     LoadChannelsByTeamIdQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<
     LoadChannelsByTeamIdQuery,
     LoadChannelsByTeamIdQueryVariables
-  >(LoadChannelsByTeamIdDocument, baseOptions);
+  >(LoadChannelsByTeamIdDocument, options);
 }
 export function useLoadChannelsByTeamIdLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<
@@ -2402,10 +2553,11 @@ export function useLoadChannelsByTeamIdLazyQuery(
     LoadChannelsByTeamIdQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<
     LoadChannelsByTeamIdQuery,
     LoadChannelsByTeamIdQueryVariables
-  >(LoadChannelsByTeamIdDocument, baseOptions);
+  >(LoadChannelsByTeamIdDocument, options);
 }
 export type LoadChannelsByTeamIdQueryHookResult = ReturnType<
   typeof useLoadChannelsByTeamIdQuery
@@ -2447,15 +2599,16 @@ export const LoadDirectMessageThreadsByTeamAndUserDocument = gql`
  * });
  */
 export function useLoadDirectMessageThreadsByTeamAndUserQuery(
-  baseOptions?: Apollo.QueryHookOptions<
+  baseOptions: Apollo.QueryHookOptions<
     LoadDirectMessageThreadsByTeamAndUserQuery,
     LoadDirectMessageThreadsByTeamAndUserQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<
     LoadDirectMessageThreadsByTeamAndUserQuery,
     LoadDirectMessageThreadsByTeamAndUserQueryVariables
-  >(LoadDirectMessageThreadsByTeamAndUserDocument, baseOptions);
+  >(LoadDirectMessageThreadsByTeamAndUserDocument, options);
 }
 export function useLoadDirectMessageThreadsByTeamAndUserLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<
@@ -2463,10 +2616,11 @@ export function useLoadDirectMessageThreadsByTeamAndUserLazyQuery(
     LoadDirectMessageThreadsByTeamAndUserQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<
     LoadDirectMessageThreadsByTeamAndUserQuery,
     LoadDirectMessageThreadsByTeamAndUserQueryVariables
-  >(LoadDirectMessageThreadsByTeamAndUserDocument, baseOptions);
+  >(LoadDirectMessageThreadsByTeamAndUserDocument, options);
 }
 export type LoadDirectMessageThreadsByTeamAndUserQueryHookResult = ReturnType<
   typeof useLoadDirectMessageThreadsByTeamAndUserQuery
@@ -2514,15 +2668,16 @@ export const LoadDirectMessagesThreadByIdDocument = gql`
  * });
  */
 export function useLoadDirectMessagesThreadByIdQuery(
-  baseOptions?: Apollo.QueryHookOptions<
+  baseOptions: Apollo.QueryHookOptions<
     LoadDirectMessagesThreadByIdQuery,
     LoadDirectMessagesThreadByIdQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<
     LoadDirectMessagesThreadByIdQuery,
     LoadDirectMessagesThreadByIdQueryVariables
-  >(LoadDirectMessagesThreadByIdDocument, baseOptions);
+  >(LoadDirectMessagesThreadByIdDocument, options);
 }
 export function useLoadDirectMessagesThreadByIdLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<
@@ -2530,10 +2685,11 @@ export function useLoadDirectMessagesThreadByIdLazyQuery(
     LoadDirectMessagesThreadByIdQueryVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<
     LoadDirectMessagesThreadByIdQuery,
     LoadDirectMessagesThreadByIdQueryVariables
-  >(LoadDirectMessagesThreadByIdDocument, baseOptions);
+  >(LoadDirectMessagesThreadByIdDocument, options);
 }
 export type LoadDirectMessagesThreadByIdQueryHookResult = ReturnType<
   typeof useLoadDirectMessagesThreadByIdQuery
@@ -2589,9 +2745,10 @@ export function useLoginMutation(
     LoginMutationVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<LoginMutation, LoginMutationVariables>(
     LoginDocument,
-    baseOptions
+    options
   );
 }
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
@@ -2603,9 +2760,15 @@ export type LoginMutationOptions = Apollo.BaseMutationOptions<
 export const MeDocument = gql`
   query Me {
     me {
-      id
-      name
-      username
+      errors {
+        field
+        message
+      }
+      user {
+        id
+        name
+        username
+      }
     }
   }
 `;
@@ -2628,15 +2791,14 @@ export const MeDocument = gql`
 export function useMeQuery(
   baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>
 ) {
-  return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
 }
 export function useMeLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>
 ) {
-  return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(
-    MeDocument,
-    baseOptions
-  );
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
 }
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
@@ -2676,19 +2838,18 @@ export const NewMessageSubDocument = gql`
  * });
  */
 export function useNewMessageSubSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     NewMessageSubSubscription,
     NewMessageSubSubscriptionVariables
   >
 ) {
+  const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useSubscription<
     NewMessageSubSubscription,
     NewMessageSubSubscriptionVariables
-  >(NewMessageSubDocument, baseOptions);
+  >(NewMessageSubDocument, options);
 }
 export type NewMessageSubSubscriptionHookResult = ReturnType<
   typeof useNewMessageSubSubscription
 >;
-export type NewMessageSubSubscriptionResult = Apollo.SubscriptionResult<
-  NewMessageSubSubscription
->;
+export type NewMessageSubSubscriptionResult = Apollo.SubscriptionResult<NewMessageSubSubscription>;

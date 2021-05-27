@@ -21,7 +21,7 @@ import {
 export function TeamMenuAllCharacters({
   dataTeams,
   router,
-  viewControllerDispatch,
+  // viewControllerDispatch,
   viewControllerState
 }: {
   dataTeams: GetAllTeamsForUserQuery | undefined;
@@ -64,9 +64,13 @@ export function TeamMenuAllCharacters({
                 onClick={() => {
                   console.log("Invite people clicked");
 
-                  viewControllerDispatch({
-                    type: "displayInviteTeamMember"
-                  });
+                  router.push(
+                    `/view-team/?teamId=${viewControllerState.teamIdShowing}&viewing=single_team_browser&action=display_invite_team_member`
+                  );
+
+                  // viewControllerDispatch({
+                  //   type: "displayInviteTeamMember"
+                  // });
                 }}
               >
                 Invite people to{" "}

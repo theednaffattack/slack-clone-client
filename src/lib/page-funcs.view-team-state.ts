@@ -28,6 +28,7 @@ export type ViewerType =
   | "messages_browser"
   | "teams_browser"
   | "team_detail"
+  | "single_team_browser"
   | "teams_invite_member";
 
 export type ParsedUrlParam = string | null;
@@ -44,7 +45,7 @@ export type ActionType =
         header: HeaderProps;
       };
     }
-  | { type: "displayInviteTeamMember" };
+  | { type: "display_invite_team_member" };
 
 export const viewControllerInitialState: ViewControllerStateType = {
   teamIdShowing: null,
@@ -67,7 +68,7 @@ export function viewControllerReducer(
         teamIdShowing: action.payload
       };
 
-    case "displayInviteTeamMember":
+    case "display_invite_team_member":
       return {
         teamIdShowing: state.teamIdShowing,
         viewerDisplaying: {
