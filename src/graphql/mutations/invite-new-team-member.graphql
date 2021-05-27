@@ -1,0 +1,14 @@
+mutation InviteNewTeamMember($data: InviteTeamMemberInput!) {
+  inviteNewTeamMember(data: $data) {
+    errors {
+      field
+      message
+    }
+    invitation {
+      id
+      email
+      teamId
+      status
+    }
+  }
+}

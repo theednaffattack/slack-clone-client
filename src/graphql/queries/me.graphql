@@ -1,7 +1,13 @@
 query Me {
   me {
-    id
-    name
-    username
+    errors {
+      field
+      message
+    }
+    user {
+      id
+      name
+      username
+    }
   }
 }

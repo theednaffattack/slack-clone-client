@@ -7,9 +7,11 @@ import { AddChannelMessageForm } from "../../components/add-channel-message-form
 import { AddMessageForm } from "../../components/add-direct-message-form";
 import { ControllerAccordion } from "../../components/controller-accordion";
 import { CreateChannelForm } from "../../components/create-channel-form";
+import { InviteTeamMemberForm } from "../../components/invite-team-member-form";
 import { RenderChannelBrowser } from "../../components/render-channel-browser";
 import { RenderChannelStack } from "../../components/render-channel-stack";
 import { RenderMessagesStack } from "../../components/render-messages-stack";
+import { RenderSingleTeamBrowser } from "../../components/render_single_team_browser";
 import { ShortcutsPanel } from "../../components/shortcuts-panel";
 import { TeamExplorer } from "../../components/team-explorer";
 import { TeamMenuAllCharacters } from "../../components/team-menu-all-characters";
@@ -252,6 +254,38 @@ const ViewTeamIndex: NextPage<ViewTeamIndexProps> = ({
         </Flex>
       ) : null}
       {/* BEG - TEAMS EXPLORER  */}
+
+      {/* BEG - SINGLE TEAM EXPLORER  */}
+      {viewControllerState.teamIdShowing &&
+      viewControllerState.viewerDisplaying.viewing === "single_team_browser" ? (
+        <RenderSingleTeamBrowser>
+          {action === "display_invite_team_member" ? (
+            <Flex
+              alignItems="center"
+              justifyContent="center"
+              // sx={{
+              //   "@media only screen and (max-width: 600px)": {
+              //     gridColumn: "1/4"
+              //   },
+              //   // gridColumn: 1,
+              //   gridRow: "1/4"
+              // }}
+
+              sx={{
+                "@media only screen and (min-width: 600px)": {
+                  gridColumn: 3
+                },
+                gridColumn: "1/4"
+              }}
+            >
+              <InviteTeamMemberForm
+                teamId={viewControllerState.teamIdShowing}
+              />
+            </Flex>
+          ) : null}
+        </RenderSingleTeamBrowser>
+      ) : null}
+      {/* END - SINGLE TEAM EXPLORER  */}
 
       {/* BEG - CHANNEL EXPLORER  */}
       {viewControllerState.teamIdShowing &&

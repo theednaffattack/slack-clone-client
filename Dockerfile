@@ -5,7 +5,8 @@ FROM node:12.16.2 AS deps
 WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
 # ENV YARN_CACHE_FOLDER=/dev/shm/yarn_cache
-RUN yarn install --frozen-lockfile --production
+# Do not enable '--production' flag below, we need typescript
+RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
 # This is where because may be the case that you would try

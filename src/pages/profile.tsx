@@ -12,8 +12,8 @@ const Profile: NextPage = () => {
   return (
     <Layout>
       <>
-        <Avatar size="lg" name={data?.me?.username ?? "?"} />
-        <Text fontSize="3xl">{data?.me?.username}</Text>
+        <Avatar size="lg" name={data?.me?.user?.username ?? "?"} />
+        <Text fontSize="3xl">{data?.me?.user?.username}</Text>
         <Button type="button" colorScheme="teal">
           jsut a button
         </Button>

@@ -32,7 +32,7 @@ export function Navbar({ dataMe }: NavbarProps) {
       <>
         <Link href="/profile" passHref>
           <ChLink mr={2}>
-            <Avatar size="md" name={dataMe.me?.username ?? "?"} />
+            <Avatar size="md" name={dataMe.me?.user?.username ?? "?"} />
           </ChLink>
         </Link>
         <Link href="/logout" passHref>
